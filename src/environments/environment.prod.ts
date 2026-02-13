@@ -1,7 +1,7 @@
 export const environment = {
   production: true,
   // Usar el mismo dominio en producción (el backend sirve los frontends)
-  apiUrl: window.location.origin,
+  apiUrl: 'https://backendpapusbarbershop-production.up.railway.app',
   appName: 'Papus BarberShop',
   version: '1.0.0',
   defaultPageSize: 10,
