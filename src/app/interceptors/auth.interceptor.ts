@@ -5,6 +5,14 @@ import { AuthService } from '../services/auth.service';
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   
+  // CRÍTICO: Ignorar peticiones a S3 (amazonaws.com)
+  // S3 rechaza peticiones con headers Authorization externos que rompen la firma presignada
+  if (req.url.includes('amazonaws.com')) {
+    // Para peticiones a S3, no agregar ningún header adicional
+    // Dejar que la petición pase sin modificación
+    return next(req);
+  }
+  
   if (req.url.includes('/auth/login')) {
     const loginHeaders: { [key: string]: string } = {
       'Content-Type': 'application/json',

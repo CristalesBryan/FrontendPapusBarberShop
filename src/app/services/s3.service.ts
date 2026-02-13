@@ -90,10 +90,15 @@ export class S3Service {
   }
 
   /**
-   * Sube un archivo directamente a S3 usando la URL presignada
+   * Sube un archivo directamente a S3 usando la URL presignada.
+   * 
+   * CRÍTICO: Solo se envía el archivo y el header Content-Type.
+   * NO se deben agregar headers adicionales (como Authorization) porque
+   * rompen la firma presignada de AWS y causan error 403 Forbidden.
+   * 
    * @param file Archivo a subir
    * @param presignedUrl URL presignada obtenida del backend
-   * @param contentType Tipo de contenido del archivo
+   * @param contentType Tipo de contenido del archivo (extraído de file.type)
    * @returns Observable que se completa cuando la subida termina
    */
   private uploadToS3(file: File, presignedUrl: string, contentType: string): Observable<void> {
@@ -112,7 +117,7 @@ export class S3Service {
           observer.next();
           observer.complete();
         } else {
-          observer.error(new Error(`Error al subir archivo: ${xhr.statusText}`));
+          observer.error(new Error(`Error al subir archivo: ${xhr.status} ${xhr.statusText}`));
         }
       });
 
@@ -124,8 +129,15 @@ export class S3Service {
         observer.error(new Error('Subida de archivo cancelada'));
       });
 
+      // IMPORTANTE: Usar XMLHttpRequest directamente para evitar que el interceptor
+      // agregue headers Authorization que rompen la firma presignada
       xhr.open('PUT', presignedUrl);
+      
+      // SOLO establecer Content-Type (extraído de file.type)
+      // NO agregar ningún otro header (Accept, Authorization, etc.)
       xhr.setRequestHeader('Content-Type', contentType);
+      
+      // Enviar solo el archivo sin modificaciones
       xhr.send(file);
     });
   }
