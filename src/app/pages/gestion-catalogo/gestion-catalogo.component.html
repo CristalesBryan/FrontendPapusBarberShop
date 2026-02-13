@@ -1,0 +1,154 @@
+<div class="container-fluid page-container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-images"></i> Gestión de Catálogo</h2>
+    <button class="btn btn-primary" (click)="mostrarFormulario = !mostrarFormulario" *ngIf="!mostrarFormulario">
+      <i class="fas fa-plus me-2"></i>Nuevo Producto
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="text-center" *ngIf="cargando">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Formulario de edición -->
+  <div class="card mb-4" *ngIf="mostrarFormulario && !cargando">
+    <div class="card-header">
+      <h5>{{ productoEditando ? 'Editar Producto' : 'Nuevo Producto' }}</h5>
+    </div>
+    <div class="card-body">
+      <form (ngSubmit)="guardar()">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Nombre del Producto</label>
+            <input type="text" class="form-control" [(ngModel)]="productoForm.nombre" name="nombre" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Precio de Venta (Q)</label>
+            <input type="number" class="form-control" [(ngModel)]="productoForm.precioVenta" name="precioVenta" 
+                   step="0.01" min="0" required>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Precio de Costo (Q)</label>
+            <input type="number" class="form-control" [(ngModel)]="productoForm.precioCosto" name="precioCosto" 
+                   step="0.01" min="0" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Stock</label>
+            <input type="number" class="form-control" [(ngModel)]="productoForm.stock" name="stock" min="0" required>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Comisión (%)</label>
+            <input type="number" class="form-control" [(ngModel)]="productoForm.comision" name="comision" 
+                   min="1" max="100" required>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Descripción</label>
+          <textarea class="form-control" [(ngModel)]="productoForm.descripcion" name="descripcion" 
+                    rows="4" placeholder="Descripción del producto..."></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Imagen del Producto</label>
+          <input type="file" class="form-control" accept="image/*" (change)="onFileSelected($event)" required>
+          <small class="form-text text-muted">
+            Formatos aceptados: JPG, JPEG, PNG, GIF, WEBP. Máximo 5MB. La imagen se subirá automáticamente a S3.
+          </small>
+          <small class="form-text text-warning d-block mt-1" *ngIf="vistaPreviaImagen && !imagenSeleccionada && !productoEditando?.imagenUrl?.includes('s3')">
+            <i class="fas fa-exclamation-triangle"></i> Imagen local detectada. Selecciona una nueva imagen para subirla a S3.
+          </small>
+        </div>
+
+        <div class="mb-3" *ngIf="vistaPreviaImagen">
+          <label class="form-label">Vista Previa</label>
+          <div class="imagen-preview">
+            <img [src]="vistaPreviaImagen" alt="Vista previa" class="img-thumbnail" style="max-height: 200px;">
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-secondary" (click)="cancelar()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Lista de productos -->
+  <div *ngIf="!cargando && !mostrarFormulario">
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-4" *ngFor="let producto of productos">
+        <div class="card producto-catalogo-card h-100">
+          <div class="producto-imagen-container">
+            <img [src]="producto.imagenUrl" 
+                 [alt]="producto.nombre" 
+                 class="producto-imagen"
+                 [attr.data-intento]="0"
+                 (click)="abrirModalImagen(producto)"
+                 (error)="onImageError($event, producto)"
+                 title="Haz clic para ver la imagen ampliada">
+          </div>
+          <div class="card-body">
+            <h5 class="card-title">{{ producto.nombre }}</h5>
+            <p class="text-muted mb-2">
+              <strong>Precio:</strong> Q{{ producto.precioVenta | number:'1.2-2' }}
+            </p>
+            <p class="text-muted mb-2">
+              <strong>Stock:</strong> {{ producto.stock }} unidades
+            </p>
+            <p class="card-text" *ngIf="producto.descripcion">
+              {{ producto.descripcion }}
+            </p>
+            <p class="text-muted small" *ngIf="!producto.descripcion">
+              Sin descripción
+            </p>
+            <div class="d-flex gap-2 mt-3">
+              <button class="btn btn-sm btn-primary flex-fill" (click)="editar(producto)">
+                <i class="fas fa-edit me-1"></i>Editar
+              </button>
+              <button class="btn btn-sm btn-danger" (click)="eliminar(producto)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert alert-info mt-4" *ngIf="productos.length === 0">
+      <i class="fas fa-info-circle me-2"></i>
+      No hay productos en el catálogo. Agrega uno nuevo para comenzar.
+    </div>
+  </div>
+
+  <!-- Modal para imagen ampliada -->
+  <div class="modal-imagen-overlay" 
+       *ngIf="mostrarModalImagen" 
+       (click)="cerrarModalImagen()">
+    <div class="modal-imagen-contenido" (click)="$event.stopPropagation()">
+      <button class="btn-cerrar-modal" (click)="cerrarModalImagen()" title="Cerrar">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="modal-imagen-wrapper">
+        <img [src]="imagenModalUrl" 
+             [alt]="productoModal?.nombre || 'Imagen del producto'"
+             class="modal-imagen-grande"
+             (error)="onImageErrorModal($event)">
+      </div>
+      <div class="modal-imagen-nombre" *ngIf="productoModal">
+        <h4>{{ productoModal.nombre }}</h4>
+      </div>
+    </div>
+  </div>
+</div>
+

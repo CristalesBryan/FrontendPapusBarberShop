@@ -1,0 +1,59 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+            <img src="/assets/images/Logo.jpeg" alt="Papus BarberShop" class="navbar-logo">
+        </a>
+        <button class="navbar-toggler" type="button" (click)="toggleMenu()">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" [class.show]="menuOpen">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" routerLink="/dashboard" routerLinkActive="active">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" routerLink="/barberos" routerLinkActive="active">
+                        <i class="fas fa-user-tie"></i> Barberos
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" routerLink="/servicios" routerLinkActive="active">
+                        <i class="fas fa-scissors"></i> Servicios
+                    </a>
+                </li>
+                <li class="nav-item" *ngIf="canAccessProductos()">
+                    <a class="nav-link" routerLink="/productos" routerLinkActive="active">
+                        <i class="fas fa-box"></i> Productos
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" routerLink="/ventas" routerLinkActive="active">
+                        <i class="fas fa-shopping-cart"></i> Ventas
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" routerLink="/reportes" routerLinkActive="active">
+                        <i class="fas fa-chart-bar"></i> Reportes
+                    </a>
+                </li>
+            </ul>
+            
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item dropdown" *ngIf="currentUser">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user"></i> {{ currentUser.username }}
+                        <span class="badge bg-secondary ms-1">{{ currentUser.rol }}</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" (click)="logout()">
+                            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                        </a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+

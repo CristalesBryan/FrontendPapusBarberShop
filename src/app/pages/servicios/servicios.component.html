@@ -1,0 +1,246 @@
+<div class="container-fluid page-container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-scissors"></i> Servicios</h2>
+    <button class="cssbuttons-io-button" (click)="mostrarFormulario = !mostrarFormulario" *ngIf="!esBarbero">
+      <svg height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 0h24v24H0z" fill="none"></path>
+        <path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z" fill="currentColor"></path>
+      </svg>
+      <span>Nuevo Servicio</span>
+    </button>
+  </div>
+
+  <!-- Formulario -->
+  <div class="card mb-4" *ngIf="mostrarFormulario">
+    <div class="card-header">
+      <h5>{{ editando && !esBarbero ? 'Editar Servicio' : 'Registrar Nuevo Servicio' }}</h5>
+    </div>
+    <div class="card-body">
+      <form (ngSubmit)="guardarServicio()">
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Barbero</label>
+            <select class="form-select" [(ngModel)]="nuevoServicio.barberoId" name="barberoId" required>
+              <option *ngFor="let barbero of barberos" [value]="barbero.id">{{ barbero.nombre }}</option>
+            </select>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Tipo de Corte</label>
+            <select class="form-select" [(ngModel)]="tipoCorteIdSeleccionado" name="tipoCorteId" (change)="onTipoCorteChange()" required>
+              <option [ngValue]="0">Seleccione un tipo de corte</option>
+              <option *ngFor="let tipo of tiposCorte" [ngValue]="tipo.id">{{ tipo.nombre }}</option>
+            </select>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Método de Pago</label>
+            <select class="form-select" [(ngModel)]="nuevoServicio.metodoPago" name="metodoPago" required>
+              <option value="Efectivo">Efectivo</option>
+              <option value="Tarjeta">Tarjeta</option>
+              <option value="Transferencia">Transferencia</option>
+            </select>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Precio</label>
+            <input type="number" class="form-control" [(ngModel)]="nuevoServicio.precio" name="precio" step="0.01" required>
+          </div>
+        </div>
+        
+        <!-- Información de fecha y hora automática (solo para nuevos servicios) -->
+        <div class="alert alert-info mb-3" role="alert" *ngIf="!editando">
+          <i class="fas fa-info-circle me-2"></i>
+          <strong>Fecha y hora:</strong> Se registrarán automáticamente al guardar el servicio.
+        </div>
+        
+        <!-- Campos de fecha y hora para edición -->
+        <div class="row" *ngIf="editando">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Fecha</label>
+            <input type="date" class="form-control" [(ngModel)]="nuevoServicio.fecha" name="fecha" readonly>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Hora</label>
+            <input type="time" class="form-control" [(ngModel)]="nuevoServicio.hora" name="hora" readonly>
+          </div>
+        </div>
+        
+        <!-- Vista previa del tipo de corte seleccionado -->
+        <div class="row" *ngIf="tipoCorteSeleccionado">
+          <div class="col-12 mb-3">
+            <div class="card border-primary shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title mb-2 text-primary">
+                  <i class="fas fa-scissors me-2"></i> {{ tipoCorteSeleccionado.nombre }}
+                </h5>
+                <p class="card-text text-muted mb-1" *ngIf="tipoCorteSeleccionado.descripcion">
+                  <i class="fas fa-info-circle me-1"></i> {{ tipoCorteSeleccionado.descripcion }}
+                </p>
+                <p class="card-text mb-0">
+                  <i class="fas fa-clock me-1"></i> Tiempo: {{ convertirTiempoALegible(tipoCorteSeleccionado.tiempoMinutos) }}
+                  <span class="ms-3">
+                    <i class="fas fa-money-bill-wave me-1"></i> Precio: Q{{ tipoCorteSeleccionado.precio | number:'1.2-2' }}
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="d-flex gap-2 mt-3">
+          <button type="submit" class="save-button" aria-label="Guardar">
+            <div class="svg-wrapper-1">
+              <div class="svg-wrapper">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="30"
+                  height="30"
+                  class="icon"
+                >
+                  <path
+                    d="M22,15.04C22,17.23 20.24,19 18.07,19H5.93C3.76,19 2,17.23 2,15.04C2,13.07 3.43,11.44 5.31,11.14C5.28,11 5.27,10.86 5.27,10.71C5.27,9.33 6.38,8.2 7.76,8.2C8.37,8.2 8.94,8.43 9.37,8.8C10.14,7.05 11.13,5.44 13.91,5.44C17.28,5.44 18.87,8.06 18.87,10.83C18.87,10.94 18.87,11.06 18.86,11.17C20.65,11.54 22,13.13 22,15.04Z"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+            <span>Guardar</span>
+          </button>
+          <button type="button" class="button" (click)="mostrarFormulario = false">
+            <span>Cancelar</span>
+            <span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-miterlimit="2" stroke-linejoin="round" fill-rule="evenodd" clip-rule="evenodd"><path fill-rule="nonzero" d="m12.002 2.005c5.518 0 9.998 4.48 9.998 9.997 0 5.518-4.48 9.998-9.998 9.998-5.517 0-9.997-4.48-9.997-9.998 0-5.517 4.48-9.997 9.997-9.997zm0 1.5c-4.69 0-8.497 3.807-8.497 8.497s3.807 8.498 8.497 8.498 8.498-3.808 8.498-8.498-3.808-8.497-8.498-8.497zm0 7.425 2.717-2.718c.146-.146.339-.219.531-.219.404 0 .75.325.75.75 0 .193-.073.384-.219.531l-2.717 2.717 2.727 2.728c.147.147.22.339.22.531 0 .427-.349.75-.75.75-.192 0-.384-.073-.53-.219l-2.729-2.728-2.728 2.728c-.146.146-.338.219-.53.219-.401 0-.751-.323-.751-.75 0-.192.073-.384.22-.531l2.728-2.728-2.722-2.722c-.146-.147-.219-.338-.219-.531 0-.425.346-.749.75-.749.192 0 .385.073.531.219z"></path></svg>
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Lista (solo visible para ADMIN) -->
+  <div class="card" *ngIf="!esBarbero">
+    <div class="card-header">
+      <h5>Lista de Servicios</h5>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive" *ngIf="!cargando">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Hora</th>
+              <th>Barbero</th>
+              <th>Tipo de Corte</th>
+              <th>Método de Pago</th>
+              <th>Precio</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let servicio of servicios">
+              <td>{{ servicio.fecha }}</td>
+              <td>{{ servicio.hora }}</td>
+              <td>{{ servicio.barberoNombre }}</td>
+              <td>{{ servicio.tipoCorte }}</td>
+              <td>{{ servicio.metodoPago }}</td>
+              <td>Q{{ servicio.precio | number:'1.2-2' }}</td>
+              <td>
+                <div class="d-flex gap-2">
+                  <button class="editBtn" (click)="editar(servicio)" title="Editar">
+                    <svg height="1em" viewBox="0 0 512 512">
+                      <path d="M410.3 231l11.3-11.3-33.9-33.9-62.1-62.1L291.7 89.8l-11.3 11.3-22.6 22.6L58.6 322.9c-10.4 10.4-18 23.3-22.2 37.4L1 480.7c-2.5 8.4-.2 17.5 6.1 23.7s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L387.7 253.7 410.3 231zM160 399.4l-9.1 22.7c-4 3.1-8.5 5.4-13.3 6.9L59.4 452l23-78.1c1.4-4.9 3.8-9.4 6.9-13.3l22.7-9.1v32c0 8.8 7.2 16 16 16h32zM362.7 18.7L348.3 33.2 325.7 55.8 314.3 67.1l33.9 33.9 62.1 62.1 33.9 33.9 11.3-11.3 22.6-22.6 14.5-14.5c25-25 25-65.5 0-90.5L453.3 18.7c-25-25-65.5-25-90.5 0zm-47.4 168l-144 144c-6.2 6.2-16.4 6.2-22.6 0s-6.2-16.4 0-22.6l144-144c6.2-6.2 16.4-6.2 22.6 0s6.2 16.4 0 22.6z"></path>
+                    </svg>
+                  </button>
+                  <button class="bin-button" (click)="eliminar(servicio)" title="Eliminar">
+                  <svg class="bin-top" viewBox="0 0 39 7" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <line y1="5" x2="39" y2="5" stroke="white" stroke-width="4"></line>
+                    <line x1="12" y1="1.5" x2="26.0357" y2="1.5" stroke="white" stroke-width="3"></line>
+                  </svg>
+                  <svg class="bin-bottom" viewBox="0 0 33 39" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <mask id="path-1-inside-1_8_19" fill="white">
+                      <path d="M0 0H33V35C33 37.2091 31.2091 39 29 39H4C1.79086 39 0 37.2091 0 35V0Z"></path>
+                    </mask>
+                    <path d="M0 0H33H0ZM37 35C37 39.4183 33.4183 43 29 43H4C-0.418278 43 -4 39.4183 -4 35H4H29H37ZM4 43C-0.418278 43 -4 39.4183 -4 35V0H4V35V43ZM37 0V35C37 39.4183 33.4183 43 29 43V35V0H37Z" fill="white" mask="url(#path-1-inside-1_8_19)"></path>
+                    <path d="M12 6L12 29" stroke="white" stroke-width="4"></path>
+                    <path d="M21 6V29" stroke="white" stroke-width="4"></path>
+                  </svg>
+                </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="text-center" *ngIf="cargando">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Confirmación -->
+  <div class="modal fade" [class.show]="mostrarModalConfirmacion" [style.display]="mostrarModalConfirmacion ? 'block' : 'none'" 
+       tabindex="-1" role="dialog" [attr.aria-hidden]="!mostrarModalConfirmacion">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header bg-warning">
+          <h5 class="modal-title text-white">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Confirmar Acción
+          </h5>
+          <button type="button" class="btn-close btn-close-white" (click)="cerrarModalConfirmacion()" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0">{{ mensajeConfirmacion }}</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="button" (click)="cerrarModalConfirmacion()">
+            <span>Cancelar</span>
+            <span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-miterlimit="2" stroke-linejoin="round" fill-rule="evenodd" clip-rule="evenodd"><path fill-rule="nonzero" d="m12.002 2.005c5.518 0 9.998 4.48 9.998 9.997 0 5.518-4.48 9.998-9.998 9.998-5.517 0-9.997-4.48-9.997-9.998 0-5.517 4.48-9.997 9.997-9.997zm0 1.5c-4.69 0-8.497 3.807-8.497 8.497s3.807 8.498 8.497 8.498 8.498-3.808 8.498-8.498-3.808-8.497-8.498-8.497zm0 7.425 2.717-2.718c.146-.146.339-.219.531-.219.404 0 .75.325.75.75 0 .193-.073.384-.219.531l-2.717 2.717 2.727 2.728c.147.147.22.339.22.531 0 .427-.349.75-.75.75-.192 0-.384-.073-.53-.219l-2.729-2.728-2.728 2.728c-.146.146-.338.219-.53.219-.401 0-.751-.323-.751-.75 0-.192.073-.384.22-.531l2.728-2.728-2.722-2.722c-.146-.147-.219-.338-.219-.531 0-.425.346-.749.75-.749.192 0 .385.073.531.219z"></path></svg>
+            </span>
+          </button>
+          <button type="button" class="btn btn-danger" (click)="confirmarAccion()">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade" [class.show]="mostrarModalConfirmacion" 
+       [style.display]="mostrarModalConfirmacion ? 'block' : 'none'" (click)="cerrarModalConfirmacion()"></div>
+
+  <!-- Modal de Notificación -->
+  <div class="modal fade" [class.show]="mostrarModalNotificacion" [style.display]="mostrarModalNotificacion ? 'block' : 'none'" 
+       tabindex="-1" role="dialog" [attr.aria-hidden]="!mostrarModalNotificacion">
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+      <div class="modal-content">
+        <div class="modal-header" [ngClass]="{
+          'bg-success': tipoNotificacion === 'success',
+          'bg-danger': tipoNotificacion === 'error',
+          'bg-warning': tipoNotificacion === 'warning',
+          'bg-info': tipoNotificacion === 'info'
+        }">
+          <h5 class="modal-title text-white">
+            <i class="fas me-2" [ngClass]="{
+              'fa-check-circle': tipoNotificacion === 'success',
+              'fa-exclamation-circle': tipoNotificacion === 'error',
+              'fa-exclamation-triangle': tipoNotificacion === 'warning',
+              'fa-info-circle': tipoNotificacion === 'info'
+            }"></i>
+            {{ tipoNotificacion === 'success' ? 'Éxito' : tipoNotificacion === 'error' ? 'Error' : tipoNotificacion === 'warning' ? 'Advertencia' : 'Información' }}
+          </h5>
+          <button type="button" class="btn-close btn-close-white" (click)="cerrarModalNotificacion()" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0">{{ mensajeNotificacion }}</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" (click)="cerrarModalNotificacion()">
+            Aceptar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade" [class.show]="mostrarModalNotificacion" 
+       [style.display]="mostrarModalNotificacion ? 'block' : 'none'" (click)="cerrarModalNotificacion()"></div>
+</div>
+

@@ -1,0 +1,15 @@
+/* Estilos específicos para el componente de Mobiliario y Equipo */
+
+.page-container {
+  padding-top: 80px; /* Espacio para que el navbar no cubra el contenido */
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+.badge {
+  font-size: 0.875rem;
+  padding: 0.35em 0.65em;
+}
+

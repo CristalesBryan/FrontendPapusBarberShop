@@ -1,0 +1,486 @@
+.container-fluid {
+  padding: 20px;
+}
+
+.page-container {
+  padding-top: 80px; /* Espacio para que el navbar no cubra el contenido */
+}
+
+.card {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border: none;
+  margin-bottom: 20px;
+}
+
+.card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  font-weight: 600;
+}
+
+.card-header h5 {
+  color: #000000;
+  margin: 0;
+}
+
+.table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+.badge {
+  padding: 0.5em 0.75em;
+  font-size: 0.875em;
+}
+
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.input-group {
+  margin-bottom: 0.5rem;
+}
+
+/* Estilos para los modales */
+.modal {
+  z-index: 1050;
+}
+
+.modal.show {
+  display: block !important;
+}
+
+.modal-backdrop {
+  z-index: 1040;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-backdrop.show {
+  display: block !important;
+}
+
+.modal-dialog-centered {
+  display: flex;
+  align-items: center;
+  min-height: calc(100% - 1rem);
+}
+
+.modal-content {
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+  border-bottom: 1px solid #dee2e6;
+  padding: 1rem 1.5rem;
+}
+
+.modal-header.bg-success {
+  background-color: #28a745 !important;
+}
+
+.modal-header.bg-danger {
+  background-color: #dc3545 !important;
+}
+
+.modal-header.bg-warning {
+  background-color: #ffc107 !important;
+}
+
+.modal-header.bg-info {
+  background-color: #17a2b8 !important;
+}
+
+.modal-title {
+  font-weight: 600;
+  color: #212529;
+}
+
+.modal-title.text-white {
+  color: #ffffff !important;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-footer {
+  border-top: 1px solid #dee2e6;
+  padding: 1rem 1.5rem;
+}
+
+.btn-close-white {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Estilos del Calendario Semanal con Columna de Barberos */
+.schedule-table-container {
+  overflow-x: auto;
+}
+
+.schedule-table-header {
+  display: flex;
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.schedule-barberos-header {
+  min-width: 200px;
+  max-width: 200px;
+  padding: 16px;
+  font-weight: 600;
+  color: #495057;
+  border-right: 2px solid #dee2e6;
+  background-color: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.schedule-days-header {
+  display: flex;
+  flex: 1;
+}
+
+.schedule-day-header {
+  flex: 1;
+  padding: 12px 8px;
+  text-align: center;
+  border-right: 1px solid #dee2e6;
+  min-width: 120px;
+  transition: background-color 0.2s;
+}
+
+.schedule-day-header:hover {
+  background-color: #e9ecef;
+}
+
+.schedule-day-header.today {
+  background-color: #e7f3ff;
+  border: 2px solid #0d6efd;
+  border-radius: 8px;
+  margin: 2px;
+}
+
+.schedule-day-header.selected {
+  background-color: #0d6efd;
+  color: white;
+  border-radius: 8px;
+  margin: 2px;
+}
+
+.schedule-day-header.selected .day-name {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.schedule-day-header.selected .day-number {
+  color: white;
+}
+
+.day-name {
+  font-size: 12px;
+  color: #6c757d;
+  text-transform: lowercase;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.schedule-day-header.selected .day-name {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.day-number {
+  font-weight: 600;
+  font-size: 18px;
+  color: #212529;
+}
+
+.day-number.today-number {
+  background-color: #0d6efd;
+  color: white;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.schedule-day-header.selected .day-number {
+  color: white;
+}
+
+.schedule-table-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.schedule-row {
+  display: flex;
+  border-bottom: 1px solid #dee2e6;
+  min-height: 150px;
+}
+
+.schedule-barbero-cell {
+  min-width: 200px;
+  max-width: 200px;
+  padding: 12px;
+  border-right: 2px solid #dee2e6;
+  background-color: #ffffff;
+  display: flex;
+  align-items: flex-start;
+  position: sticky;
+  left: 0;
+  z-index: 5;
+  background-color: #ffffff;
+}
+
+.barbero-name {
+  font-weight: 600;
+  color: #495057;
+  font-size: 14px;
+}
+
+.schedule-day-cell {
+  flex: 1;
+  padding: 8px;
+  border-right: 1px solid #dee2e6;
+  min-width: 120px;
+  background-color: #ffffff;
+  position: relative;
+  transition: background-color 0.2s;
+}
+
+.schedule-day-cell:hover {
+  background-color: #f8f9fa;
+}
+
+.schedule-day-cell.today {
+  background-color: #f0f8ff;
+}
+
+.schedule-day-cell.selected {
+  background-color: #e7f3ff;
+}
+
+.citas-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 100px;
+}
+
+.cita-item {
+  background-color: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.cita-item:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.cita-confirmada {
+  border-left: 4px solid #28a745;
+  background-color: #f0fff4;
+}
+
+.cita-pendiente {
+  border-left: 4px solid #ffc107;
+  background-color: #fffbf0;
+}
+
+.cita-cancelada {
+  border-left: 4px solid #dc3545;
+  background-color: #fff5f5;
+  opacity: 0.7;
+}
+
+.cita-completada {
+  border-left: 4px solid #17a2b8;
+  background-color: #f0f9ff;
+}
+
+.cita-time {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 4px;
+  font-size: 11px;
+}
+
+.cita-cliente {
+  font-weight: 500;
+  color: #212529;
+  margin-bottom: 2px;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cita-tipo {
+  color: #6c757d;
+  font-size: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+.cita-actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+  justify-content: flex-end;
+}
+
+.cita-mas-indicador {
+  background-color: #e9ecef;
+  border: 1px dashed #6c757d;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 11px;
+  color: #495057;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+  margin-top: 4px;
+}
+
+.cita-mas-indicador:hover {
+  background-color: #dee2e6;
+  border-color: #495057;
+  color: #212529;
+  transform: translateY(-1px);
+}
+
+.cita-mas-indicador i {
+  margin-right: 4px;
+}
+
+.citas-lista-modal {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.cita-card-modal {
+  transition: all 0.2s;
+}
+
+.cita-card-modal:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.cita-actions .btn-link {
+  padding: 2px 4px;
+  font-size: 10px;
+}
+
+/* Estilos para el modal de confirmación dinámico */
+.modal-confirmacion {
+  animation: modalFadeIn 0.3s ease-out;
+  border: none;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-confirmacion .modal-header {
+  border-radius: 8px 8px 0 0;
+  padding: 1.25rem 1.5rem;
+}
+
+.modal-confirmacion .modal-body {
+  padding: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.modal-confirmacion .modal-body p {
+  margin: 0;
+}
+
+.modal-confirmacion .modal-body strong {
+  color: #495057;
+  font-weight: 600;
+}
+
+.modal-confirmacion .modal-body small {
+  display: block;
+  margin-top: 0.5rem;
+}
+
+.modal-confirmacion .modal-footer {
+  border-top: 1px solid #dee2e6;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.modal-confirmacion .modal-footer .btn {
+  min-width: 100px;
+  padding: 0.5rem 1.25rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.modal-confirmacion .modal-footer .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.modal-confirmacion .modal-footer .btn-secondary {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  color: white;
+}
+
+.modal-confirmacion .modal-footer .btn-secondary:hover {
+  background-color: #5a6268;
+  border-color: #545b62;
+}
+
+.modal-confirmacion .modal-footer .btn-success {
+  background-color: #28a745;
+  border-color: #28a745;
+}
+
+.modal-confirmacion .modal-footer .btn-warning {
+  background-color: #ffc107;
+  border-color: #ffc107;
+  color: #212529;
+}
+
+.modal-confirmacion .modal-footer .btn-danger {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.modal-confirmacion .modal-footer .btn-info {
+  background-color: #17a2b8;
+  border-color: #17a2b8;
+}
+

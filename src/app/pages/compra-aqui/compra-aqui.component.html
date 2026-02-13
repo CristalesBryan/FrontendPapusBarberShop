@@ -1,0 +1,314 @@
+<div class="compra-container">
+  <!-- Fondo animado -->
+  <div class="background-container">
+    <div class="pattern-bg">
+      <svg
+        preserveAspectRatio="xMidYMid slice"
+        height="100%"
+        width="100%"
+        class="cube-svg"
+        viewBox="0 0 120 104"
+      >
+        <defs>
+          <linearGradient y2="100%" x2="100%" y1="0%" x1="0%" id="cube-dark">
+            <stop stop-color="#232526" offset="0%"></stop>
+            <stop stop-color="#414345" offset="100%"></stop>
+          </linearGradient>
+          <linearGradient y2="0%" x2="100%" y1="100%" x1="0%" id="cube-mid">
+            <stop stop-color="#4b6cb7" offset="0%"></stop>
+            <stop stop-color="#182848" offset="100%"></stop>
+          </linearGradient>
+          <linearGradient y2="100%" x2="0%" y1="0%" x1="100%" id="cube-light">
+            <stop stop-color="#a8edea" offset="0%"></stop>
+            <stop stop-color="#fed6e3" offset="100%"></stop>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+  </div>
+  
+  <!-- Contenido -->
+  <div class="content-overlay">
+    <div class="container-fluid page-container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-shopping-bag"></i> Compra Aquí</h2>
+    <div class="carrito-dropdown-container">
+      <button class="btn btn-primary btn-carrito" (click)="toggleCarrito()" type="button">
+        <i class="fas fa-shopping-cart me-2"></i>
+        Carrito
+        <span class="badge bg-light text-dark ms-2" *ngIf="getCantidadTotalItems() > 0">
+          {{ getCantidadTotalItems() }}
+        </span>
+      </button>
+      <div class="carrito-dropdown" [class.mostrar]="mostrarCarrito" *ngIf="mostrarCarrito">
+        <div class="carrito-dropdown-header">
+          <h6 class="mb-0">
+            <i class="fas fa-shopping-cart me-2"></i>
+            Carrito de Compras
+          </h6>
+        </div>
+        
+        <div class="carrito-dropdown-body">
+          <div *ngIf="carrito.length === 0" class="carrito-vacio-dropdown">
+            <i class="fas fa-shopping-cart fa-2x mb-2"></i>
+            <p class="mb-0">Tu carrito está vacío</p>
+          </div>
+          
+          <div *ngIf="carrito.length > 0" class="carrito-items-dropdown">
+            <div class="carrito-item-dropdown" *ngFor="let item of carrito">
+              <div class="item-imagen-dropdown">
+                <img [src]="getProductoImagen(item.producto)" 
+                     [alt]="item.producto.nombre"
+                     (error)="onImageError($event, item.producto)">
+              </div>
+              <div class="item-info-dropdown">
+                <h6 class="item-nombre-dropdown">{{ item.producto.nombre }}</h6>
+                <div class="item-controls-dropdown">
+                  <button class="btn-cantidad-dropdown" (click)="actualizarCantidad(item.producto.id, item.cantidad - 1); $event.stopPropagation()" type="button">
+                    <i class="fas fa-minus"></i>
+                  </button>
+                  <span class="cantidad-dropdown">{{ item.cantidad }}</span>
+                  <button class="btn-cantidad-dropdown" 
+                          (click)="actualizarCantidad(item.producto.id, item.cantidad + 1); $event.stopPropagation()" 
+                          [disabled]="item.cantidad >= item.producto.stock"
+                          type="button">
+                    <i class="fas fa-plus"></i>
+                  </button>
+                  <button class="btn-eliminar-dropdown" (click)="eliminarDelCarrito(item.producto.id); $event.stopPropagation()" type="button" title="Eliminar">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+                <p class="item-subtotal-dropdown mb-0">Q{{ (item.producto.precioVenta * item.cantidad) | number:'1.2-2' }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="carrito-dropdown-footer" *ngIf="carrito.length > 0">
+          <div class="carrito-total-dropdown">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <strong>Total:</strong>
+              <strong class="text-primary">Q{{ getTotalCarrito() | number:'1.2-2' }}</strong>
+            </div>
+            <button class="btn btn-danger btn-sm w-100 mb-2" (click)="vaciarCarrito(); $event.stopPropagation()" type="button">
+              <i class="fas fa-trash me-2"></i>Vaciar
+            </button>
+            <button class="btn btn-success btn-sm w-100" type="button" (click)="finalizarCompra(); $event.stopPropagation()">
+              <i class="fas fa-check me-2"></i>Finalizar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barra de búsqueda -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="fas fa-search"></i>
+            </span>
+            <input type="text" class="form-control" 
+                   placeholder="Buscar productos..." 
+                   [(ngModel)]="terminoBusqueda"
+                   (input)="buscarProductos()">
+            <button class="btn btn-outline-secondary" 
+                    type="button" 
+                    (click)="limpiarBusqueda()"
+                    *ngIf="terminoBusqueda">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <div class="col-md-6 text-end">
+          <span class="badge bg-primary fs-6">
+            {{ productosFiltrados.length }} producto(s) disponible(s)
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="text-center" *ngIf="cargando">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Catálogo de Productos -->
+  <div *ngIf="!cargando">
+    <!-- Mensaje si no hay productos -->
+    <div class="alert alert-info" *ngIf="productosFiltrados.length === 0">
+      <i class="fas fa-info-circle me-2"></i>
+      <span *ngIf="terminoBusqueda">
+        No se encontraron productos que coincidan con "{{ terminoBusqueda }}"
+      </span>
+      <span *ngIf="!terminoBusqueda">
+        No hay productos disponibles en este momento
+      </span>
+    </div>
+
+    <!-- Grid de productos -->
+    <div class="row g-4" *ngIf="productosFiltrados.length > 0">
+      <div class="col-md-4 col-lg-3" *ngFor="let producto of productosFiltrados">
+        <div class="card producto-card h-100">
+          <!-- Imagen del producto -->
+          <div class="producto-imagen-container">
+            <img [src]="getProductoImagen(producto)" 
+                 [alt]="producto.nombre" 
+                 class="producto-imagen"
+                 (click)="abrirModalImagen(producto)"
+                 (error)="onImageError($event, producto)"
+                 title="Haz clic para ver la imagen ampliada">
+          </div>
+          
+          <div class="card-body d-flex flex-column">
+            <div class="producto-header mb-3">
+              <h5 class="card-title mb-2">{{ producto.nombre }}</h5>
+              <span class="badge bg-success" *ngIf="producto.stock > 0">
+                <i class="fas fa-check-circle me-1"></i>
+                En Stock
+              </span>
+              <span class="badge bg-danger" *ngIf="producto.stock === 0">
+                <i class="fas fa-times-circle me-1"></i>
+                Sin Stock
+              </span>
+            </div>
+            
+            <div class="producto-info flex-grow-1">
+              <div class="mb-3">
+                <div class="precio-venta">
+                  <span class="text-muted small">Precio:</span>
+                  <h4 class="text-primary mb-0">Q{{ producto.precioVenta | number:'1.2-2' }}</h4>
+                </div>
+              </div>
+              
+              <div class="stock-info mb-3">
+                <small [class.text-muted]="producto.stock > 0" [class.text-danger]="producto.stock === 0">
+                  <i class="fas fa-box me-1"></i>
+                  Stock disponible: {{ producto.stock }} unidad(es)
+                </small>
+              </div>
+
+              <div class="descripcion-info mb-3" *ngIf="producto.descripcion">
+                <p class="text-muted small mb-0" style="font-size: 0.85rem; line-height: 1.4;">
+                  <i class="fas fa-info-circle me-1"></i>
+                  {{ producto.descripcion }}
+                </p>
+              </div>
+            </div>
+
+            <div class="producto-footer mt-auto">
+              <div class="sp">
+                <button class="sparkle-button" 
+                        [disabled]="producto.stock === 0"
+                        (click)="agregarAlCarrito(producto)"
+                        title="Agregar al carrito">
+                  <span class="spark"></span>
+                  <span class="backdrop"></span>
+                  <svg class="sparkle" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14.187 8.096L15 5.25L15.813 8.096C16.0231 8.83114 16.4171 9.50062 16.9577 10.0413C17.4984 10.5819 18.1679 10.9759 18.903 11.186L21.75 12L18.904 12.813C18.1689 13.0231 17.4994 13.4171 16.9587 13.9577C16.4181 14.4984 16.0241 15.1679 15.814 15.903L15 18.75L14.187 15.904C13.9769 15.1689 13.5829 14.4994 13.0423 13.9587C12.5016 13.4181 11.8321 13.0241 11.097 12.814L8.25 12L11.096 11.187C11.8311 10.9769 12.5006 10.5829 13.0413 10.0423C13.5819 9.50162 13.9759 8.83214 14.186 8.097L14.187 8.096Z" fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round"></path>
+                    <path d="M6 14.25L5.741 15.285C5.59267 15.8785 5.28579 16.4206 4.85319 16.8532C4.42059 17.2858 3.87853 17.5927 3.285 17.741L2.25 18L3.285 18.259C3.87853 18.4073 4.42059 18.7142 4.85319 19.1468C5.28579 19.5794 5.59267 20.1215 5.741 20.715L6 21.75L6.259 20.715C6.40725 20.1216 6.71398 19.5796 7.14639 19.147C7.5788 18.7144 8.12065 18.4075 8.714 18.259L9.75 18L8.714 17.741C8.12065 17.5925 7.5788 17.2856 7.14639 16.853C6.71398 16.4204 6.40725 15.8784 6.259 15.285L6 14.25Z" fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round"></path>
+                    <path d="M6.5 4L6.303 4.5915C6.24777 4.75718 6.15472 4.90774 6.03123 5.03123C5.90774 5.15472 5.75718 5.24777 5.5915 5.303L5 5.5L5.5915 5.697C5.75718 5.75223 5.90774 5.84528 6.03123 5.96877C6.15472 6.09226 6.24777 6.24282 6.303 6.4085L6.5 7L6.697 6.4085C6.75223 6.24282 6.84528 6.09226 6.96877 5.96877C7.09226 5.84528 7.24282 5.75223 7.4085 5.697L8 5.5L7.4085 5.303C7.24282 5.24777 7.09226 5.15472 6.96877 5.03123C6.84528 4.90774 6.75223 4.75718 6.697 4.5915L6.5 4Z" fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round"></path>
+                  </svg>
+                  <span class="text">Agregar al Carrito</span>
+                </button>
+                <div class="bodydrop"></div>
+                <span aria-hidden="true" class="particle-pen">
+                  <svg class="particle" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" 
+                       *ngFor="let particula of particulas"
+                       [style.--x]="particula.x + '%'"
+                       [style.--y]="particula.y + '%'"
+                       [style.--delay]="particula.delay + 's'"
+                       [style.--duration]="particula.duration + 's'">
+                    <path d="M6.937 3.846L7.75 1L8.563 3.846C8.77313 4.58114 9.1671 5.25062 9.70774 5.79126C10.2484 6.3319 10.9179 6.72587 11.653 6.936L14.5 7.75L11.654 8.563C10.9189 8.77313 10.2494 9.1671 9.70874 9.70774C9.1681 10.2484 8.77413 10.9179 8.564 11.653L7.75 14.5L6.937 11.654C6.72687 10.9189 6.3329 10.2494 5.79226 9.70874C5.25162 9.1681 4.58214 8.77413 3.847 8.564L1 7.75L3.846 6.937C4.58114 6.72687 5.25062 6.3329 5.79126 5.79226C6.3319 5.25162 6.72587 4.58214 6.936 3.847L6.937 3.846Z" fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round"></path>
+                  </svg>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <!-- Modal para imagen ampliada -->
+  <div class="modal-imagen-overlay" 
+       *ngIf="mostrarModalImagen" 
+       (click)="cerrarModalImagen()">
+    <div class="modal-imagen-contenido" (click)="$event.stopPropagation()">
+      <button class="btn-cerrar-modal" (click)="cerrarModalImagen()" type="button" title="Cerrar (ESC)">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="modal-imagen-wrapper" *ngIf="imagenModalUrl">
+        <img [src]="imagenModalUrl" 
+             [alt]="productoModal?.nombre || 'Imagen del producto'"
+             class="modal-imagen-grande"
+             (error)="onImageErrorModal($event)">
+      </div>
+      <div class="modal-imagen-nombre" *ngIf="productoModal">
+        <h4>{{ productoModal.nombre }}</h4>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Confirmación Dinámico -->
+  <div class="modal fade" 
+       [class.show]="mostrarModalConfirmacion" 
+       [style.display]="mostrarModalConfirmacion ? 'block' : 'none'" 
+       tabindex="-1" 
+       role="dialog"
+       [attr.aria-hidden]="!mostrarModalConfirmacion">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content modal-confirmacion">
+        <div class="modal-header" 
+             [ngClass]="{
+               'bg-success': confirmacionTipo === 'success',
+               'bg-warning': confirmacionTipo === 'warning',
+               'bg-danger': confirmacionTipo === 'danger',
+               'bg-info': confirmacionTipo === 'info'
+             }">
+          <h5 class="modal-title text-white">
+            <i class="fas" 
+               [ngClass]="{
+                 'fa-check-circle': confirmacionTipo === 'success',
+                 'fa-exclamation-triangle': confirmacionTipo === 'warning',
+                 'fa-times-circle': confirmacionTipo === 'danger',
+                 'fa-info-circle': confirmacionTipo === 'info'
+               }" 
+               class="me-2"></i>
+            {{ confirmacionTitulo }}
+          </h5>
+          <button type="button" class="btn-close btn-close-white" (click)="cerrarModalConfirmacion()" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <p [innerHTML]="confirmacionMensaje"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="cerrarModalConfirmacion()">
+            <i class="fas fa-times me-1"></i> Cancelar
+          </button>
+          <button type="button" class="btn"
+                  [ngClass]="{
+                    'btn-success': confirmacionTipo === 'success',
+                    'btn-warning': confirmacionTipo === 'warning',
+                    'btn-danger': confirmacionTipo === 'danger',
+                    'btn-info': confirmacionTipo === 'info'
+                  }"
+                  (click)="confirmarAccion()">
+            <i class="fas fa-check me-1"></i> Aceptar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade" 
+       [class.show]="mostrarModalConfirmacion" 
+       [style.display]="mostrarModalConfirmacion ? 'block' : 'none'" 
+       (click)="cerrarModalConfirmacion()"></div>
+</div>

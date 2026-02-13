@@ -1,0 +1,8 @@
+.container-fluid {
+  padding: 20px;
+}
+
+.page-container {
+  padding-top: 80px; /* Espacio para que el navbar no cubra el contenido */
+}
+

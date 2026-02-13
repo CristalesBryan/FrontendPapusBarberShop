@@ -1,0 +1,53 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="card">
+      <div class="card-header text-center">
+        <img src="/assets/images/Logo.jpeg" alt="Papus BarberShop" class="login-logo">
+      </div>
+      <div class="card-body">
+        <form (ngSubmit)="onSubmit()">
+          <div class="mb-3">
+            <label for="username" class="form-label">Usuario</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              id="username" 
+              [(ngModel)]="loginRequest.username"
+              name="username"
+              required
+              [disabled]="loading">
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Contraseña</label>
+            <input 
+              type="password" 
+              class="form-control" 
+              id="password" 
+              [(ngModel)]="loginRequest.password"
+              name="password"
+              required
+              [disabled]="loading">
+          </div>
+          
+          <div class="alert alert-danger" *ngIf="errorMessage">
+            {{ errorMessage }}
+          </div>
+          
+          <button 
+            type="submit" 
+            class="btn btn-primary w-100"
+            [disabled]="loading">
+            <span *ngIf="!loading">
+              <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+            </span>
+            <span *ngIf="loading">
+              <span class="spinner-border spinner-border-sm me-2"></span>
+              Iniciando sesión...
+            </span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+

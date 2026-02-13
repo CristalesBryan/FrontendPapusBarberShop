@@ -1,0 +1,18 @@
+.container-fluid {
+  padding: 20px;
+}
+
+.page-container {
+  padding-top: 80px; /* Espacio para que el navbar no cubra el contenido */
+}
+
+.nav-tabs .nav-link {
+  cursor: pointer;
+}
+
+.card.bg-primary,
+.card.bg-success,
+.card.bg-info {
+  border: none;
+}
+

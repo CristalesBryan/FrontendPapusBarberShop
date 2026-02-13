@@ -1,0 +1,344 @@
+<div class="container-fluid page-container">
+  <h2 class="mb-4"><i class="fas fa-calendar-alt"></i> Horarios de Barberos</h2>
+
+  <!-- Controles del Calendario -->
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="row align-items-center mb-3">
+        <div class="col-md-6">
+          <div class="d-flex align-items-center">
+            <button class="btn btn-outline-primary me-2" (click)="diaAnterior()" title="Día anterior">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <h4 class="mb-0 mx-3">
+              {{ getRangoSemana() }}
+            </h4>
+            <button class="btn btn-outline-primary me-2" (click)="diaSiguiente()" title="Día siguiente">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+            <button class="btn btn-outline-secondary" (click)="irAHoy()" title="Ir a hoy">
+              <i class="fas fa-calendar-day"></i> Hoy
+            </button>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Filtrar por Barbero</label>
+          <select class="form-select" [(ngModel)]="barberoFiltro" (change)="onFiltroCambiado()">
+            <option [ngValue]="null">Todos los barberos</option>
+            <option *ngFor="let barbero of barberos" [ngValue]="barbero.id">{{ barbero.nombre }}</option>
+          </select>
+        </div>
+        <div class="col-md-3 text-end">
+          <button class="cssbuttons-io-button" (click)="abrirFormularioNuevo()">
+            <svg height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0 0h24v24H0z" fill="none"></path>
+              <path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z" fill="currentColor"></path>
+            </svg>
+            <span>Nuevo Horario</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Calendario Semanal -->
+  <div class="card" *ngIf="!cargando">
+    <div class="card-body p-0">
+      <div class="schedule-table-container">
+        <!-- Encabezado con columna de barberos y días de la semana -->
+        <div class="schedule-table-header">
+          <div class="schedule-barberos-header">Barberos</div>
+          <div class="schedule-days-header">
+            <div 
+              class="schedule-day-header" 
+              *ngFor="let fecha of semanaActual"
+              [class.today]="esHoy(fecha)"
+              [class.selected]="esFechaSeleccionada(fecha)"
+              (click)="abrirFormularioConFecha(fecha)"
+              style="cursor: pointer;">
+              <div class="day-name">{{ getDiaSemanaAbrev(fecha) }}</div>
+              <div class="day-number" [class.today-number]="esFechaSeleccionada(fecha)">
+                {{ getDiaNumero(fecha) }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cuerpo de la tabla: barberos y sus horarios por día -->
+        <div class="schedule-table-body">
+          <div 
+            class="schedule-row" 
+            *ngFor="let barbero of barberos">
+            <!-- Columna de barbero -->
+            <div class="schedule-barbero-cell">
+              <div class="barbero-name">{{ barbero.nombre }}</div>
+            </div>
+            
+            <!-- Columnas de días de la semana -->
+            <div 
+              class="schedule-day-cell" 
+              *ngFor="let fecha of semanaActual"
+              [class.today]="esHoy(fecha)"
+              [class.selected]="esFechaSeleccionada(fecha)"
+              (click)="abrirFormularioConFecha(fecha, barbero.id)"
+              style="cursor: pointer;">
+              <div class="schedules-container">
+                <div 
+                  class="schedule-item" 
+                  *ngFor="let horario of getHorariosPorFechaYBarbero(fecha, barbero.id)"
+                  [class.active]="horario.activo"
+                  [class.inactive]="!horario.activo"
+                  [title]="convertir24hA12h(horario.horaEntrada) + ' a ' + convertir24hA12h(horario.horaSalida)"
+                  (click)="abrirModalDetallesHorario(horario); $event.stopPropagation()"
+                  style="cursor: pointer;">
+                  <div class="schedule-time">{{ convertir24hA12h(horario.horaEntrada) }} - {{ convertir24hA12h(horario.horaSalida) }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="text-center" *ngIf="cargando">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Modal para Registrar/Editar Horario -->
+  <div class="modal fade" [class.show]="mostrarFormulario" [style.display]="mostrarFormulario ? 'block' : 'none'" 
+       tabindex="-1" role="dialog" [attr.aria-hidden]="!mostrarFormulario">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title text-white">
+            <i class="fas fa-calendar-alt me-2 text-white"></i>
+            {{ editando ? 'Editar Horario' : 'Registrar Nuevo Horario' }}
+          </h5>
+          <button type="button" class="btn-close btn-close-white" (click)="cerrarModal()" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form (ngSubmit)="guardarHorario()" id="formHorario">
+            <div class="row">
+              <div class="col-md-12 mb-3">
+                <label class="form-label">Fecha *</label>
+                <input type="date" class="form-control" [(ngModel)]="fechaHorarioSeleccionada" 
+                       name="fecha" (change)="nuevoHorario.fecha = fechaHorarioSeleccionada" required>
+              </div>
+              <div class="col-md-12 mb-3">
+                <label class="form-label">Barbero *</label>
+                <select class="form-select" [(ngModel)]="nuevoHorario.barberoId" name="barberoId" required [disabled]="true">
+                  <option [value]="0">Seleccione un barbero</option>
+                  <option *ngFor="let barbero of barberos" [value]="barbero.id">{{ barbero.nombre }}</option>
+                </select>
+                <small class="form-text text-muted">
+                  <i class="fas fa-info-circle me-1"></i>
+                  El barbero se selecciona automáticamente según la celda del calendario
+                </small>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Hora de Entrada *</label>
+                <select class="form-select" [(ngModel)]="horaEntradaSeleccionada" name="horaEntrada" 
+                        (change)="onHoraEntradaChange()" required>
+                  <option *ngFor="let hora of horasDisponibles" [value]="hora">{{ hora }}</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Hora de Salida *</label>
+                <select class="form-select" [(ngModel)]="horaSalidaSeleccionada" name="horaSalida" 
+                        (change)="onHoraSalidaChange()" required>
+                  <option *ngFor="let hora of horasDisponibles" [value]="hora">{{ hora }}</option>
+                </select>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="button" (click)="cerrarModal()">
+            <span>Cancelar</span>
+            <span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-miterlimit="2" stroke-linejoin="round" fill-rule="evenodd" clip-rule="evenodd"><path fill-rule="nonzero" d="m12.002 2.005c5.518 0 9.998 4.48 9.998 9.997 0 5.518-4.48 9.998-9.998 9.998-5.517 0-9.997-4.48-9.997-9.998 0-5.517 4.48-9.997 9.997-9.997zm0 1.5c-4.69 0-8.497 3.807-8.497 8.497s3.807 8.498 8.497 8.498 8.498-3.808 8.498-8.498-3.808-8.497-8.498-8.497zm0 7.425 2.717-2.718c.146-.146.339-.219.531-.219.404 0 .75.325.75.75 0 .193-.073.384-.219.531l-2.717 2.717 2.727 2.728c.147.147.22.339.22.531 0 .427-.349.75-.75.75-.192 0-.384-.073-.53-.219l-2.729-2.728-2.728 2.728c-.146.146-.338.219-.53.219-.401 0-.751-.323-.751-.75 0-.192.073-.384.22-.531l2.728-2.728-2.722-2.722c-.146-.147-.219-.338-.219-.531 0-.425.346-.749.75-.749.192 0 .385.073.531.219z"></path></svg>
+            </span>
+          </button>
+          <button type="submit" class="save-button" form="formHorario" [disabled]="cargando" [attr.aria-label]="editando ? 'Actualizar' : 'Guardar'">
+            <div class="svg-wrapper-1">
+              <div class="svg-wrapper">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="30"
+                  height="30"
+                  class="icon"
+                >
+                  <path
+                    d="M22,15.04C22,17.23 20.24,19 18.07,19H5.93C3.76,19 2,17.23 2,15.04C2,13.07 3.43,11.44 5.31,11.14C5.28,11 5.27,10.86 5.27,10.71C5.27,9.33 6.38,8.2 7.76,8.2C8.37,8.2 8.94,8.43 9.37,8.8C10.14,7.05 11.13,5.44 13.91,5.44C17.28,5.44 18.87,8.06 18.87,10.83C18.87,10.94 18.87,11.06 18.86,11.17C20.65,11.54 22,13.13 22,15.04Z"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+            <span>{{ editando ? 'Actualizar' : 'Guardar' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade" [class.show]="mostrarFormulario" 
+       [style.display]="mostrarFormulario ? 'block' : 'none'" (click)="cerrarModal()"></div>
+
+  <!-- Modal de Confirmación -->
+  <div class="modal fade" [class.show]="mostrarModalConfirmacion" [style.display]="mostrarModalConfirmacion ? 'block' : 'none'" 
+       tabindex="-1" role="dialog" [attr.aria-hidden]="!mostrarModalConfirmacion">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header bg-warning text-dark">
+          <h5 class="modal-title text-dark">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            {{ tituloConfirmacion }}
+          </h5>
+          <button type="button" class="btn-close" (click)="cerrarModalConfirmacion()" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0">{{ mensajeConfirmacion }}</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="button" (click)="cerrarModalConfirmacion()">
+            <span>Cancelar</span>
+            <span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-miterlimit="2" stroke-linejoin="round" fill-rule="evenodd" clip-rule="evenodd"><path fill-rule="nonzero" d="m12.002 2.005c5.518 0 9.998 4.48 9.998 9.997 0 5.518-4.48 9.998-9.998 9.998-5.517 0-9.997-4.48-9.997-9.998 0-5.517 4.48-9.997 9.997-9.997zm0 1.5c-4.69 0-8.497 3.807-8.497 8.497s3.807 8.498 8.497 8.498 8.498-3.808 8.498-8.498-3.808-8.497-8.498-8.497zm0 7.425 2.717-2.718c.146-.146.339-.219.531-.219.404 0 .75.325.75.75 0 .193-.073.384-.219.531l-2.717 2.717 2.727 2.728c.147.147.22.339.22.531 0 .427-.349.75-.75.75-.192 0-.384-.073-.53-.219l-2.729-2.728-2.728 2.728c-.146.146-.338.219-.53.219-.401 0-.751-.323-.751-.75 0-.192.073-.384.22-.531l2.728-2.728-2.722-2.722c-.146-.147-.219-.338-.219-.531 0-.425.346-.749.75-.749.192 0 .385.073.531.219z"></path></svg>
+            </span>
+          </button>
+          <button type="button" class="btn btn-danger" (click)="confirmarAccion()">
+            <i class="fas fa-check me-1"></i> Aceptar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade" [class.show]="mostrarModalConfirmacion" 
+       [style.display]="mostrarModalConfirmacion ? 'block' : 'none'" (click)="cerrarModalConfirmacion()"></div>
+
+  <!-- Modal de Notificación -->
+  <div class="modal fade" [class.show]="mostrarModalNotificacion" [style.display]="mostrarModalNotificacion ? 'block' : 'none'" 
+       tabindex="-1" role="dialog" [attr.aria-hidden]="!mostrarModalNotificacion">
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+      <div class="modal-content">
+        <div class="modal-header" [ngClass]="{
+          'bg-success': tipoNotificacion === 'success',
+          'bg-danger': tipoNotificacion === 'error',
+          'bg-warning': tipoNotificacion === 'warning',
+          'bg-info': tipoNotificacion === 'info'
+        }">
+          <h5 class="modal-title text-white">
+            <i class="fas me-2" [ngClass]="{
+              'fa-check-circle': tipoNotificacion === 'success',
+              'fa-exclamation-circle': tipoNotificacion === 'error',
+              'fa-exclamation-triangle': tipoNotificacion === 'warning',
+              'fa-info-circle': tipoNotificacion === 'info'
+            }"></i>
+            {{ tipoNotificacion === 'success' ? 'Éxito' : tipoNotificacion === 'error' ? 'Error' : tipoNotificacion === 'warning' ? 'Advertencia' : 'Información' }}
+          </h5>
+          <button type="button" class="btn-close btn-close-white" (click)="cerrarModalNotificacion()" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0">{{ mensajeNotificacion }}</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" (click)="cerrarModalNotificacion()">
+            Aceptar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade" [class.show]="mostrarModalNotificacion" 
+       [style.display]="mostrarModalNotificacion ? 'block' : 'none'" (click)="cerrarModalNotificacion()"></div>
+
+  <!-- Modal de Detalles de Horario -->
+  <div class="modal fade" [class.show]="mostrarModalDetallesHorario" [style.display]="mostrarModalDetallesHorario ? 'block' : 'none'" 
+       tabindex="-1" role="dialog" [attr.aria-hidden]="!mostrarModalDetallesHorario" *ngIf="horarioSeleccionado">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header" [ngClass]="{
+          'bg-success': horarioSeleccionado.activo,
+          'bg-secondary': !horarioSeleccionado.activo
+        }">
+          <h5 class="modal-title text-white">
+            <i class="fas fa-clock me-2"></i>
+            Detalles del Horario
+          </h5>
+          <button type="button" class="btn-close btn-close-white" (click)="cerrarModalDetallesHorario()" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <h6 class="text-muted mb-1">Barbero</h6>
+              <p class="mb-0"><strong>{{ horarioSeleccionado.barberoNombre }}</strong></p>
+            </div>
+            <div class="col-md-6">
+              <h6 class="text-muted mb-1">Estado</h6>
+              <span class="badge" [ngClass]="horarioSeleccionado.activo ? 'bg-success' : 'bg-secondary'">
+                {{ horarioSeleccionado.activo ? 'Activo' : 'Inactivo' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <h6 class="text-muted mb-1">Fecha</h6>
+              <p class="mb-0">{{ horarioSeleccionado.fecha ? (horarioSeleccionado.fecha.split('T')[0]) : 'No especificada' }}</p>
+            </div>
+            <div class="col-md-6">
+              <h6 class="text-muted mb-1">Hora de Entrada</h6>
+              <p class="mb-0"><strong>{{ convertir24hA12h(horarioSeleccionado.horaEntrada) }}</strong></p>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <h6 class="text-muted mb-1">Hora de Salida</h6>
+              <p class="mb-0"><strong>{{ convertir24hA12h(horarioSeleccionado.horaSalida) }}</strong></p>
+            </div>
+            <div class="col-md-6">
+              <h6 class="text-muted mb-1">Duración</h6>
+              <p class="mb-0">
+                {{ calcularDuracion(horarioSeleccionado.horaEntrada, horarioSeleccionado.horaSalida) }}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="cerrarModalDetallesHorario()">
+            <i class="fas fa-times me-1"></i> Cerrar
+          </button>
+          <div class="d-flex gap-2">
+            <button type="button" class="editBtn" (click)="editarHorarioDesdeModal()" title="Editar">
+              <svg height="1em" viewBox="0 0 512 512">
+                <path d="M410.3 231l11.3-11.3-33.9-33.9-62.1-62.1L291.7 89.8l-11.3 11.3-22.6 22.6L58.6 322.9c-10.4 10.4-18 23.3-22.2 37.4L1 480.7c-2.5 8.4-.2 17.5 6.1 23.7s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L387.7 253.7 410.3 231zM160 399.4l-9.1 22.7c-4 3.1-8.5 5.4-13.3 6.9L59.4 452l23-78.1c1.4-4.9 3.8-9.4 6.9-13.3l22.7-9.1v32c0 8.8 7.2 16 16 16h32zM362.7 18.7L348.3 33.2 325.7 55.8 314.3 67.1l33.9 33.9 62.1 62.1 33.9 33.9 11.3-11.3 22.6-22.6 14.5-14.5c25-25 25-65.5 0-90.5L453.3 18.7c-25-25-65.5-25-90.5 0zm-47.4 168l-144 144c-6.2 6.2-16.4 6.2-22.6 0s-6.2-16.4 0-22.6l144-144c6.2-6.2 16.4-6.2 22.6 0s6.2 16.4 0 22.6z"></path>
+              </svg>
+            </button>
+            <button type="button" class="bin-button" (click)="eliminarHorarioDesdeModal()" title="Eliminar">
+            <svg class="bin-top" viewBox="0 0 39 7" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <line y1="5" x2="39" y2="5" stroke="white" stroke-width="4"></line>
+              <line x1="12" y1="1.5" x2="26.0357" y2="1.5" stroke="white" stroke-width="3"></line>
+            </svg>
+            <svg class="bin-bottom" viewBox="0 0 33 39" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <mask id="path-1-inside-1_8_19" fill="white">
+                <path d="M0 0H33V35C33 37.2091 31.2091 39 29 39H4C1.79086 39 0 37.2091 0 35V0Z"></path>
+              </mask>
+              <path d="M0 0H33H0ZM37 35C37 39.4183 33.4183 43 29 43H4C-0.418278 43 -4 39.4183 -4 35H4H29H37ZM4 43C-0.418278 43 -4 39.4183 -4 35V0H4V35V43ZM37 0V35C37 39.4183 33.4183 43 29 43V35V0H37Z" fill="white" mask="url(#path-1-inside-1_8_19)"></path>
+              <path d="M12 6L12 29" stroke="white" stroke-width="4"></path>
+              <path d="M21 6V29" stroke="white" stroke-width="4"></path>
+            </svg>
+          </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade" [class.show]="mostrarModalDetallesHorario" 
+       [style.display]="mostrarModalDetallesHorario ? 'block' : 'none'" (click)="cerrarModalDetallesHorario()"></div>
+</div>

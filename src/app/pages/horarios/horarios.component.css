@@ -1,0 +1,387 @@
+.container-fluid {
+  padding: 20px;
+}
+
+.page-container {
+  padding-top: 80px; /* Espacio para que el navbar no cubra el contenido */
+}
+
+.card {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border: none;
+  margin-bottom: 20px;
+}
+
+.card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  font-weight: 600;
+}
+
+.card-header h5 {
+  color: #000000;
+  margin: 0;
+}
+
+/* Estilos del Calendario Semanal con Columna de Barberos */
+.schedule-table-container {
+  overflow-x: auto;
+}
+
+.schedule-table-header {
+  display: flex;
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.schedule-barberos-header {
+  min-width: 200px;
+  max-width: 200px;
+  padding: 16px;
+  font-weight: 600;
+  color: #495057;
+  border-right: 2px solid #dee2e6;
+  background-color: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.schedule-days-header {
+  display: flex;
+  flex: 1;
+}
+
+.schedule-day-header {
+  flex: 1;
+  padding: 12px 8px;
+  text-align: center;
+  border-right: 1px solid #dee2e6;
+  min-width: 120px;
+  transition: background-color 0.2s;
+}
+
+.schedule-day-header:hover {
+  background-color: #e9ecef;
+}
+
+.schedule-day-header.today {
+  background-color: #e7f3ff;
+  border: 2px solid #0d6efd;
+  border-radius: 8px;
+  margin: 2px;
+}
+
+.schedule-day-header.selected {
+  background-color: #0d6efd;
+  color: white;
+  border-radius: 8px;
+  margin: 2px;
+}
+
+.schedule-day-header.selected .day-name {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.schedule-day-header.selected .day-number {
+  color: white;
+}
+
+.day-name {
+  font-size: 12px;
+  color: #6c757d;
+  text-transform: lowercase;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.schedule-day-header.selected .day-name {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.day-number {
+  font-weight: 600;
+  font-size: 18px;
+  color: #212529;
+}
+
+.day-number.today-number {
+  background-color: #0d6efd;
+  color: white;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.schedule-day-header.selected .day-number {
+  color: white;
+}
+
+.schedule-table-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.schedule-row {
+  display: flex;
+  border-bottom: 1px solid #dee2e6;
+  min-height: 100px;
+}
+
+.schedule-barbero-cell {
+  min-width: 200px;
+  max-width: 200px;
+  padding: 12px;
+  border-right: 2px solid #dee2e6;
+  background-color: #ffffff;
+  display: flex;
+  align-items: flex-start;
+  position: sticky;
+  left: 0;
+  z-index: 5;
+  background-color: #ffffff;
+}
+
+.barbero-name {
+  font-weight: 600;
+  color: #212529;
+  font-size: 14px;
+}
+
+.schedule-day-cell {
+  flex: 1;
+  padding: 8px;
+  border-right: 1px solid #dee2e6;
+  background-color: #ffffff;
+  min-width: 120px;
+  min-height: 100px;
+  transition: background-color 0.2s;
+}
+
+.schedule-day-cell:hover {
+  background-color: #f8f9fa;
+}
+
+.schedule-day-cell.today {
+  background-color: #f0f9ff;
+}
+
+.schedule-day-cell.selected {
+  background-color: #e7f3ff;
+  border: 2px solid #0d6efd;
+}
+
+.schedules-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 80px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.schedule-item {
+  background-color: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 4px;
+}
+
+.schedule-item:hover {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transform: translateY(-1px);
+}
+
+.schedule-item.active {
+  border-left: 3px solid #28a745;
+  background-color: #d4edda;
+}
+
+.schedule-item.inactive {
+  border-left: 3px solid #6c757d;
+  background-color: #e9ecef;
+  opacity: 0.7;
+}
+
+.schedule-time {
+  color: #6c757d;
+  font-size: 11px;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.schedule-actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 2px;
+  justify-content: flex-end;
+}
+
+.schedule-actions .btn-link {
+  text-decoration: none;
+  padding: 0;
+  line-height: 1;
+}
+
+.schedule-actions .btn-link:hover {
+  opacity: 0.8;
+}
+
+.schedule-actions i {
+  font-size: 10px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .calendar-day {
+    min-height: 100px;
+    padding: 4px;
+  }
+
+  .day-number {
+    font-size: 12px;
+  }
+
+  .schedule-item {
+    font-size: 10px;
+    padding: 3px 4px;
+  }
+
+  .schedule-barbero {
+    font-size: 10px;
+  }
+
+  .schedule-time {
+    font-size: 9px;
+  }
+}
+
+/* Scrollbar personalizado para schedules-container */
+.schedules-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.schedules-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 2px;
+}
+
+.schedules-container::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 2px;
+}
+
+.schedules-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.badge {
+  padding: 0.5em 0.75em;
+  font-size: 0.875em;
+}
+
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+/* Estilos del Modal */
+.modal {
+  z-index: 1050;
+}
+
+.modal.show {
+  display: block !important;
+}
+
+.modal-backdrop {
+  z-index: 1040;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-backdrop.show {
+  display: block !important;
+}
+
+.modal-dialog-centered {
+  display: flex;
+  align-items: center;
+  min-height: calc(100% - 1rem);
+}
+
+.modal-content {
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+  border-bottom: 1px solid #dee2e6;
+  padding: 1rem 1.5rem;
+}
+
+.modal-header.bg-primary {
+  background-color: #0d6efd !important;
+  border-bottom: none;
+}
+
+.modal-title {
+  font-weight: 600;
+  color: #212529;
+}
+
+.modal-title.text-white {
+  color: #ffffff !important;
+}
+
+.modal-title .text-white {
+  color: #ffffff !important;
+}
+
+.btn-close-white {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+.modal-header.bg-warning {
+  background-color: #ffc107 !important;
+}
+
+.modal-header.bg-warning .modal-title {
+  color: #212529 !important;
+}
+
+.modal-header.bg-warning .btn-close {
+  filter: none;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-footer {
+  border-top: 1px solid #dee2e6;
+  padding: 1rem 1.5rem;
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.btn-close:hover {
+  opacity: 1;
+}

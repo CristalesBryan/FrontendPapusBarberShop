@@ -1,0 +1,847 @@
+<div class="container-fluid page-container">
+  <h2 class="mb-4"><i class="fas fa-calendar-check"></i> Gestor de Citas</h2>
+
+  <!-- Controles del Calendario -->
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="row align-items-center mb-3">
+        <div class="col-md-6">
+          <div class="d-flex align-items-center">
+            <button class="btn btn-outline-primary me-2" (click)="diaAnterior()" title="Día anterior">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <h4 class="mb-0 mx-3">
+              {{ getRangoSemana() }}
+            </h4>
+            <button class="btn btn-outline-primary me-2" (click)="diaSiguiente()" title="Día siguiente">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+            <button class="btn btn-outline-secondary" (click)="irAHoy()" title="Ir a hoy">
+              <i class="fas fa-calendar-day"></i> Hoy
+            </button>
+          </div>
+        </div>
+        <div class="col-md-6 text-end">
+          <button class="cssbuttons-io-button" (click)="toggleFormulario()">
+            <svg height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0 0h24v24H0z" fill="none"></path>
+              <path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z" fill="currentColor"></path>
+            </svg>
+            <span>Nueva Cita</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Registrar Nueva Cita -->
+  <div class="modal fade" [class.show]="mostrarFormulario" [style.display]="mostrarFormulario ? 'block' : 'none'" 
+       tabindex="-1" role="dialog" [attr.aria-hidden]="!mostrarFormulario">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title text-white">
+            <i class="fas fa-calendar-check me-2 text-white"></i>
+            Registrar Nueva Cita
+          </h5>
+          <button type="button" class="btn-close btn-close-white" (click)="toggleFormulario()" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form (ngSubmit)="guardarCita()" id="formCita">
+        <!-- Selección de Tipo de Corte -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label">Tipo de Corte *</label>
+            <select class="form-select" [(ngModel)]="nuevaCita.tipoCorteId" 
+                    name="tipoCorteId" required (change)="onTipoCorteSeleccionado()"
+                    [disabled]="getTiposCorteDisponibles().length === 0">
+              <option [ngValue]="0">
+                {{ getTiposCorteDisponibles().length === 0 ? 'Cargando tipos de corte...' : 'Seleccione un tipo de corte' }}
+              </option>
+              <option *ngFor="let tipoCorte of getTiposCorteDisponibles()" [ngValue]="tipoCorte.id">
+                {{ tipoCorte.nombre }}
+              </option>
+            </select>
+            <small class="form-text text-muted" *ngIf="getTiposCorteDisponibles().length === 0">
+              <span *ngIf="tiposCorte.length === 0">Cargando tipos de corte desde el servidor...</span>
+              <span *ngIf="tiposCorte.length > 0 && barberoSeleccionado > 0">No hay tipos de corte disponibles para el barbero seleccionado</span>
+            </small>
+            <small class="form-text text-success" *ngIf="getTiposCorteDisponibles().length > 0">
+              {{ getTiposCorteDisponibles().length }} tipo(s) de corte disponible(s)
+              <span *ngIf="barberoSeleccionado > 0"> para el barbero seleccionado</span>
+            </small>
+          </div>
+        </div>
+
+        <!-- Información del Tipo de Corte Seleccionado -->
+        <div class="card mb-3" *ngIf="tipoCorteSeleccionado">
+          <div class="card-body">
+            <h6 class="card-title">{{ tipoCorteSeleccionado.nombre }}</h6>
+            <p class="card-text" *ngIf="tipoCorteSeleccionado.descripcion">
+              <strong>Descripción:</strong> {{ tipoCorteSeleccionado.descripcion }}
+            </p>
+            <p class="card-text">
+              <strong>Tiempo estimado:</strong> {{ tipoCorteSeleccionado.tiempoMinutos }} minutos
+            </p>
+            <p class="card-text">
+              <strong>Precio:</strong> Q{{ tipoCorteSeleccionado.precio | number:'1.2-2' }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Fecha -->
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label class="form-label">Fecha *</label>
+            <input type="date" class="form-control" [(ngModel)]="fechaSeleccionada" 
+                   name="fecha" required (change)="onFechaCambiada()">
+          </div>
+        </div>
+
+        <!-- Selección de Barbero y Hora -->
+        <div class="row mb-3" *ngIf="fechaSeleccionada && tipoCorteSeleccionado">
+          <div class="col-md-6">
+            <label class="form-label">Barbero *</label>
+            <select class="form-select" [(ngModel)]="barberoSeleccionado" 
+                    name="barbero" required (change)="onBarberoSeleccionado()"
+                    [disabled]="getBarberosDisponibles().length === 0 || tieneBarberoAsignado()">
+              <option [ngValue]="0">
+                {{ getBarberosDisponibles().length === 0 ? 'No hay barberos disponibles para esta fecha' : 'Seleccione un barbero' }}
+              </option>
+              <option *ngFor="let barbero of getBarberosDisponibles()" [ngValue]="barbero.id">
+                {{ barbero.nombre }}
+              </option>
+            </select>
+            <small class="form-text text-muted" *ngIf="getBarberosDisponibles().length === 0 && fechaSeleccionada">
+              No hay barberos con horario configurado para esta fecha. Por favor, espere a que los barbero tenga Horario asignado
+            </small>
+            <small class="form-text text-info" *ngIf="tieneBarberoAsignado()">
+              <i class="fas fa-info-circle me-1"></i>
+              El barbero se selecciona automáticamente según el tipo de corte elegido
+            </small>
+            <small class="form-text text-success" *ngIf="getBarberosDisponibles().length > 0 && !tieneBarberoAsignado()">
+              {{ getBarberosDisponibles().length }} barbero(s) disponible(s) para esta fecha
+            </small>
+          </div>
+          <div class="col-md-6" *ngIf="barberoSeleccionado > 0">
+            <label class="form-label">Hora Disponible *</label>
+            <select class="form-select" [(ngModel)]="horaSeleccionada12h" 
+                    name="hora" required (change)="onHoraSeleccionada()"
+                    [disabled]="horasDisponiblesBarbero.length === 0">
+              <option value="">
+                {{ horasDisponiblesBarbero.length === 0 ? 'No hay horas disponibles' : 'Seleccione una hora' }}
+              </option>
+              <option *ngFor="let hora of horasDisponiblesBarbero; trackBy: trackByHora" [value]="hora">
+                {{ hora }}
+              </option>
+            </select>
+            <small class="form-text text-muted" *ngIf="horasDisponiblesBarbero.length === 0 && tipoCorteSeleccionado">
+              No hay horas disponibles para este tipo de corte ({{ tipoCorteSeleccionado.tiempoMinutos }} min) en el horario del barbero.
+            </small>
+          </div>
+        </div>
+
+        <!-- Información del Cliente -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label">Nombre del Cliente *</label>
+            <input type="text" class="form-control" [(ngModel)]="nuevaCita.nombreCliente" 
+                   name="nombreCliente" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Correo del Cliente *</label>
+            <input type="email" class="form-control" [(ngModel)]="nuevaCita.correoCliente" 
+                   name="correoCliente" required>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label">Teléfono del Cliente</label>
+            <input type="text" class="form-control" [(ngModel)]="nuevaCita.telefonoCliente" 
+                   name="telefonoCliente">
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-12">
+            <label class="form-label">Comentarios</label>
+            <textarea class="form-control" rows="3" [(ngModel)]="nuevaCita.comentarios" 
+                      name="comentarios"></textarea>
+          </div>
+        </div>
+
+        <!-- Correos de Confirmación -->
+        <div class="row mb-3">
+          <div class="col-md-12">
+            <label class="form-label">Correos para Confirmación *</label>
+            <div *ngFor="let correo of nuevaCita.correosConfirmacion; let i = index" class="mb-2">
+              <div class="input-group">
+                <input type="email" class="form-control" [(ngModel)]="nuevaCita.correosConfirmacion[i]" 
+                       [name]="'correo' + i" placeholder="correo@ejemplo.com">
+                <button type="button" class="btn btn-outline-danger" 
+                        (click)="eliminarCorreo(i)" 
+                        *ngIf="nuevaCita.correosConfirmacion.length > 1">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+            <button type="button" class="cssbuttons-io-button" (click)="agregarCorreo()">
+              <svg height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 0h24v24H0z" fill="none"></path>
+                <path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z" fill="currentColor"></path>
+              </svg>
+              <span>Agregar Correo</span>
+            </button>
+          </div>
+        </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="button" (click)="toggleFormulario()">
+            <span>Cancelar</span>
+            <span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-miterlimit="2" stroke-linejoin="round" fill-rule="evenodd" clip-rule="evenodd"><path fill-rule="nonzero" d="m12.002 2.005c5.518 0 9.998 4.48 9.998 9.997 0 5.518-4.48 9.998-9.998 9.998-5.517 0-9.997-4.48-9.997-9.998 0-5.517 4.48-9.997 9.997-9.997zm0 1.5c-4.69 0-8.497 3.807-8.497 8.497s3.807 8.498 8.497 8.498 8.498-3.808 8.498-8.498-3.808-8.497-8.498-8.497zm0 7.425 2.717-2.718c.146-.146.339-.219.531-.219.404 0 .75.325.75.75 0 .193-.073.384-.219.531l-2.717 2.717 2.727 2.728c.147.147.22.339.22.531 0 .427-.349.75-.75.75-.192 0-.384-.073-.53-.219l-2.729-2.728-2.728 2.728c-.146.146-.338.219-.53.219-.401 0-.751-.323-.751-.75 0-.192.073-.384.22-.531l2.728-2.728-2.722-2.722c-.146-.147-.219-.338-.219-.531 0-.425.346-.749.75-.749.192 0 .385.073.531.219z"></path></svg>
+            </span>
+          </button>
+          <button type="submit" class="save-button" form="formCita" [disabled]="cargando" aria-label="Guardar Cita">
+            <div class="svg-wrapper-1">
+              <div class="svg-wrapper">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="30"
+                  height="30"
+                  class="icon"
+                >
+                  <path
+                    d="M22,15.04C22,17.23 20.24,19 18.07,19H5.93C3.76,19 2,17.23 2,15.04C2,13.07 3.43,11.44 5.31,11.14C5.28,11 5.27,10.86 5.27,10.71C5.27,9.33 6.38,8.2 7.76,8.2C8.37,8.2 8.94,8.43 9.37,8.8C10.14,7.05 11.13,5.44 13.91,5.44C17.28,5.44 18.87,8.06 18.87,10.83C18.87,10.94 18.87,11.06 18.86,11.17C20.65,11.54 22,13.13 22,15.04Z"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+            <span>Guardar Cita</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade" [class.show]="mostrarFormulario" 
+       [style.display]="mostrarFormulario ? 'block' : 'none'" (click)="toggleFormulario()"></div>
+
+  <!-- Calendario Semanal -->
+  <div class="card" *ngIf="!cargando">
+    <div class="card-body p-0">
+      <div class="schedule-table-container">
+        <!-- Encabezado con columna de barberos y días de la semana -->
+        <div class="schedule-table-header">
+          <div class="schedule-barberos-header">Barberos</div>
+          <div class="schedule-days-header">
+            <div 
+              class="schedule-day-header" 
+              *ngFor="let fecha of semanaActual"
+              [class.today]="esHoy(fecha)"
+              [class.selected]="esFechaSeleccionada(fecha)"
+              (click)="abrirFormularioConFecha(fecha)"
+              style="cursor: pointer;">
+              <div class="day-name">{{ getDiaSemanaAbrev(fecha) }}</div>
+              <div class="day-number" [class.today-number]="esFechaSeleccionada(fecha)">
+                {{ getDiaNumero(fecha) }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cuerpo de la tabla: barberos y sus citas por día -->
+        <div class="schedule-table-body">
+          <div 
+            class="schedule-row" 
+            *ngFor="let barbero of barberos">
+            <!-- Columna de barbero -->
+            <div class="schedule-barbero-cell">
+              <div class="barbero-name">{{ barbero.nombre }}</div>
+            </div>
+            
+            <!-- Columnas de días de la semana -->
+            <div 
+              class="schedule-day-cell" 
+              *ngFor="let fecha of semanaActual"
+              [class.today]="esHoy(fecha)"
+              [class.selected]="esFechaSeleccionada(fecha)"
+              (click)="getCitasAdicionales(fecha, barbero.id) > 0 ? abrirModalCitasDia(fecha, barbero.id, $event) : abrirFormularioConFecha(fecha, barbero.id)"
+              style="cursor: pointer;">
+              <div class="citas-container">
+                <!-- Mostrar solo las primeras 2 citas -->
+                <div 
+                  class="cita-item" 
+                  *ngFor="let cita of getCitasVisibles(fecha, barbero.id)"
+                  [ngClass]="{
+                    'cita-confirmada': cita.estado === 'CONFIRMADA',
+                    'cita-pendiente': cita.estado === 'PENDIENTE',
+                    'cita-cancelada': cita.estado === 'CANCELADA',
+                    'cita-completada': cita.estado === 'COMPLETADA'
+                  }"
+                  [title]="cita.nombreCliente + ' - ' + convertirHoraA12h(cita.hora) + ' - ' + cita.tipoCorteNombre"
+                  (click)="abrirModalDetallesCita(cita); $event.stopPropagation()"
+                  style="cursor: pointer;">
+                  <div class="cita-time">{{ convertirHoraA12h(cita.hora) }}</div>
+                  <div class="cita-cliente">{{ cita.nombreCliente }}</div>
+                  <div class="cita-tipo">{{ cita.tipoCorteNombre }}</div>
+                  <div class="cita-actions">
+                    <button class="btn btn-sm btn-link p-0" 
+                            (click)="completarCita(cita.id); $event.stopPropagation()"
+                            *ngIf="cita.estado !== 'CANCELADA' && cita.estado !== 'COMPLETADA'"
+                            title="Finalizar">
+                      <i class="fas fa-check text-success"></i>
+                    </button>
+                    <button class="btn btn-sm btn-link p-0" 
+                            (click)="mostrarModalCambiarHora(cita); $event.stopPropagation()"
+                            *ngIf="cita.estado !== 'CANCELADA' && cita.estado !== 'COMPLETADA'"
+                            title="Cambiar Hora">
+                      <i class="fas fa-clock text-warning"></i>
+                    </button>
+                    <button class="btn btn-sm btn-link p-0" 
+                            (click)="cancelarCita(cita.id); $event.stopPropagation()"
+                            *ngIf="cita.estado !== 'CANCELADA' && cita.estado !== 'COMPLETADA'"
+                            title="Cancelar">
+                      <i class="fas fa-times text-danger"></i>
+                    </button>
+                  </div>
+                </div>
+                <!-- Indicador de citas adicionales -->
+                <div 
+                  class="cita-mas-indicador" 
+                  *ngIf="getCitasAdicionales(fecha, barbero.id) > 0"
+                  (click)="abrirModalCitasDia(fecha, barbero.id, $event); $event.stopPropagation()"
+                  title="Ver todas las citas">
+                  <i class="fas fa-ellipsis-h"></i>
+                  <span>+{{ getCitasAdicionales(fecha, barbero.id) }} más</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="text-center" *ngIf="cargando">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Modal para Cambiar Hora -->
+  <div class="modal fade" [class.show]="mostrarModalCambiarHoraFlag" [style.display]="mostrarModalCambiarHoraFlag ? 'block' : 'none'" 
+       tabindex="-1" role="dialog" *ngIf="citaCambiarHora">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Cambiar Hora de Cita</h5>
+          <button type="button" class="btn-close" (click)="cerrarModalCambiarHora()" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <p><strong>Cliente:</strong> {{ citaCambiarHora.nombreCliente }}</p>
+            <p><strong>Barbero:</strong> {{ citaCambiarHora.barberoNombre }}</p>
+            <p><strong>Fecha:</strong> {{ citaCambiarHora.fecha }}</p>
+            <p><strong>Hora Actual:</strong> {{ citaCambiarHora.hora }}</p>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Nueva Hora *</label>
+            <select class="form-select" [(ngModel)]="nuevaHoraSeleccionada" name="nuevaHora" required>
+              <option value="">Seleccione una hora disponible</option>
+              <option *ngFor="let hora of horasDisponiblesCambiar" [value]="hora">
+                {{ hora }}
+              </option>
+            </select>
+            <small class="form-text text-muted" *ngIf="horasDisponiblesCambiar.length === 0">
+              No hay horas disponibles para este tipo de corte en el horario del barbero.
+            </small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="button" (click)="cerrarModalCambiarHora()">
+            <span>Cancelar</span>
+            <span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-miterlimit="2" stroke-linejoin="round" fill-rule="evenodd" clip-rule="evenodd"><path fill-rule="nonzero" d="m12.002 2.005c5.518 0 9.998 4.48 9.998 9.997 0 5.518-4.48 9.998-9.998 9.998-5.517 0-9.997-4.48-9.997-9.998 0-5.517 4.48-9.997 9.997-9.997zm0 1.5c-4.69 0-8.497 3.807-8.497 8.497s3.807 8.498 8.497 8.498 8.498-3.808 8.498-8.498-3.808-8.497-8.498-8.497zm0 7.425 2.717-2.718c.146-.146.339-.219.531-.219.404 0 .75.325.75.75 0 .193-.073.384-.219.531l-2.717 2.717 2.727 2.728c.147.147.22.339.22.531 0 .427-.349.75-.75.75-.192 0-.384-.073-.53-.219l-2.729-2.728-2.728 2.728c-.146.146-.338.219-.53.219-.401 0-.751-.323-.751-.75 0-.192.073-.384.22-.531l2.728-2.728-2.722-2.722c-.146-.147-.219-.338-.219-.531 0-.425.346-.749.75-.749.192 0 .385.073.531.219z"></path></svg>
+            </span>
+          </button>
+          <button type="button" class="save-button" (click)="cambiarHora()" 
+                  [disabled]="!nuevaHoraSeleccionada || cargando" aria-label="Guardar Cambio">
+            <div class="svg-wrapper-1">
+              <div class="svg-wrapper">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="30"
+                  height="30"
+                  class="icon"
+                >
+                  <path
+                    d="M22,15.04C22,17.23 20.24,19 18.07,19H5.93C3.76,19 2,17.23 2,15.04C2,13.07 3.43,11.44 5.31,11.14C5.28,11 5.27,10.86 5.27,10.71C5.27,9.33 6.38,8.2 7.76,8.2C8.37,8.2 8.94,8.43 9.37,8.8C10.14,7.05 11.13,5.44 13.91,5.44C17.28,5.44 18.87,8.06 18.87,10.83C18.87,10.94 18.87,11.06 18.86,11.17C20.65,11.54 22,13.13 22,15.04Z"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+            <span>Guardar Cambio</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade" [class.show]="mostrarModalCambiarHoraFlag" 
+       [style.display]="mostrarModalCambiarHoraFlag ? 'block' : 'none'" (click)="cerrarModalCambiarHora()"></div>
+
+  <!-- Modal de Notificación -->
+  <div class="modal fade" [class.show]="mostrarModalNotificacion" [style.display]="mostrarModalNotificacion ? 'block' : 'none'" 
+       tabindex="-1" role="dialog" [attr.aria-hidden]="!mostrarModalNotificacion">
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+      <div class="modal-content">
+        <div class="modal-header" [ngClass]="{
+          'bg-success': tipoNotificacion === 'success',
+          'bg-danger': tipoNotificacion === 'error',
+          'bg-warning': tipoNotificacion === 'warning',
+          'bg-info': tipoNotificacion === 'info'
+        }">
+          <h5 class="modal-title text-white">
+            <i class="fas me-2" [ngClass]="{
+              'fa-check-circle': tipoNotificacion === 'success',
+              'fa-exclamation-circle': tipoNotificacion === 'error',
+              'fa-exclamation-triangle': tipoNotificacion === 'warning',
+              'fa-info-circle': tipoNotificacion === 'info'
+            }"></i>
+            {{ tipoNotificacion === 'success' ? 'Éxito' : tipoNotificacion === 'error' ? 'Error' : tipoNotificacion === 'warning' ? 'Advertencia' : 'Información' }}
+          </h5>
+          <button type="button" class="btn-close btn-close-white" (click)="cerrarModalNotificacion()" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0">{{ mensajeNotificacion }}</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" (click)="cerrarModalNotificacion()">
+            Aceptar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Modal de Detalles de Cita -->
+  <div class="modal fade" [class.show]="mostrarModalDetallesCita" [style.display]="mostrarModalDetallesCita ? 'block' : 'none'" 
+       tabindex="-1" role="dialog" [attr.aria-hidden]="!mostrarModalDetallesCita" *ngIf="citaSeleccionada">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header" [ngClass]="{
+          'bg-success': citaSeleccionada.estado === 'CONFIRMADA',
+          'bg-warning': citaSeleccionada.estado === 'PENDIENTE',
+          'bg-danger': citaSeleccionada.estado === 'CANCELADA',
+          'bg-info': citaSeleccionada.estado === 'COMPLETADA'
+        }">
+          <h5 class="modal-title text-white">
+            <i class="fas fa-calendar-check me-2"></i>
+            Detalles de la Cita
+          </h5>
+          <button type="button" class="btn-close btn-close-white" (click)="cerrarModalDetallesCita()" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Vista de Detalles (cuando no se está editando) -->
+          <div *ngIf="!editandoCita">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <h6 class="text-muted mb-1">Estado</h6>
+                <span class="badge" [ngClass]="getEstadoBadgeClass(citaSeleccionada.estado)">
+                  {{ citaSeleccionada.estado }}
+                </span>
+              </div>
+              <div class="col-md-6">
+                <h6 class="text-muted mb-1">Fecha y Hora</h6>
+                <p class="mb-0">{{ citaSeleccionada.fecha.split('T')[0] }} a las {{ convertirHoraA12h(citaSeleccionada.hora) }}</p>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <h6 class="text-muted mb-1">Barbero</h6>
+                <p class="mb-0">{{ citaSeleccionada.barberoNombre }}</p>
+              </div>
+              <div class="col-md-6">
+                <h6 class="text-muted mb-1">Tipo de Corte</h6>
+                <p class="mb-0">{{ citaSeleccionada.tipoCorteNombre }}</p>
+                <small class="text-muted" *ngIf="citaSeleccionada.tipoCorteDescripcion">
+                  {{ citaSeleccionada.tipoCorteDescripcion }}
+                </small>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <h6 class="text-muted mb-1">Tiempo Estimado</h6>
+                <p class="mb-0">{{ citaSeleccionada.tipoCorteTiempoMinutos }} minutos</p>
+              </div>
+              <div class="col-md-6">
+                <h6 class="text-muted mb-1">Precio</h6>
+                <p class="mb-0">Q{{ citaSeleccionada.tipoCortePrecio | number:'1.2-2' }}</p>
+              </div>
+            </div>
+
+            <hr>
+
+            <div class="row mb-3">
+              <div class="col-md-12">
+                <h6 class="text-muted mb-1">Cliente</h6>
+                <p class="mb-0"><strong>{{ citaSeleccionada.nombreCliente }}</strong></p>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <h6 class="text-muted mb-1">Correo</h6>
+                <p class="mb-0">{{ citaSeleccionada.correoCliente }}</p>
+              </div>
+              <div class="col-md-6" *ngIf="citaSeleccionada.telefonoCliente">
+                <h6 class="text-muted mb-1">Teléfono</h6>
+                <p class="mb-0">{{ citaSeleccionada.telefonoCliente }}</p>
+              </div>
+            </div>
+
+            <div class="row mb-3" *ngIf="citaSeleccionada.comentarios">
+              <div class="col-md-12">
+                <h6 class="text-muted mb-1">Comentarios</h6>
+                <p class="mb-0">{{ citaSeleccionada.comentarios }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vista de Edición -->
+          <div *ngIf="editandoCita">
+            <form (ngSubmit)="guardarEdicionCita()" id="formEditarCita">
+              <!-- Fecha -->
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label class="form-label">Fecha *</label>
+                  <input type="date" class="form-control" [(ngModel)]="citaEditando.fecha" 
+                         name="fecha" required (change)="onFechaCambiada()">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Hora Disponible *</label>
+                  <select class="form-select" [(ngModel)]="horaSeleccionada12h" 
+                          name="hora" required (change)="onHoraSeleccionada()"
+                          [disabled]="horasDisponiblesBarbero.length === 0">
+                    <option value="">
+                      {{ horasDisponiblesBarbero.length === 0 ? 'No hay horas disponibles' : 'Seleccione una hora' }}
+                    </option>
+                    <option *ngFor="let hora of horasDisponiblesBarbero; trackBy: trackByHora" [value]="hora">
+                      {{ hora }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Barbero -->
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label class="form-label">Barbero *</label>
+                  <select class="form-select" [(ngModel)]="citaEditando.barberoId" 
+                          name="barberoId" required (change)="onBarberoSeleccionado()"
+                          [disabled]="getBarberosDisponibles().length === 0 || tieneBarberoAsignado()">
+                    <option [ngValue]="0">
+                      {{ getBarberosDisponibles().length === 0 ? 'No hay barberos disponibles' : 'Seleccione un barbero' }}
+                    </option>
+                    <option *ngFor="let barbero of getBarberosDisponibles()" [ngValue]="barbero.id">
+                      {{ barbero.nombre }}
+                    </option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Tipo de Corte *</label>
+                  <select class="form-select" [(ngModel)]="citaEditando.tipoCorteId" 
+                          name="tipoCorteId" required (change)="onTipoCorteSeleccionado()">
+                    <option [ngValue]="0">Seleccione un tipo de corte</option>
+                    <option *ngFor="let tipoCorte of getTiposCorteDisponibles()" [ngValue]="tipoCorte.id">
+                      {{ tipoCorte.nombre }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Información del Cliente -->
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label class="form-label">Nombre del Cliente *</label>
+                  <input type="text" class="form-control" [(ngModel)]="citaEditando.nombreCliente" 
+                         name="nombreCliente" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Correo del Cliente *</label>
+                  <input type="email" class="form-control" [(ngModel)]="citaEditando.correoCliente" 
+                         name="correoCliente" required>
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label class="form-label">Teléfono del Cliente</label>
+                  <input type="text" class="form-control" [(ngModel)]="citaEditando.telefonoCliente" 
+                         name="telefonoCliente">
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-md-12">
+                  <label class="form-label">Comentarios</label>
+                  <textarea class="form-control" rows="3" [(ngModel)]="citaEditando.comentarios" 
+                            name="comentarios"></textarea>
+                </div>
+              </div>
+
+              <!-- Correos de Confirmación -->
+              <div class="row mb-3">
+                <div class="col-md-12">
+                  <label class="form-label">Correos para Confirmación *</label>
+                  <div *ngFor="let correo of citaEditando.correosConfirmacion; let i = index" class="mb-2">
+                    <div class="input-group">
+                      <input type="email" class="form-control" [(ngModel)]="citaEditando.correosConfirmacion[i]" 
+                             [name]="'correo' + i" placeholder="correo@ejemplo.com">
+                      <button type="button" class="btn btn-outline-danger" 
+                              (click)="eliminarCorreo(i)" 
+                              *ngIf="citaEditando.correosConfirmacion.length > 1">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <button type="button" class="cssbuttons-io-button" (click)="agregarCorreo()">
+                    <svg height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M0 0h24v24H0z" fill="none"></path>
+                      <path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z" fill="currentColor"></path>
+                    </svg>
+                    <span>Agregar Correo</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="button" (click)="editandoCita ? cancelarEdicionCita() : cerrarModalDetallesCita()">
+            <span>{{ editandoCita ? 'Cancelar Edición' : 'Cerrar' }}</span>
+            <span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-miterlimit="2" stroke-linejoin="round" fill-rule="evenodd" clip-rule="evenodd"><path fill-rule="nonzero" d="m12.002 2.005c5.518 0 9.998 4.48 9.998 9.997 0 5.518-4.48 9.998-9.998 9.998-5.517 0-9.997-4.48-9.997-9.998 0-5.517 4.48-9.997 9.997-9.997zm0 1.5c-4.69 0-8.497 3.807-8.497 8.497s3.807 8.498 8.497 8.498 8.498-3.808 8.498-8.498-3.808-8.497-8.498-8.497zm0 7.425 2.717-2.718c.146-.146.339-.219.531-.219.404 0 .75.325.75.75 0 .193-.073.384-.219.531l-2.717 2.717 2.727 2.728c.147.147.22.339.22.531 0 .427-.349.75-.75.75-.192 0-.384-.073-.53-.219l-2.729-2.728-2.728 2.728c-.146.146-.338.219-.53.219-.401 0-.751-.323-.751-.75 0-.192.073-.384.22-.531l2.728-2.728-2.722-2.722c-.146-.147-.219-.338-.219-.531 0-.425.346-.749.75-.749.192 0 .385.073.531.219z"></path></svg>
+            </span>
+          </button>
+          <button type="button" class="editBtn" 
+                  (click)="iniciarEdicionCita()" 
+                  *ngIf="!editandoCita && citaSeleccionada.estado !== 'CANCELADA' && citaSeleccionada.estado !== 'COMPLETADA'"
+                  title="Editar">
+            <svg height="1em" viewBox="0 0 512 512">
+              <path d="M410.3 231l11.3-11.3-33.9-33.9-62.1-62.1L291.7 89.8l-11.3 11.3-22.6 22.6L58.6 322.9c-10.4 10.4-18 23.3-22.2 37.4L1 480.7c-2.5 8.4-.2 17.5 6.1 23.7s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L387.7 253.7 410.3 231zM160 399.4l-9.1 22.7c-4 3.1-8.5 5.4-13.3 6.9L59.4 452l23-78.1c1.4-4.9 3.8-9.4 6.9-13.3l22.7-9.1v32c0 8.8 7.2 16 16 16h32zM362.7 18.7L348.3 33.2 325.7 55.8 314.3 67.1l33.9 33.9 62.1 62.1 33.9 33.9 11.3-11.3 22.6-22.6 14.5-14.5c25-25 25-65.5 0-90.5L453.3 18.7c-25-25-65.5-25-90.5 0zm-47.4 168l-144 144c-6.2 6.2-16.4 6.2-22.6 0s-6.2-16.4 0-22.6l144-144c6.2-6.2 16.4-6.2 22.6 0s6.2 16.4 0 22.6z"></path>
+            </svg>
+          </button>
+          <button type="submit" class="save-button" 
+                  form="formEditarCita" 
+                  *ngIf="editandoCita" 
+                  [disabled]="cargando" aria-label="Guardar Cambios">
+            <div class="svg-wrapper-1">
+              <div class="svg-wrapper">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="30"
+                  height="30"
+                  class="icon"
+                >
+                  <path
+                    d="M22,15.04C22,17.23 20.24,19 18.07,19H5.93C3.76,19 2,17.23 2,15.04C2,13.07 3.43,11.44 5.31,11.14C5.28,11 5.27,10.86 5.27,10.71C5.27,9.33 6.38,8.2 7.76,8.2C8.37,8.2 8.94,8.43 9.37,8.8C10.14,7.05 11.13,5.44 13.91,5.44C17.28,5.44 18.87,8.06 18.87,10.83C18.87,10.94 18.87,11.06 18.86,11.17C20.65,11.54 22,13.13 22,15.04Z"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+            <span>Guardar Cambios</span>
+          </button>
+          <button type="button" class="btn btn-info" 
+                  (click)="finalizarCitaDesdeModal()" 
+                  *ngIf="!editandoCita && citaSeleccionada.estado !== 'CANCELADA' && citaSeleccionada.estado !== 'COMPLETADA'">
+            <i class="fas fa-check me-1"></i> Finalizar
+          </button>
+          <button type="button" class="btn btn-danger" 
+                  (click)="cancelarCitaDesdeModal()" 
+                  *ngIf="!editandoCita && citaSeleccionada.estado !== 'CANCELADA' && citaSeleccionada.estado !== 'COMPLETADA'">
+            <i class="fas fa-times me-1"></i> Cancelar Cita
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade" [class.show]="mostrarModalDetallesCita" 
+       [style.display]="mostrarModalDetallesCita ? 'block' : 'none'" (click)="cerrarModalDetallesCita()"></div>
+
+  <div class="modal-backdrop fade" [class.show]="mostrarModalNotificacion" 
+       [style.display]="mostrarModalNotificacion ? 'block' : 'none'" (click)="cerrarModalNotificacion()"></div>
+
+  <!-- Modal de Confirmación Dinámico -->
+  <div class="modal fade" 
+       [class.show]="mostrarModalConfirmacion" 
+       [style.display]="mostrarModalConfirmacion ? 'block' : 'none'" 
+       tabindex="-1" 
+       role="dialog"
+       [attr.aria-hidden]="!mostrarModalConfirmacion">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content modal-confirmacion">
+        <div class="modal-header" 
+             [ngClass]="{
+               'bg-success': confirmacionTipo === 'success',
+               'bg-warning': confirmacionTipo === 'warning',
+               'bg-danger': confirmacionTipo === 'danger',
+               'bg-info': confirmacionTipo === 'info'
+             }">
+          <h5 class="modal-title text-white">
+            <i class="fas" 
+               [ngClass]="{
+                 'fa-check-circle': confirmacionTipo === 'success',
+                 'fa-exclamation-triangle': confirmacionTipo === 'warning',
+                 'fa-times-circle': confirmacionTipo === 'danger',
+                 'fa-info-circle': confirmacionTipo === 'info'
+               }" 
+               class="me-2"></i>
+            {{ confirmacionTitulo }}
+          </h5>
+          <button type="button" class="btn-close btn-close-white" (click)="cerrarModalConfirmacion()" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <p [innerHTML]="confirmacionMensaje"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="cerrarModalConfirmacion()">
+            <i class="fas fa-times me-1"></i> Cancelar
+          </button>
+          <button type="button" 
+                  class="btn" 
+                  [ngClass]="{
+                    'btn-success': confirmacionTipo === 'success',
+                    'btn-warning': confirmacionTipo === 'warning',
+                    'btn-danger': confirmacionTipo === 'danger',
+                    'btn-info': confirmacionTipo === 'info'
+                  }"
+                  (click)="confirmarAccion()">
+            <i class="fas fa-check me-1"></i> Aceptar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade" 
+       [class.show]="mostrarModalConfirmacion" 
+       [style.display]="mostrarModalConfirmacion ? 'block' : 'none'" 
+       (click)="cerrarModalConfirmacion()"></div>
+
+  <!-- Modal para ver todas las citas de un día/barbero -->
+  <div class="modal fade" 
+       [class.show]="mostrarModalCitasDia" 
+       [style.display]="mostrarModalCitasDia ? 'block' : 'none'" 
+       tabindex="-1" 
+       role="dialog"
+       [attr.aria-hidden]="!mostrarModalCitasDia">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title text-white">
+            <i class="fas fa-calendar-day me-2"></i>
+            Citas del {{ fechaModalDia ? (getDiaSemanaAbrev(fechaModalDia) + ' ' + getDiaNumero(fechaModalDia) + ' de ' + getMesNombre(fechaModalDia)) : '' }}
+            <span *ngIf="barberoModalDia"> - {{ barberoModalDia.nombre }}</span>
+          </h5>
+          <button type="button" class="btn-close btn-close-white" (click)="cerrarModalCitasDia()" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <div *ngIf="citasModalDia.length === 0" class="text-center py-4">
+            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+            <p class="text-muted">No hay citas programadas para este día.</p>
+          </div>
+          <div *ngIf="citasModalDia.length > 0" class="citas-lista-modal">
+            <div 
+              class="card mb-3 cita-card-modal" 
+              *ngFor="let cita of citasModalDia"
+              [ngClass]="{
+                'border-success': cita.estado === 'CONFIRMADA',
+                'border-warning': cita.estado === 'PENDIENTE',
+                'border-danger': cita.estado === 'CANCELADA',
+                'border-info': cita.estado === 'COMPLETADA'
+              }">
+              <div class="card-body">
+                <div class="row align-items-center">
+                  <div class="col-md-8">
+                    <div class="d-flex align-items-center mb-2">
+                      <span class="badge me-2"
+                            [ngClass]="{
+                              'bg-success': cita.estado === 'CONFIRMADA',
+                              'bg-warning': cita.estado === 'PENDIENTE',
+                              'bg-danger': cita.estado === 'CANCELADA',
+                              'bg-info': cita.estado === 'COMPLETADA'
+                            }">
+                        {{ cita.estado }}
+                      </span>
+                      <h6 class="mb-0 me-3">
+                        <i class="fas fa-clock me-1"></i>
+                        {{ convertirHoraA12h(cita.hora) }}
+                      </h6>
+                    </div>
+                    <h5 class="mb-1">{{ cita.nombreCliente }}</h5>
+                    <p class="text-muted mb-1">
+                      <i class="fas fa-cut me-1"></i>
+                      {{ cita.tipoCorteNombre }}
+                    </p>
+                    <p class="text-muted small mb-0" *ngIf="cita.comentarios">
+                      <i class="fas fa-comment me-1"></i>
+                      {{ cita.comentarios }}
+                    </p>
+                  </div>
+                  <div class="col-md-4 text-end">
+                    <div class="btn-group-vertical btn-group-sm" role="group">
+                      <button class="btn btn-outline-primary btn-sm mb-1" 
+                              (click)="abrirModalDetallesCita(cita); cerrarModalCitasDia()"
+                              title="Ver detalles">
+                        <i class="fas fa-eye me-1"></i> Ver Detalles
+                      </button>
+                      <button class="btn btn-outline-success btn-sm mb-1" 
+                              (click)="completarCita(cita.id); cerrarModalCitasDia()"
+                              *ngIf="cita.estado !== 'CANCELADA' && cita.estado !== 'COMPLETADA'"
+                              title="Finalizar">
+                        <i class="fas fa-check me-1"></i> Finalizar
+                      </button>
+                      <button class="btn btn-outline-warning btn-sm mb-1" 
+                              (click)="mostrarModalCambiarHora(cita); cerrarModalCitasDia()"
+                              *ngIf="cita.estado !== 'CANCELADA' && cita.estado !== 'COMPLETADA'"
+                              title="Cambiar Hora">
+                        <i class="fas fa-clock me-1"></i> Cambiar Hora
+                      </button>
+                      <button class="btn btn-outline-danger btn-sm" 
+                              (click)="cancelarCita(cita.id); cerrarModalCitasDia()"
+                              *ngIf="cita.estado !== 'CANCELADA' && cita.estado !== 'COMPLETADA'"
+                              title="Cancelar">
+                        <i class="fas fa-times me-1"></i> Cancelar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="cerrarModalCitasDia()">
+            <i class="fas fa-times me-1"></i> Cerrar
+          </button>
+          <button type="button" class="btn btn-primary" 
+                  (click)="abrirFormularioConFecha(fechaModalDia!, barberoModalDia!.id); cerrarModalCitasDia()"
+                  *ngIf="fechaModalDia && barberoModalDia">
+            <i class="fas fa-plus me-1"></i> Nueva Cita
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade" 
+       [class.show]="mostrarModalCitasDia" 
+       [style.display]="mostrarModalCitasDia ? 'block' : 'none'" 
+       (click)="cerrarModalCitasDia()"></div>
+</div>
+

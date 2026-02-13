@@ -1,0 +1,214 @@
+.sidebar {
+  width: 250px;
+  min-width: 250px;
+  height: calc(100vh - 56px);
+  background-color: #343a40;
+  color: white;
+  position: fixed;
+  left: 0;
+  top: 56px;
+  transition: width 0.3s ease, transform 0.3s ease;
+  z-index: 1000;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar.collapsed {
+  width: 60px;
+  min-width: 60px;
+}
+
+/* Asegurar que el sidebar se expanda al hacer hover incluso cuando está colapsado */
+.sidebar.collapsed:hover {
+  width: 250px;
+  min-width: 250px;
+}
+
+.sidebar-header {
+  padding: 15px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.toggle-btn {
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.toggle-btn:hover {
+  background-color: rgba(255,255,255,0.1);
+  border-radius: 4px;
+}
+
+.sidebar-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.sidebar-nav {
+  padding: 10px 0;
+  flex: 1;
+}
+
+.sidebar-nav .nav-item {
+  margin: 5px 10px;
+}
+
+.sidebar-nav .nav-link {
+  color: rgba(255,255,255,0.8);
+  padding: 12px 15px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.sidebar-nav .nav-link i {
+  width: 20px;
+  margin-right: 10px;
+  text-align: center;
+}
+
+.sidebar.collapsed .nav-link i {
+  margin-right: 0;
+}
+
+.sidebar-nav .nav-link:hover {
+  background-color: rgba(255,255,255,0.1);
+  color: white;
+}
+
+.sidebar-nav .nav-link.active {
+  background-color: #007bff;
+  color: white;
+}
+
+.sidebar.collapsed .nav-link span {
+  display: none;
+}
+
+/* Mostrar el texto cuando se hace hover en el sidebar colapsado */
+.sidebar.collapsed:hover .nav-link span {
+  display: inline;
+}
+
+.sidebar.collapsed:hover .nav-link i {
+  margin-right: 10px;
+}
+
+/* Estilos para redes sociales */
+.social-section {
+  padding: 20px 15px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  margin-top: auto;
+}
+
+.social-card {
+  width: fit-content;
+  height: fit-content;
+  background-color: rgb(238, 238, 238);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 15px;
+  gap: 15px;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.055);
+  border-radius: 8px;
+  margin: 0 auto;
+}
+
+/* for all social containers*/
+.socialContainer {
+  width: 52px;
+  height: 52px;
+  border-radius: 5px;
+  background-color: rgb(44, 44, 44);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition-duration: 0.3s;
+  text-decoration: none;
+}
+
+/* Tiktok*/
+.containerTwo:hover {
+  background-color: #25f4ee;
+  transition-duration: 0.3s;
+}
+
+/* Facebook*/
+.containerThree:hover {
+  background-color: #1877f2;
+  transition-duration: 0.3s;
+}
+
+.socialContainer:active {
+  transform: scale(0.9);
+  transition-duration: 0.3s;
+}
+
+.socialSvg {
+  width: 19px;
+}
+
+.largeIcon {
+  width: 27px; /* Ancho específico solo para el icono de TikTok */
+}
+
+.socialSvg path {
+  fill: rgb(255, 255, 255);
+}
+
+.socialContainer:hover .socialSvg {
+  animation: slide-in-top 0.3s both;
+}
+
+@keyframes slide-in-top {
+  0% {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Ajustes para sidebar colapsado - siempre horizontal */
+.sidebar.collapsed .social-section {
+  padding: 15px 5px;
+}
+
+.sidebar.collapsed .social-card {
+  flex-direction: row;
+  padding: 10px 10px;
+  gap: 10px;
+}
+
+.sidebar.collapsed .socialContainer {
+  width: 45px;
+  height: 45px;
+}
+
+.sidebar.collapsed:hover .social-card {
+  flex-direction: row;
+  padding: 15px 15px;
+  gap: 15px;
+}
+
+.sidebar.collapsed:hover .socialContainer {
+  width: 52px;
+  height: 52px;
+}
+

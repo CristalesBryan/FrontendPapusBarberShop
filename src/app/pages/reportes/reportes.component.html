@@ -1,0 +1,193 @@
+<div class="container-fluid page-container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-chart-bar"></i> Reportes</h2>
+    <button class="cssbuttons-io-button" (click)="refrescar()" [disabled]="cargando" title="Actualizar reportes">
+      <svg height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" [class.spinning]="cargando" style="transition: transform 0.3s;">
+        <path d="M0 0h24v24H0z" fill="none"></path>
+        <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z" fill="currentColor"></path>
+      </svg>
+      <span>Actualizar</span>
+    </button>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header">
+      <ul class="nav nav-tabs card-header-tabs">
+        <li class="nav-item">
+          <a class="nav-link" [class.active]="vista === 'diario'" (click)="cambiarVista('diario')">Resumen Diario</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" [class.active]="vista === 'mensual'" (click)="cambiarVista('mensual')">Resumen Mensual</a>
+        </li>
+      </ul>
+    </div>
+    <div class="card-body">
+      <!-- Resumen Diario -->
+      <div *ngIf="vista === 'diario'">
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label class="form-label">Consultar por Fecha</label>
+            <div class="input-group">
+              <input type="date" class="form-control" [(ngModel)]="fechaConsulta">
+              <button class="btn btn-primary" (click)="consultarPorFecha()">Consultar</button>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="resumenDiario && !cargando">
+          <h5>Resumen del {{ resumenDiario.fecha }}</h5>
+          <div class="row mb-4">
+            <div class="col-md-3">
+              <div class="card bg-primary text-white">
+                <div class="card-body">
+                  <h6>Total Servicios</h6>
+                  <h3>Q{{ resumenDiario.totalServicios | number:'1.2-2' }}</h3>
+                  <small>{{ resumenDiario.cantidadServicios }} servicios</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card bg-success text-white">
+                <div class="card-body">
+                  <h6>Total Ventas</h6>
+                  <h3>Q{{ resumenDiario.totalVentas | number:'1.2-2' }}</h3>
+                  <small>{{ resumenDiario.cantidadVentas }} ventas</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card bg-warning text-white">
+                <div class="card-body">
+                  <h6>Total Comisiones</h6>
+                  <h3>Q{{ resumenDiario.totalComisiones | number:'1.2-2' }}</h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card bg-info text-white">
+                <div class="card-body">
+                  <h6>Total General</h6>
+                  <h3>Q{{ resumenDiario.totalGeneral | number:'1.2-2' }}</h3>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <h5 class="mb-3">Resumen por Barbero</h5>
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Barbero</th>
+                  <th>% Servicio</th>
+                  <th>Total Servicios</th>
+                  <th>Total Ventas</th>
+                  <th>Total Comisiones</th>
+                  <th>Total Generado</th>
+                  <th>Pago Barbero</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let resumen of resumenDiario.resumenBarberos">
+                  <td>{{ resumen.barberoNombre }}</td>
+                  <td>{{ resumen.porcentajeServicio }}%</td>
+                  <td>Q{{ resumen.totalServicios | number:'1.2-2' }}</td>
+                  <td>Q{{ resumen.totalVentas | number:'1.2-2' }}</td>
+                  <td>Q{{ resumen.totalComisiones | number:'1.2-2' }}</td>
+                  <td>Q{{ resumen.totalGenerado | number:'1.2-2' }}</td>
+                  <td><strong>Q{{ resumen.pagoBarbero | number:'1.2-2' }}</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumen Mensual -->
+      <div *ngIf="vista === 'mensual'">
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label class="form-label">Consultar por Mes</label>
+            <div class="input-group">
+              <input type="month" class="form-control" [(ngModel)]="mesConsulta">
+              <button class="btn btn-primary" (click)="consultarPorMes()">Consultar</button>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="resumenMensual && !cargando">
+          <h5>Resumen del Mes {{ resumenMensual.mes }}</h5>
+        <div class="row mb-4">
+          <div class="col-md-3">
+            <div class="card bg-primary text-white">
+              <div class="card-body">
+                <h6>Total Servicios</h6>
+                <h3>Q{{ resumenMensual.totalServicios | number:'1.2-2' }}</h3>
+                <small>{{ resumenMensual.cantidadServicios }} servicios</small>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card bg-success text-white">
+              <div class="card-body">
+                <h6>Total Ventas</h6>
+                <h3>Q{{ resumenMensual.totalVentas | number:'1.2-2' }}</h3>
+                <small>{{ resumenMensual.cantidadVentas }} ventas</small>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card bg-warning text-white">
+              <div class="card-body">
+                <h6>Total Comisiones</h6>
+                <h3>Q{{ resumenMensual.totalComisiones | number:'1.2-2' }}</h3>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card bg-info text-white">
+              <div class="card-body">
+                <h6>Total General</h6>
+                <h3>Q{{ resumenMensual.totalGeneral | number:'1.2-2' }}</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h5 class="mb-3">Resumen por Barbero</h5>
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Barbero</th>
+                <th>% Servicio</th>
+                <th>Total Servicios</th>
+                <th>Total Ventas</th>
+                <th>Total Comisiones</th>
+                <th>Total Generado</th>
+                <th>Pago Barbero</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let resumen of resumenMensual.resumenBarberos">
+                <td>{{ resumen.barberoNombre }}</td>
+                <td>{{ resumen.porcentajeServicio }}%</td>
+                <td>Q{{ resumen.totalServicios | number:'1.2-2' }}</td>
+                <td>Q{{ resumen.totalVentas | number:'1.2-2' }}</td>
+                <td>Q{{ resumen.totalComisiones | number:'1.2-2' }}</td>
+                <td>Q{{ resumen.totalGenerado | number:'1.2-2' }}</td>
+                <td><strong>Q{{ resumen.pagoBarbero | number:'1.2-2' }}</strong></td>
+              </tr>
+            </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center" *ngIf="cargando">
+        <div class="spinner-border text-primary" role="status"></div>
+      </div>
+    </div>
+  </div>
+</div>
+

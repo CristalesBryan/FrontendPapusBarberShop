@@ -1,0 +1,144 @@
+.login-container {
+  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Imagen de fondo con overlay para mejor legibilidad */
+  background-image: url('/assets/images/Foto Local.jpeg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  /* Overlay oscuro para mejorar la legibilidad del formulario */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  padding: 20px;
+  overflow: hidden;
+}
+
+/* Overlay oscuro sobre la imagen de fondo */
+.login-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 0;
+}
+
+/* Asegurar que el contenido esté sobre el overlay */
+.login-card {
+  position: relative;
+  z-index: 1;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+  z-index: 1;
+}
+
+.card {
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  border: none;
+  background: transparent;
+}
+
+.card-header {
+  background: transparent !important;
+  color: white;
+  border-radius: 15px 15px 0 0 !important;
+  padding: 30px;
+  padding-bottom: 20px; /* Padding fijo para mantener espacio */
+  border: none;
+  min-height: 120px; /* Altura mínima fija para evitar que se mueva */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-logo {
+  width: 900px; /* Tamaño fijo del logo */
+  height: auto;
+  max-height: 300px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+  /* Asegurar que el logo no afecte el layout */
+  position: relative;
+}
+
+.card-header h3 {
+  margin: 0;
+  font-weight: 600;
+}
+
+.card-body {
+  padding: 30px;
+  padding-top: 20px; /* Padding superior fijo */
+  background: transparent;
+  color: white;
+  /* Asegurar que el body mantenga su posición */
+  position: relative;
+}
+
+.form-label {
+  font-weight: 500;
+  color: white;
+  margin-bottom: 8px;
+}
+
+/* Estilos para los inputs */
+.form-control {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.form-control::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.form-control:focus {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+}
+
+/* Mensaje de error */
+.alert-danger {
+  background-color: rgba(220, 53, 69, 0.8);
+  border-color: rgba(220, 53, 69, 0.9);
+  color: white;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  padding: 12px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+

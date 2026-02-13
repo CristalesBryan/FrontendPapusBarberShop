@@ -1,0 +1,34 @@
+<div class="sidebar" 
+     [class.collapsed]="isCollapsed"
+     (mouseenter)="onMouseEnter()"
+     (mouseleave)="onMouseLeave()">
+  <div class="sidebar-header">
+    <button class="btn btn-link toggle-btn" (click)="toggleSidebar()">
+      <i class="fas" [class.fa-chevron-left]="!isCollapsed" [class.fa-chevron-right]="isCollapsed"></i>
+    </button>
+  </div>
+  <div class="sidebar-content">
+    <nav class="sidebar-nav">
+    <ul class="nav flex-column">
+      <li class="nav-item" *ngFor="let item of menuItems">
+        <a class="nav-link" 
+           *ngIf="canShowItem(item) && item.external"
+           [href]="item.path"
+           target="_blank"
+           rel="noopener noreferrer">
+          <i [class]="item.icon"></i>
+          <span *ngIf="!isCollapsed">{{ item.label }}</span>
+        </a>
+        <a class="nav-link" 
+           *ngIf="canShowItem(item) && !item.external"
+           [routerLink]="item.path" 
+           routerLinkActive="active">
+          <i [class]="item.icon"></i>
+          <span *ngIf="!isCollapsed">{{ item.label }}</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+  </div>
+</div>
+

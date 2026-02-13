@@ -1,0 +1,885 @@
+.compra-container {
+  position: relative;
+  min-height: 100vh;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Fondo animado */
+.background-container {
+  position: fixed;
+  top: 56px; /* Debajo del navbar */
+  left: 0;
+  width: 100%;
+  height: calc(100% - 56px);
+  z-index: 0;
+  background: #181c21;
+  margin: 0;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+/* Ajustar cuando hay sidebar */
+body:not(.sidebar-collapsed) .background-container {
+  left: 250px;
+  width: calc(100% - 250px);
+}
+
+body.sidebar-collapsed .background-container {
+  left: 60px;
+  width: calc(100% - 60px);
+}
+
+.pattern-bg {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: repeating-linear-gradient(
+    135deg,
+    #232526 0px,
+    #232526 60px,
+    #23252699 70px,
+    #414345 130px
+  );
+  position: relative;
+}
+
+.cube-svg {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  left: -30%;
+  top: -20%;
+  background: transparent;
+  opacity: 0.7;
+  z-index: 1;
+  animation: cubeMove 18s linear infinite alternate;
+}
+
+@keyframes cubeMove {
+  from {
+    transform: translateY(0) scale(1);
+  }
+  to {
+    transform: translateY(-20%) scale(1.02) rotate(1deg);
+  }
+}
+
+/* Contenido sobre el fondo */
+.content-overlay {
+  position: relative;
+  z-index: 2;
+  padding: 20px;
+}
+
+.page-container {
+  padding-top: 60px;
+}
+
+/* Ajustes de color para legibilidad sobre el fondo oscuro */
+.page-container h2 {
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.producto-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.98);
+}
+
+/* Contenedor de imagen del producto */
+.producto-imagen-container {
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+  background-color: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 10px;
+}
+
+.producto-imagen {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  cursor: pointer;
+}
+
+.producto-imagen:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+.producto-imagen-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+  background-color: #e9ecef;
+}
+
+.producto-imagen-placeholder i {
+  opacity: 0.5;
+  margin-bottom: 10px;
+}
+
+.producto-imagen-placeholder p {
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.producto-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.producto-header {
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 1rem;
+}
+
+.producto-header h5 {
+  color: #212529;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.producto-info {
+  min-height: 120px;
+}
+
+.precio-venta h4 {
+  font-weight: 700;
+  color: #0d6efd;
+}
+
+.stock-info {
+  font-size: 0.9rem;
+}
+
+.descripcion-info {
+  border-top: 1px solid #e9ecef;
+  padding-top: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.descripcion-info p {
+  color: #6c757d;
+  margin: 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.producto-footer {
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  justify-content: center;
+}
+
+.card {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  border: none;
+  margin-bottom: 20px;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+}
+
+.input-group-text {
+  background-color: #f8f9fa;
+  border-right: none;
+}
+
+.form-control:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.badge {
+  font-size: 0.85rem;
+  padding: 0.5em 0.75em;
+}
+
+/* Estilos para botón sparkle - Agregar al Carrito */
+.sp {
+  position: relative;
+}
+
+.sparkle-button {
+  --active: 0;
+  --bg: radial-gradient(
+    40% 50% at center 100%,
+    hsl(270 calc(var(--active) * 97%) 72% / var(--active)),
+    transparent
+  ),
+  radial-gradient(
+    80% 100% at center 120%,
+    hsl(260 calc(var(--active) * 97%) 70% / var(--active)),
+    transparent
+  ),
+  hsl(260 calc(var(--active) * 97%) calc((var(--active) * 44%) + 12%));
+  background: var(--bg);
+  font-size: 1.2rem;
+  font-weight: 500;
+  border: 0;
+  cursor: pointer;
+  padding: 1em 1em;
+  display: flex;
+  align-items: center;
+  gap: 0.25em;
+  white-space: nowrap;
+  border-radius: 100px;
+  position: relative;
+  box-shadow: 0 0 calc(var(--active) * 3em) calc(var(--active) * 1em) hsl(260 97% 61% / 0.75),
+    0 0em 0 0 hsl(260 calc(var(--active) * 97%) calc((var(--active) * 50%) + 30%)) inset,
+    0 -0.05em 0 0 hsl(260 calc(var(--active) * 97%) calc(var(--active) * 60%)) inset;
+  transition: box-shadow var(--transition), scale var(--transition), background var(--transition);
+  scale: calc(1 + (var(--active) * 0.1));
+  transition: .3s;
+  --transition: 0.3s;
+  --spark: 1.5s;
+  --cut: 0.1em;
+}
+
+.sparkle-button:active {
+  scale: 1;
+  transition: .3s;
+}
+
+.sparkle path {
+  color: hsl(0 0% calc((var(--active, 0) * 70%) + var(--base)));
+  transform-box: fill-box;
+  transform-origin: center;
+  fill: currentColor;
+  stroke: currentColor;
+  animation-delay: calc((var(--transition) * 1.5) + (var(--delay) * 1s));
+  animation-duration: 0.6s;
+  transition: color var(--transition);
+}
+
+.sparkle-button:is(:hover, :focus-visible) path {
+  animation-name: bounce;
+}
+
+@keyframes bounce {
+  35%, 65% {
+    scale: var(--scale);
+  }
+}
+
+.sparkle path:nth-of-type(1) {
+  --scale: 0.5;
+  --delay: 0.1;
+  --base: 40%;
+}
+
+.sparkle path:nth-of-type(2) {
+  --scale: 1.5;
+  --delay: 0.2;
+  --base: 20%;
+}
+
+.sparkle path:nth-of-type(3) {
+  --scale: 2.5;
+  --delay: 0.35;
+  --base: 30%;
+}
+
+.sparkle-button:before {
+  content: "";
+  position: absolute;
+  inset: -0.2em;
+  z-index: -1;
+  border: 0.25em solid hsl(260 97% 50% / 0.5);
+  border-radius: 100px;
+  opacity: var(--active, 0);
+  transition: opacity var(--transition);
+}
+
+.spark {
+  position: absolute;
+  inset: 0;
+  border-radius: 100px;
+  rotate: 0deg;
+  overflow: hidden;
+  mask: linear-gradient(white, transparent 50%);
+  animation: flip calc(var(--spark) * 2) infinite steps(2, end);
+}
+
+@keyframes flip {
+  to {
+    rotate: 360deg;
+  }
+}
+
+.spark:before {
+  content: "";
+  position: absolute;
+  width: 200%;
+  aspect-ratio: 1;
+  top: 0%;
+  left: 50%;
+  z-index: -1;
+  translate: -50% -15%;
+  rotate: 0;
+  transform: rotate(-90deg);
+  opacity: calc((var(--active)) + 0.4);
+  background: conic-gradient(
+    from 0deg,
+    transparent 0 340deg,
+    white 360deg
+  );
+  transition: opacity var(--transition);
+  animation: rotate var(--spark) linear infinite both;
+}
+
+.spark:after {
+  content: "";
+  position: absolute;
+  inset: var(--cut);
+  border-radius: 100px;
+}
+
+.backdrop {
+  position: absolute;
+  inset: var(--cut);
+  background: var(--bg);
+  border-radius: 100px;
+  transition: background var(--transition);
+}
+
+@keyframes rotate {
+  to {
+    transform: rotate(90deg);
+  }
+}
+
+@supports(selector(:has(:is(+ *)))) {
+  body:has(button:is(:hover, :focus-visible)) {
+    --active: 1;
+    --play-state: running;
+  }
+  .bodydrop {
+    display: none;
+  }
+}
+
+.sparkle-button:is(:hover, :focus-visible) ~ :is(.bodydrop, .particle-pen) {
+  --active: 1;
+  --play-state: running;
+}
+
+.sparkle-button:is(:hover, :focus-visible) {
+  --active: 1;
+  --play-state: running;
+}
+
+.particle-pen {
+  position: absolute;
+  width: 200%;
+  aspect-ratio: 1;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  -webkit-mask: radial-gradient(white, transparent 65%);
+  z-index: -1;
+  opacity: var(--active, 0);
+  transition: opacity var(--transition);
+}
+
+.particle {
+  fill: white;
+  width: calc(var(--size, 0.25) * 1rem);
+  aspect-ratio: 1;
+  position: absolute;
+  top: var(--y, 50%);
+  left: var(--x, 50%);
+  opacity: var(--alpha, 1);
+  animation: float-out var(--duration, 1s) calc(var(--delay, 0s) * -1) infinite linear;
+  transform-origin: var(--origin-x, 1000%) var(--origin-y, 1000%);
+  z-index: -1;
+  animation-play-state: var(--play-state, paused);
+  --size: 0.25;
+  --alpha: 1;
+  --origin-x: 1000%;
+  --origin-y: 1000%;
+}
+
+.particle path {
+  fill: hsl(0 0% 90%);
+  stroke: none;
+}
+
+.particle:nth-of-type(even) {
+  animation-direction: reverse;
+}
+
+@keyframes float-out {
+  to {
+    rotate: 360deg;
+  }
+}
+
+.text {
+  translate: 2% -6%;
+  letter-spacing: 0.01ch;
+  background: linear-gradient(90deg, hsl(0 0% calc((var(--active) * 100%) + 65%)), hsl(0 0% calc((var(--active) * 100%) + 26%)));
+  -webkit-background-clip: text;
+  color: transparent;
+  transition: background var(--transition);
+}
+
+.sparkle-button svg {
+  inline-size: 1.25em;
+  translate: -25% -5%;
+}
+
+.sparkle-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Modal para imagen ampliada */
+.modal-imagen-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.9);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-imagen-contenido {
+  position: relative;
+  max-width: 90%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: scaleIn 0.3s ease;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.btn-cerrar-modal {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  color: white;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+  z-index: 10000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.btn-cerrar-modal:hover {
+  background: rgba(0, 0, 0, 0.8);
+  border-color: rgba(255, 255, 255, 1);
+  transform: rotate(90deg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.modal-imagen-wrapper {
+  background: white;
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  max-width: 500px;
+  max-height: 70vh;
+  width: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  text-align: center;
+  position: relative;
+}
+
+.modal-imagen-grande {
+  max-width: 350px;
+  max-height: 50vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 4px;
+  display: block;
+  margin: 0 auto;
+  vertical-align: middle;
+}
+
+.modal-imagen-nombre {
+  margin-top: 20px;
+  text-align: center;
+  color: white;
+}
+
+.modal-imagen-nombre h4 {
+  color: white;
+  font-size: 1.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  margin: 0;
+}
+
+.modal-imagen-placeholder {
+  width: 100%;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+  background-color: #e9ecef;
+  border-radius: 8px;
+}
+
+.modal-imagen-placeholder i {
+  opacity: 0.5;
+  margin-bottom: 15px;
+}
+
+.modal-imagen-placeholder p {
+  font-size: 1.1rem;
+  margin: 0;
+  color: #6c757d;
+}
+
+/* Estilos del carrito dropdown */
+.carrito-dropdown-container {
+  position: relative;
+  z-index: 1000;
+}
+
+.btn-carrito {
+  position: relative;
+  background-color: rgba(13, 110, 253, 0.9);
+  border: none;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.btn-carrito:hover {
+  background-color: rgba(13, 110, 253, 1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.carrito-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 380px;
+  max-height: 600px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  z-index: 1001;
+}
+
+.carrito-dropdown.mostrar {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.carrito-dropdown-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1rem;
+  border-radius: 8px 8px 0 0;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.carrito-dropdown-header h6 {
+  color: white;
+  margin: 0;
+  font-weight: 600;
+}
+
+.carrito-dropdown-body {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 400px;
+  padding: 1rem;
+}
+
+.carrito-vacio-dropdown {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  color: #6c757d;
+  text-align: center;
+}
+
+.carrito-vacio-dropdown i {
+  opacity: 0.5;
+  margin-bottom: 0.5rem;
+}
+
+.carrito-items-dropdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.carrito-item-dropdown {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+  transition: all 0.2s ease;
+}
+
+.carrito-item-dropdown:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  background-color: #e9ecef;
+}
+
+.item-imagen-dropdown {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #dee2e6;
+}
+
+.item-imagen-dropdown img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.item-info-dropdown {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.item-nombre-dropdown {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #212529;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-controls-dropdown {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btn-cantidad-dropdown {
+  width: 24px;
+  height: 24px;
+  border: 1px solid #dee2e6;
+  background-color: white;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.7rem;
+  padding: 0;
+}
+
+.btn-cantidad-dropdown:hover:not(:disabled) {
+  background-color: #e9ecef;
+  border-color: #adb5bd;
+}
+
+.btn-cantidad-dropdown:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cantidad-dropdown {
+  min-width: 24px;
+  text-align: center;
+  font-weight: 600;
+  color: #212529;
+  font-size: 0.85rem;
+}
+
+.btn-eliminar-dropdown {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background-color: #dc3545;
+  color: white;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: auto;
+  font-size: 0.7rem;
+  padding: 0;
+}
+
+.btn-eliminar-dropdown:hover {
+  background-color: #c82333;
+  transform: scale(1.1);
+}
+
+.item-subtotal-dropdown {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0d6efd;
+}
+
+.carrito-dropdown-footer {
+  border-top: 2px solid #dee2e6;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 0 0 8px 8px;
+}
+
+.carrito-total-dropdown {
+  background-color: white;
+  padding: 0.75rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .carrito-dropdown {
+    width: calc(100vw - 40px);
+    right: -20px;
+    max-width: 380px;
+  }
+}
+
+/* Estilos para el modal de confirmación */
+.modal-confirmacion {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.modal-confirmacion .modal-header {
+  border-bottom: none;
+  padding: 1.5rem;
+}
+
+.modal-confirmacion .modal-header.bg-success {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+}
+
+.modal-confirmacion .modal-header.bg-warning {
+  background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%) !important;
+}
+
+.modal-confirmacion .modal-header.bg-danger {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+}
+
+.modal-confirmacion .modal-header.bg-info {
+  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%) !important;
+}
+
+.modal-confirmacion .modal-title {
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.modal-confirmacion .modal-body {
+  padding: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.modal-confirmacion .modal-footer {
+  border-top: 1px solid #dee2e6;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.modal-confirmacion .btn {
+  min-width: 100px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.modal-confirmacion .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+}
+
