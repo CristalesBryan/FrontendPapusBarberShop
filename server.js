@@ -4,21 +4,22 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
-// BACKEND_URL debe ser la URL completa del backend en Railway (ej: https://tu-backend.railway.app)
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8080';
 
-// Middleware para parsear JSON
+// 1. Middleware para parsear JSON
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Configurar proxy para peticiones API
-// Redirige todas las peticiones /auth/* y /api/* al backend
+// 2. Proxies PRIMERO
 app.use('/auth', createProxyMiddleware({
   target: BACKEND_URL,
   changeOrigin: true,
   logLevel: 'debug',
+  onProxyReq: (proxyReq, req, res) => {
+    console.log(`🔄 Proxying ${req.method} ${req.path} to ${BACKEND_URL}`);
+  },
   onError: (err, req, res) => {
-    console.error('Error en proxy /auth:', err.message);
+    console.error('❌ Error en proxy /auth:', err.message);
     if (!res.headersSent) {
       res.status(500).json({ error: 'Error al conectar con el backend' });
     }
@@ -29,21 +30,21 @@ app.use('/api', createProxyMiddleware({
   target: BACKEND_URL,
   changeOrigin: true,
   logLevel: 'debug',
+  onProxyReq: (proxyReq, req, res) => {
+    console.log(`🔄 Proxying ${req.method} ${req.path} to ${BACKEND_URL}`);
+  },
   onError: (err, req, res) => {
-    console.error('Error en proxy /api:', err.message);
+    console.error('❌ Error en proxy /api:', err.message);
     if (!res.headersSent) {
       res.status(500).json({ error: 'Error al conectar con el backend' });
     }
   }
 }));
 
-// Servir archivos estáticos
-app.use(express.static(path.join(__dirname, 'dist/papus-barbershop-frontend'), {
-  // No servir index.html para rutas de API
-  index: false
-}));
+// 3. Archivos estáticos
+app.use(express.static(path.join(__dirname, 'dist/papus-barbershop-frontend')));
 
-// Redirigir todas las rutas GET al index.html (para Angular routing)
+// 4. Catch-all AL FINAL (para Angular routing)
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist/papus-barbershop-frontend/index.html'));
 });
