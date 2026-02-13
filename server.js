@@ -14,6 +14,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/auth', createProxyMiddleware({
   target: BACKEND_URL,
   changeOrigin: true,
+  timeout: 30000,
+  proxyTimeout: 30000,
   logLevel: 'debug',
   onProxyReq: (proxyReq, req, res) => {
     console.log(`🔄 Proxying ${req.method} ${req.path} to ${BACKEND_URL}`);
@@ -29,6 +31,8 @@ app.use('/auth', createProxyMiddleware({
 app.use('/api', createProxyMiddleware({
   target: BACKEND_URL,
   changeOrigin: true,
+  timeout: 30000,
+  proxyTimeout: 30000,
   logLevel: 'debug',
   onProxyReq: (proxyReq, req, res) => {
     console.log(`🔄 Proxying ${req.method} ${req.path} to ${BACKEND_URL}`);
