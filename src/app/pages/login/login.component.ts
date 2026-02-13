@@ -25,40 +25,62 @@ export class LoginComponent {
     private router: Router
   ) {}
 
+  /**
+   * Maneja el envío del formulario de login.
+   * Valida las credenciales, guarda el token en sessionStorage (y localStorage para compatibilidad),
+   * y redirige al usuario según su rol.
+   */
   onSubmit(): void {
+    // Validar que se haya ingresado el usuario
     if (!this.loginRequest.username) {
       this.errorMessage = 'Por favor, ingrese su usuario';
       return;
     }
     
+    // Validar que se haya ingresado la contraseña
     if (!this.loginRequest.password) {
       this.errorMessage = 'Por favor, ingrese su contraseña';
       return;
     }
 
+    // Activar el spinner de carga
     this.loading = true;
     this.errorMessage = '';
 
+    // Realizar la petición de login
     this.authService.login(this.loginRequest).subscribe({
       next: (response) => {
+        // Desactivar el spinner de carga
         this.loading = false;
+        
+        // Verificar que el login fue exitoso
         if (response.success) {
+          // El token ya fue guardado en sessionStorage y localStorage por el AuthService
           // Redirigir según el rol del usuario
           if (response.rol === 'BARBERO') {
-            this.router.navigate(['/servicios']);
+            // Los barberos van a la página de servicios
+            this.router.navigate(['/servicios']).catch(err => {
+              console.error('Error al redirigir a /servicios:', err);
+            });
           } else {
-            this.router.navigate(['/dashboard']);
+            // Los administradores y otros roles van al dashboard
+            this.router.navigate(['/dashboard']).catch(err => {
+              console.error('Error al redirigir a /dashboard:', err);
+            });
           }
         } else {
+          // Mostrar mensaje de error si el login falló
           this.errorMessage = response.message || 'Error al iniciar sesión';
         }
       },
       error: (error) => {
+        // Desactivar el spinner de carga en caso de error
         this.loading = false;
         console.error('Error de login completo:', error);
         console.error('Error status:', error.status);
         console.error('Error error:', error.error);
         
+        // Manejar diferentes tipos de errores
         if (error.error) {
           if (error.error.message) {
             this.errorMessage = error.error.message;

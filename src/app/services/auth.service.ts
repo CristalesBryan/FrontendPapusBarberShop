@@ -49,11 +49,16 @@ export class AuthService {
     });
   }
 
+  /**
+   * Inicializa el usuario desde el token almacenado.
+   * Busca el token en sessionStorage primero, luego en localStorage como fallback.
+   * Valida el token y extrae la información del usuario.
+   */
   private initializeUser(): void {
     const token = this.getToken();
     if (token) {
       try {
-        // Verificar si el token es válido
+        // Verificar si el token es válido (no expirado)
         if (!this.isAuthenticated()) {
           console.warn('Token expirado, limpiando...');
           this.logout();
@@ -84,8 +89,10 @@ export class AuthService {
 
   /**
    * Asegura que el usuario esté inicializado desde el token.
+   * Busca el token en sessionStorage primero, luego en localStorage como fallback.
    * Útil para llamar antes de verificar roles en guards.
-   * Retorna true si el usuario está disponible, false si no.
+   * 
+   * @returns true si el usuario está disponible y autenticado, false si no
    */
   ensureUserInitialized(): boolean {
     const token = this.getToken();
@@ -93,11 +100,10 @@ export class AuthService {
       if (!this.currentUserSubject.value) {
         console.log('Inicializando usuario desde token...');
         this.initializeUser();
-        // Esperar un momento para que la inicialización se complete
-        // y luego verificar nuevamente
+        // Verificar nuevamente después de la inicialización
         const user = this.currentUserSubject.value;
         if (!user) {
-          // Si aún no hay usuario, intentar recuperarlo directamente
+          // Si aún no hay usuario, intentar recuperarlo directamente del token
           const userFromToken = this.getUserFromToken(token);
           if (userFromToken && userFromToken.rol) {
             this.currentUserSubject.next(userFromToken);
@@ -140,11 +146,26 @@ export class AuthService {
       );
   }
 
+  /**
+   * Cierra la sesión del usuario eliminando el token de ambos almacenamientos.
+   * Limpia tanto sessionStorage como localStorage para asegurar un logout completo.
+   */
   logout(): void {
+    // Limpiar token de sessionStorage
     sessionStorage.removeItem('token');
+    // Limpiar token de localStorage para asegurar logout completo
+    localStorage.removeItem('token');
+    // Limpiar el usuario del contexto
     this.currentUserSubject.next(null);
   }
 
+  /**
+   * Verifica si el usuario está autenticado.
+   * Busca el token en sessionStorage primero, luego en localStorage como fallback.
+   * Valida que el token exista y no esté expirado.
+   * 
+   * @returns true si el usuario está autenticado, false si no
+   */
   isAuthenticated(): boolean {
     const token = this.getToken();
     if (!token) return false;
@@ -152,22 +173,65 @@ export class AuthService {
     try {
       const payload = this.decodeToken(token);
       const currentTime = Date.now() / 1000;
+      // Verificar que el token no haya expirado
       return payload.exp > currentTime;
     } catch {
       return false;
     }
   }
 
+  /**
+   * Obtiene el token de autenticación.
+   * Busca primero en sessionStorage (preferido) y luego en localStorage (fallback para compatibilidad).
+   * Si encuentra el token en localStorage pero no en sessionStorage, lo migra a sessionStorage.
+   * 
+   * @returns El token JWT o null si no existe
+   */
   getToken(): string | null {
-    // Usar sessionStorage en lugar de localStorage para que cada pestaña tenga su propio token
-    return sessionStorage.getItem('token');
+    // Prioridad 1: Buscar en sessionStorage (almacenamiento preferido)
+    let token = sessionStorage.getItem('token');
+    
+    if (token) {
+      return token;
+    }
+    
+    // Prioridad 2: Buscar en localStorage como fallback (compatibilidad con usuarios existentes)
+    token = localStorage.getItem('token');
+    
+    if (token) {
+      // Migrar el token de localStorage a sessionStorage para futuras consultas
+      sessionStorage.setItem('token', token);
+      // Opcional: mantener también en localStorage para compatibilidad durante la transición
+      // O eliminar de localStorage si se prefiere solo sessionStorage
+      console.log('Token migrado de localStorage a sessionStorage');
+      return token;
+    }
+    
+    return null;
   }
 
+  /**
+   * Guarda el token de autenticación en sessionStorage.
+   * También mantiene una copia en localStorage para compatibilidad con usuarios existentes.
+   * 
+   * @param token El token JWT a guardar
+   */
   private setToken(token: string): void {
-    // Usar sessionStorage en lugar de localStorage para que cada pestaña tenga su propio token
+    // Guardar en sessionStorage (almacenamiento principal)
     sessionStorage.setItem('token', token);
+    
+    // También guardar en localStorage para compatibilidad con usuarios que ya tienen sesión
+    // Esto permite que usuarios existentes sigan funcionando durante la transición
+    localStorage.setItem('token', token);
   }
 
+  /**
+   * Obtiene el usuario actual autenticado.
+   * Busca primero en el contexto, y si no existe, intenta recuperarlo del token.
+   * El token se busca en sessionStorage primero, luego en localStorage como fallback.
+   * 
+   * @returns El usuario actual o null si no está autenticado
+   */
   getCurrentUser(): User | null {
     let user = this.currentUserSubject.value;
     // Si no hay usuario en el contexto pero hay token, intentar recuperarlo
