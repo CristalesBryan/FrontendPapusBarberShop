@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, from } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { Observable, from, throwError } from 'rxjs';
+import { map, switchMap, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
@@ -122,67 +122,27 @@ export class S3Service {
   /**
    * Sube un archivo directamente a S3 usando la URL presignada.
    * 
-   * CRÍTICO: Solo se envía el archivo y el header Content-Type.
-   * NO se deben agregar headers adicionales (como Authorization) porque
-   * rompen la firma presignada de AWS y causan error 403 Forbidden.
+   * IMPORTANTE: No se envían headers adicionales porque la URL presignada
+   * solo firma el header "host". Cualquier header adicional podría causar problemas.
    * 
    * @param file Archivo a subir
    * @param presignedUrl URL presignada obtenida del backend
-   * @param contentType Tipo de contenido del archivo (extraído de file.type)
+   * @param contentType Tipo de contenido del archivo (no se usa, mantenido por compatibilidad)
    * @returns Observable que se completa cuando la subida termina
    */
   private uploadToS3(file: File, presignedUrl: string, contentType: string): Observable<void> {
-    return new Observable(observer => {
-      const xhr = new XMLHttpRequest();
-      
-      // Normalizar Content-Type para asegurar coincidencia exacta
-      const normalizedContentType = contentType.toLowerCase().trim();
-
-      xhr.upload.addEventListener('progress', (event) => {
-        if (event.lengthComputable) {
-          const percentComplete = (event.loaded / event.total) * 100;
-          console.log(`[S3Service] Progreso de subida: ${percentComplete.toFixed(2)}%`);
-        }
-      });
-
-      xhr.addEventListener('load', () => {
-        console.log(`[S3Service] Respuesta de S3: ${xhr.status} ${xhr.statusText}`);
-        if (xhr.status === 200 || xhr.status === 204) {
-          console.log('[S3Service] Archivo subido exitosamente');
-          observer.next();
-          observer.complete();
-        } else {
-          console.error(`[S3Service] Error al subir archivo: ${xhr.status} ${xhr.statusText}`);
-          console.error(`[S3Service] Response text: ${xhr.responseText}`);
-          observer.error(new Error(`Error al subir archivo: ${xhr.status} ${xhr.statusText}`));
-        }
-      });
-
-      xhr.addEventListener('error', (event) => {
-        console.error('[S3Service] Error de red al subir archivo', event);
-        observer.error(new Error('Error de red al subir archivo'));
-      });
-
-      xhr.addEventListener('abort', () => {
-        console.warn('[S3Service] Subida de archivo cancelada');
-        observer.error(new Error('Subida de archivo cancelada'));
-      });
-
-      // IMPORTANTE: Usar XMLHttpRequest directamente para evitar que el interceptor
-      // agregue headers Authorization que rompen la firma presignada
-      xhr.open('PUT', presignedUrl);
-      
-      // CRÍTICO: SOLO establecer Content-Type (debe coincidir exactamente con el usado en la firma)
-      // NO agregar ningún otro header (Accept, Authorization, etc.)
-      // El Content-Type debe ser exactamente el mismo que se usó para generar la URL presignada
-      xhr.setRequestHeader('Content-Type', normalizedContentType);
-      
-      console.log(`[S3Service] Enviando PUT a S3 con Content-Type: ${normalizedContentType}`);
-      console.log(`[S3Service] URL: ${presignedUrl.substring(0, 100)}...`);
-      
-      // Enviar solo el archivo sin modificaciones
-      xhr.send(file);
-    });
+    // PUT simple sin headers adicionales
+    // La URL presignada solo firma "host", por lo que no se envían headers personalizados
+    return this.http.put(presignedUrl, file).pipe(
+      map(() => {
+        console.log('[S3Service] Archivo subido exitosamente');
+        return;
+      }),
+      catchError(error => {
+        console.error('[S3Service] Error al subir archivo a S3:', error);
+        return throwError(() => new Error(`Error al subir archivo: ${error.status || 'Unknown'} ${error.statusText || error.message || ''}`));
+      })
+    );
   }
 
   /**
