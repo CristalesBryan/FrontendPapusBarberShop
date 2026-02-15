@@ -36,12 +36,17 @@ export class S3Service {
    * @returns Observable con la URL presignada y la key del objeto
    */
   getPresignedUploadUrl(fileName: string, folder: string = 'general', contentType: string = 'image/jpeg'): Observable<PresignedUrlResponse> {
+    // Normalizar Content-Type antes de enviarlo al backend
+    const normalizedContentType = contentType.toLowerCase().trim();
+    
     const endpoint = `${this.apiUrl}/api/s3/presigned-url/upload`;
     const body = {
       fileName,
       folder,
-      contentType
+      contentType: normalizedContentType
     };
+    
+    console.log(`[S3Service] Solicitando URL presignada con Content-Type: ${normalizedContentType}`);
 
     return this.http.post<PresignedUrlResponse>(endpoint, body);
   }
@@ -73,10 +78,35 @@ export class S3Service {
    */
   uploadFile(file: File, folder: string = 'general', customFileName?: string): Observable<UploadResponse> {
     const fileName = customFileName || this.generateFileName(file.name);
-    const contentType = file.type || 'application/octet-stream';
+    // Normalizar Content-Type: lowercase, sin espacios, con fallback
+    let contentType = (file.type || 'application/octet-stream').toLowerCase().trim();
+    
+    // Si el tipo está vacío después de normalizar, usar el fallback
+    if (!contentType || contentType === '') {
+      contentType = 'application/octet-stream';
+    }
+    
+    // Detectar tipo de imagen basado en extensión si file.type está vacío
+    if (contentType === 'application/octet-stream') {
+      const extension = file.name.toLowerCase().split('.').pop();
+      const imageTypes: { [key: string]: string } = {
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'png': 'image/png',
+        'gif': 'image/gif',
+        'webp': 'image/webp',
+        'svg': 'image/svg+xml'
+      };
+      if (extension && imageTypes[extension]) {
+        contentType = imageTypes[extension];
+      }
+    }
+
+    console.log(`[S3Service] Subiendo archivo: ${fileName}, Content-Type: ${contentType}`);
 
     return this.getPresignedUploadUrl(fileName, folder, contentType).pipe(
       switchMap((presignedData: PresignedUrlResponse) => {
+        console.log(`[S3Service] URL presignada obtenida, subiendo archivo con Content-Type: ${contentType}`);
         return this.uploadToS3(file, presignedData.url, contentType).pipe(
           map(() => ({
             key: presignedData.key,
@@ -104,28 +134,37 @@ export class S3Service {
   private uploadToS3(file: File, presignedUrl: string, contentType: string): Observable<void> {
     return new Observable(observer => {
       const xhr = new XMLHttpRequest();
+      
+      // Normalizar Content-Type para asegurar coincidencia exacta
+      const normalizedContentType = contentType.toLowerCase().trim();
 
       xhr.upload.addEventListener('progress', (event) => {
         if (event.lengthComputable) {
           const percentComplete = (event.loaded / event.total) * 100;
-          // Puedes emitir el progreso si lo necesitas
+          console.log(`[S3Service] Progreso de subida: ${percentComplete.toFixed(2)}%`);
         }
       });
 
       xhr.addEventListener('load', () => {
+        console.log(`[S3Service] Respuesta de S3: ${xhr.status} ${xhr.statusText}`);
         if (xhr.status === 200 || xhr.status === 204) {
+          console.log('[S3Service] Archivo subido exitosamente');
           observer.next();
           observer.complete();
         } else {
+          console.error(`[S3Service] Error al subir archivo: ${xhr.status} ${xhr.statusText}`);
+          console.error(`[S3Service] Response text: ${xhr.responseText}`);
           observer.error(new Error(`Error al subir archivo: ${xhr.status} ${xhr.statusText}`));
         }
       });
 
-      xhr.addEventListener('error', () => {
+      xhr.addEventListener('error', (event) => {
+        console.error('[S3Service] Error de red al subir archivo', event);
         observer.error(new Error('Error de red al subir archivo'));
       });
 
       xhr.addEventListener('abort', () => {
+        console.warn('[S3Service] Subida de archivo cancelada');
         observer.error(new Error('Subida de archivo cancelada'));
       });
 
@@ -133,9 +172,13 @@ export class S3Service {
       // agregue headers Authorization que rompen la firma presignada
       xhr.open('PUT', presignedUrl);
       
-      // SOLO establecer Content-Type (extraído de file.type)
+      // CRÍTICO: SOLO establecer Content-Type (debe coincidir exactamente con el usado en la firma)
       // NO agregar ningún otro header (Accept, Authorization, etc.)
-      xhr.setRequestHeader('Content-Type', contentType);
+      // El Content-Type debe ser exactamente el mismo que se usó para generar la URL presignada
+      xhr.setRequestHeader('Content-Type', normalizedContentType);
+      
+      console.log(`[S3Service] Enviando PUT a S3 con Content-Type: ${normalizedContentType}`);
+      console.log(`[S3Service] URL: ${presignedUrl.substring(0, 100)}...`);
       
       // Enviar solo el archivo sin modificaciones
       xhr.send(file);
