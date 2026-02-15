@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductoService } from '../../services/producto.service';
 import { Producto } from '../../models/producto.model';
+import { environment } from '../../../environments/environment';
 
 interface ItemCarrito {
   producto: Producto;
@@ -136,13 +137,35 @@ export class CompraAquiComponent implements OnInit, OnDestroy {
 
   private cacheImagenes: Map<number, string> = new Map(); // Cache simple para placeholders
 
+  /**
+   * Obtiene la URL pública directa de la imagen del producto desde S3.
+   * El bucket es público, por lo que usamos URLs directas en lugar de presignadas.
+   * 
+   * @param producto Producto del cual obtener la imagen
+   * @returns URL pública directa de S3 o placeholder si no hay imagen
+   */
   getProductoImagen(producto: Producto): string {
-    // Usar directamente la URL presignada que viene del backend
+    // Si hay imagenUrl, extraer el s3Key y construir URL pública directa
     if (producto.imagenUrl) {
-      return producto.imagenUrl;
+      // Extraer s3Key de la URL (puede ser presignada o pública)
+      const s3Key = this.extractS3KeyFromUrl(producto.imagenUrl);
+      
+      if (s3Key) {
+        // Construir URL pública directa del bucket público
+        const bucketName = environment.s3.bucketName || 'papusbarbershop';
+        const region = environment.s3.region || 'us-east-2';
+        const publicUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${s3Key}`;
+        
+        // Cachear la URL pública
+        if (!this.cacheImagenes.has(producto.id)) {
+          this.cacheImagenes.set(producto.id, publicUrl);
+        }
+        
+        return publicUrl;
+      }
     }
     
-    // Si no hay imagenUrl, usar placeholder
+    // Si no hay imagenUrl o no se pudo extraer el s3Key, usar placeholder
     const placeholderUrl = `data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5OTk5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5TaW4gaW1hZ2VuPC90ZXh0Pjwvc3ZnPg==`;
     
     // Cachear el placeholder para evitar recrearlo
@@ -151,6 +174,58 @@ export class CompraAquiComponent implements OnInit, OnDestroy {
     }
     
     return this.cacheImagenes.get(producto.id) || placeholderUrl;
+  }
+
+  /**
+   * Extrae el s3Key de una URL de S3 (presignada o pública).
+   * 
+   * Las URLs presignadas tienen el formato:
+   * https://bucket.s3.region.amazonaws.com/key?X-Amz-Algorithm=...
+   * 
+   * Las URLs públicas tienen el formato:
+   * https://bucket.s3.region.amazonaws.com/key
+   * 
+   * @param url URL de S3 (presignada o pública)
+   * @returns s3Key o null si no se puede extraer
+   */
+  private extractS3KeyFromUrl(url: string): string | null {
+    if (!url) return null;
+    
+    try {
+      // Si la URL ya es un s3Key (sin dominio), retornarla tal cual
+      if (!url.includes('http') && !url.includes('://') && !url.includes('?')) {
+        return url;
+      }
+      
+      // Parsear la URL
+      const urlObj = new URL(url);
+      
+      // El s3Key está en el pathname, después del primer /
+      // Ejemplo: /productos/imagen.jpg -> productos/imagen.jpg
+      let s3Key = urlObj.pathname;
+      
+      // Remover el primer / si existe
+      if (s3Key.startsWith('/')) {
+        s3Key = s3Key.substring(1);
+      }
+      
+      // Decodificar caracteres especiales
+      s3Key = decodeURIComponent(s3Key);
+      
+      // Si el s3Key está vacío, intentar extraerlo de otra forma
+      if (!s3Key || s3Key.trim() === '') {
+        // Intentar con regex para URLs de S3
+        const match = url.match(/s3[.-][^/]+\.amazonaws\.com\/(.+?)(?:\?|$)/);
+        if (match && match[1]) {
+          s3Key = decodeURIComponent(match[1]);
+        }
+      }
+      
+      return s3Key && s3Key.trim() !== '' ? s3Key : null;
+    } catch (error) {
+      console.error('Error al extraer s3Key de URL:', url, error);
+      return null;
+    }
   }
 
   onImageError(event: Event, producto: Producto): void {
