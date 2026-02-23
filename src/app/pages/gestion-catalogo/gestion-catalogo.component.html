@@ -150,5 +150,64 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal de Confirmación -->
+  <div class="modal fade" [class.show]="mostrarModalConfirmacion" [style.display]="mostrarModalConfirmacion ? 'block' : 'none'"
+       tabindex="-1" role="dialog" [attr.aria-hidden]="!mostrarModalConfirmacion">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header bg-warning">
+          <h5 class="modal-title text-white">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Confirmar eliminación
+          </h5>
+          <button type="button" class="btn-close btn-close-white" (click)="cerrarModalConfirmacion()" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0">{{ mensajeConfirmacion }}</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="cerrarModalConfirmacion()">Cancelar</button>
+          <button type="button" class="btn btn-danger" (click)="confirmarAccion()">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade" [class.show]="mostrarModalConfirmacion"
+       [style.display]="mostrarModalConfirmacion ? 'block' : 'none'" (click)="cerrarModalConfirmacion()"></div>
+
+  <!-- Modal de Notificación -->
+  <div class="modal fade" [class.show]="mostrarModalNotificacion" [style.display]="mostrarModalNotificacion ? 'block' : 'none'"
+       tabindex="-1" role="dialog" [attr.aria-hidden]="!mostrarModalNotificacion">
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+      <div class="modal-content">
+        <div class="modal-header" [ngClass]="{
+          'bg-success': tipoNotificacion === 'success',
+          'bg-danger': tipoNotificacion === 'error',
+          'bg-warning': tipoNotificacion === 'warning',
+          'bg-info': tipoNotificacion === 'info'
+        }">
+          <h5 class="modal-title text-white">
+            <i class="fas me-2" [ngClass]="{
+              'fa-check-circle': tipoNotificacion === 'success',
+              'fa-exclamation-circle': tipoNotificacion === 'error',
+              'fa-exclamation-triangle': tipoNotificacion === 'warning',
+              'fa-info-circle': tipoNotificacion === 'info'
+            }"></i>
+            {{ tipoNotificacion === 'success' ? 'Éxito' : tipoNotificacion === 'error' ? 'Error' : tipoNotificacion === 'warning' ? 'Advertencia' : 'Información' }}
+          </h5>
+          <button type="button" class="btn-close btn-close-white" (click)="cerrarModalNotificacion()" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0">{{ mensajeNotificacion }}</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" (click)="cerrarModalNotificacion()">Aceptar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade" [class.show]="mostrarModalNotificacion"
+       [style.display]="mostrarModalNotificacion ? 'block' : 'none'" (click)="cerrarModalNotificacion()"></div>
 </div>
 

@@ -17,6 +17,14 @@ export class ProductosComponent implements OnInit, OnDestroy {
   productoEditando: Producto | null = null;
   mostrarFormulario = false;
   cargando = true;
+
+  // Modales dinámicos
+  mostrarModalConfirmacion = false;
+  mensajeConfirmacion = '';
+  accionConfirmacion: (() => void) | null = null;
+  mostrarModalNotificacion = false;
+  mensajeNotificacion = '';
+  tipoNotificacion: 'success' | 'error' | 'info' | 'warning' = 'info';
   
   // Listener para eventos de actualización de productos
   private productoActualizadoListener = () => {
@@ -85,20 +93,43 @@ export class ProductosComponent implements OnInit, OnDestroy {
   }
 
   eliminar(producto: Producto): void {
-    if (confirm(`¿Está seguro de que desea eliminar el producto "${producto.nombre}"?`)) {
+    this.mensajeConfirmacion = `¿Está seguro de que desea eliminar el producto "${producto.nombre}"?`;
+    this.accionConfirmacion = () => {
       this.productoService.delete(producto.id).subscribe({
         next: () => {
           this.cargarProductos();
-          alert('Producto eliminado exitosamente');
-          // Disparar evento para actualizar otras vistas
+          this.mostrarNotificacion('Producto eliminado exitosamente', 'success');
           window.dispatchEvent(new Event('productoActualizado'));
         },
         error: (error) => {
           console.error('Error al eliminar producto:', error);
-          alert(error.error?.message || 'Error al eliminar el producto');
+          this.mostrarNotificacion(error.error?.message || 'Error al eliminar el producto', 'error');
         }
       });
-    }
+    };
+    this.mostrarModalConfirmacion = true;
+  }
+
+  mostrarNotificacion(mensaje: string, tipo: 'success' | 'error' | 'info' | 'warning' = 'info'): void {
+    this.mensajeNotificacion = mensaje;
+    this.tipoNotificacion = tipo;
+    this.mostrarModalNotificacion = true;
+  }
+
+  cerrarModalNotificacion(): void {
+    this.mostrarModalNotificacion = false;
+    setTimeout(() => { this.mensajeNotificacion = ''; }, 300);
+  }
+
+  confirmarAccion(): void {
+    if (this.accionConfirmacion) this.accionConfirmacion();
+    this.cerrarModalConfirmacion();
+  }
+
+  cerrarModalConfirmacion(): void {
+    this.mostrarModalConfirmacion = false;
+    this.mensajeConfirmacion = '';
+    this.accionConfirmacion = null;
   }
 }
 
