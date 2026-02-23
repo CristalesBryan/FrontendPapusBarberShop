@@ -57,6 +57,9 @@
                         <span class="badge bg-secondary ms-1">{{ currentUser.rol }}</span>
                     </a>
                     <ul class="dropdown-menu">
+                        <li *ngIf="isAdmin()"><a class="dropdown-item" (click)="abrirModalCambiarPassword()">
+                            <i class="fas fa-key"></i> Cambiar contraseña
+                        </a></li>
                         <li><a class="dropdown-item" (click)="logout()">
                             <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
                         </a></li>
@@ -66,4 +69,46 @@
         </div>
     </div>
 </nav>
+
+<!-- Modal Cambiar contraseña (solo ADMIN) -->
+<div class="modal fade" [class.show]="mostrarModalPassword" [style.display]="mostrarModalPassword ? 'block' : 'none'" 
+     tabindex="-1" role="dialog" (click)="cerrarModalPassword($event)">
+    <div class="modal-dialog modal-dialog-centered" role="document" (click)="$event.stopPropagation()">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-key me-2"></i>Cambiar contraseña</h5>
+                <button type="button" class="btn-close" (click)="cerrarModalPassword($event)" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small">Indica tu contraseña actual y la nueva. Mínimo 4 caracteres.</p>
+                <div class="mb-3">
+                    <label class="form-label">Contraseña actual</label>
+                    <input type="password" class="form-control" [(ngModel)]="passwordActual" name="passwordActual" 
+                           placeholder="Contraseña actual" autocomplete="current-password">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Nueva contraseña</label>
+                    <input type="password" class="form-control" [(ngModel)]="passwordNueva" name="passwordNueva" 
+                           placeholder="Nueva contraseña" autocomplete="new-password">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Repetir nueva contraseña</label>
+                    <input type="password" class="form-control" [(ngModel)]="passwordRepetir" name="passwordRepetir" 
+                           placeholder="Repetir nueva contraseña" autocomplete="new-password">
+                </div>
+                <div class="alert alert-danger py-2 mb-0" *ngIf="mensajeErrorPassword">{{ mensajeErrorPassword }}</div>
+                <div class="alert alert-success py-2 mb-0" *ngIf="mensajeOkPassword">{{ mensajeOkPassword }}</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="cerrarModalPassword($event)">Cancelar</button>
+                <button type="button" class="btn btn-primary" (click)="enviarCambioPassword()" [disabled]="enviandoPassword">
+                    <span *ngIf="!enviandoPassword">Cambiar contraseña</span>
+                    <span *ngIf="enviandoPassword"><span class="spinner-border spinner-border-sm me-1"></span>Guardando...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="mostrarModalPassword" 
+     [style.display]="mostrarModalPassword ? 'block' : 'none'" (click)="cerrarModalPassword($event)"></div>
 

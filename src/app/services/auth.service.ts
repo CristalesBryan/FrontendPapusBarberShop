@@ -332,5 +332,16 @@ export class AuthService {
     const token = this.getToken();
     return token ? { 'Authorization': `Bearer ${token}` } : {};
   }
+
+  /**
+   * Cambiar la contraseña del usuario actual (solo ADMIN).
+   * Requiere contraseña actual y nueva.
+   */
+  changePassword(currentPassword: string, newPassword: string): Observable<string> {
+    return this.http.post(`${this.API_URL}/admin/change-password`, {
+      currentPassword,
+      newPassword
+    }, { responseType: 'text' });
+  }
 }
 
