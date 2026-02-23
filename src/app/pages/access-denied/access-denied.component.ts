@@ -38,8 +38,7 @@ export class AccessDeniedComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Cambiar el texto del botón según el rol
-    if (this.authService.isBarbero()) {
+    if (this.authService.isBarbero() || this.authService.isCesia()) {
       this.botonTexto = 'Volver a Servicios';
     } else {
       this.botonTexto = 'Volver al Dashboard';
@@ -47,8 +46,7 @@ export class AccessDeniedComponent implements OnInit {
   }
 
   volver(): void {
-    // Redirigir según el rol del usuario
-    if (this.authService.isBarbero()) {
+    if (this.authService.isBarbero() || this.authService.isCesia()) {
       this.router.navigate(['/servicios']);
     } else {
       this.router.navigate(['/dashboard']);

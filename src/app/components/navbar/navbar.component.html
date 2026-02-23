@@ -8,17 +8,17 @@
         </button>
         <div class="collapse navbar-collapse" [class.show]="menuOpen">
             <ul class="navbar-nav me-auto">
-                <li class="nav-item">
+                <li class="nav-item" *ngIf="isAdmin()">
                     <a class="nav-link" routerLink="/dashboard" routerLinkActive="active">
                         <i class="fas fa-home"></i> Dashboard
                     </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" *ngIf="isAdmin()">
                     <a class="nav-link" routerLink="/barberos" routerLinkActive="active">
                         <i class="fas fa-user-tie"></i> Barberos
                     </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" *ngIf="canAccessServiciosOVentas()">
                     <a class="nav-link" routerLink="/servicios" routerLinkActive="active">
                         <i class="fas fa-scissors"></i> Servicios
                     </a>
@@ -28,12 +28,22 @@
                         <i class="fas fa-box"></i> Productos
                     </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" *ngIf="canAccessServiciosOVentas()">
                     <a class="nav-link" routerLink="/ventas" routerLinkActive="active">
                         <i class="fas fa-shopping-cart"></i> Ventas
                     </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" *ngIf="canAccessGestionCatalogo()">
+                    <a class="nav-link" routerLink="/gestion-catalogo" routerLinkActive="active">
+                        <i class="fas fa-images"></i> Gestión Catálogo
+                    </a>
+                </li>
+                <li class="nav-item" *ngIf="canAccessCompraAqui()">
+                    <a class="nav-link" routerLink="/compra-aqui" routerLinkActive="active">
+                        <i class="fas fa-shopping-bag"></i> Compra Aquí
+                    </a>
+                </li>
+                <li class="nav-item" *ngIf="isAdmin()">
                     <a class="nav-link" routerLink="/reportes" routerLinkActive="active">
                         <i class="fas fa-chart-bar"></i> Reportes
                     </a>

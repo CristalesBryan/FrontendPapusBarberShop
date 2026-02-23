@@ -57,8 +57,8 @@ export class LoginComponent {
         if (response.success) {
           // El token ya fue guardado en sessionStorage y localStorage por el AuthService
           // Redirigir según el rol del usuario
-          if (response.rol === 'BARBERO') {
-            // Los barberos van a la página de servicios
+          if (response.rol === 'BARBERO' || response.rol === 'CESIA') {
+            // Barberos y Cesia van a la página de servicios
             this.router.navigate(['/servicios']).catch(err => {
               console.error('Error al redirigir a /servicios:', err);
             });

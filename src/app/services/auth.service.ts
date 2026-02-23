@@ -284,6 +284,17 @@ export class AuthService {
     return this.hasRole('BARBERO');
   }
 
+  isCesia(): boolean {
+    return this.hasRole('CESIA');
+  }
+
+  /**
+   * Acceso a vistas de barbero o Cesia (Servicios, Ventas).
+   */
+  isBarberoOrCesia(): boolean {
+    return this.hasAnyRole(['BARBERO', 'CESIA']);
+  }
+
   private decodeToken(token: string): any {
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');

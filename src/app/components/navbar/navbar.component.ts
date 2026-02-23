@@ -42,8 +42,24 @@ export class NavbarComponent implements OnInit {
         return this.authService.isBarbero();
     }
 
+    isCesia(): boolean {
+        return this.authService.isCesia();
+    }
+
     canAccessProductos(): boolean {
         return this.authService.hasRole('ADMIN');
+    }
+
+    canAccessGestionCatalogo(): boolean {
+        return this.authService.hasAnyRole(['ADMIN', 'CESIA']);
+    }
+
+    canAccessCompraAqui(): boolean {
+        return this.authService.hasAnyRole(['ADMIN', 'CESIA']);
+    }
+
+    canAccessServiciosOVentas(): boolean {
+        return this.authService.hasAnyRole(['ADMIN', 'BARBERO', 'CESIA']);
     }
 }
 

@@ -17,18 +17,18 @@ export class SidebarComponent implements OnInit, OnDestroy {
   private routerSubscription?: Subscription;
 
   menuItems = [
-    { path: '/dashboard', icon: 'fas fa-home', label: 'Dashboard' },
-    { path: '/barberos', icon: 'fas fa-user-tie', label: 'Barberos' },
-    { path: '/horarios', icon: 'fas fa-clock', label: 'Horarios' },
-    { path: '/citas', icon: 'fas fa-calendar-check', label: 'Citas' },
+    { path: '/dashboard', icon: 'fas fa-home', label: 'Dashboard', adminOnly: true },
+    { path: '/barberos', icon: 'fas fa-user-tie', label: 'Barberos', adminOnly: true },
+    { path: '/horarios', icon: 'fas fa-clock', label: 'Horarios', adminOnly: true },
+    { path: '/citas', icon: 'fas fa-calendar-check', label: 'Citas', adminOnly: true },
     { path: '/servicios', icon: 'fas fa-scissors', label: 'Servicios', adminAndBarbero: true },
     { path: '/ventas', icon: 'fas fa-shopping-cart', label: 'Ventas', adminAndBarbero: true },
-    { path: '/compra-aqui', icon: 'fas fa-shopping-bag', label: 'Compra Aquí' },
+    { path: '/compra-aqui', icon: 'fas fa-shopping-bag', label: 'Compra Aquí', adminAndCesia: true },
     { path: '/productos', icon: 'fas fa-box', label: 'Productos', adminOnly: true },
-    { path: '/gestion-catalogo', icon: 'fas fa-images', label: 'Gestión de Catálogo', adminOnly: true },
+    { path: '/gestion-catalogo', icon: 'fas fa-images', label: 'Gestión de Catálogo', adminAndCesia: true },
     { path: '/mobiliario-equipo', icon: 'fas fa-couch', label: 'Mobiliario y Equipo', adminOnly: true },
     { path: '/tipos-corte', icon: 'fas fa-cut', label: 'Gestión de Tipos de Corte', adminOnly: true },
-    { path: '/reportes', icon: 'fas fa-chart-bar', label: 'Reportes' },
+    { path: '/reportes', icon: 'fas fa-chart-bar', label: 'Reportes', adminOnly: true },
     { path: '/acerca-de-nosotros', icon: 'fas fa-info-circle', label: 'Acerca de Nosotros' },
     { path: '/academia', icon: 'fas fa-graduation-cap', label: 'Academia' },
     { path: 'https://www.facebook.com/share/1XmXmG651q/?mibextid=wwXIfr', icon: 'fab fa-facebook', label: 'Facebook', external: true },
@@ -102,21 +102,23 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   canShowItem(item: any): boolean {
-    // Si es barbero, solo mostrar Servicios y Ventas
+    // Enlaces externos y páginas sin restricción se muestran a todos los autenticados
+    if (!item.adminOnly && !item.adminAndBarbero && !item.adminAndCesia) {
+      return true;
+    }
+    // BARBERO: solo Servicios y Ventas
     if (this.authService.isBarbero()) {
       return item.adminAndBarbero === true;
     }
-    
-    // Si es admin, mostrar todo incluyendo Servicios y Ventas
+    // CESIA: Servicios, Ventas, Gestión Catálogo, Compra Aquí
+    if (this.authService.isCesia()) {
+      return item.adminAndBarbero === true || item.adminAndCesia === true;
+    }
+    // ADMIN: todo
     if (this.authService.isAdmin()) {
-      if (item.adminOnly || item.adminAndBarbero) {
-        return true;
-      }
       return true;
     }
-    
-    // Para otros casos (no debería llegar aquí)
-    return true;
+    return false;
   }
 }
 
