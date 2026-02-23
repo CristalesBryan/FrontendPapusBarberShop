@@ -98,8 +98,8 @@
     </div>
   </div>
 
-  <!-- Lista (solo visible para ADMIN) -->
-  <div class="card" *ngIf="!esBarbero">
+  <!-- Lista (solo visible para ADMIN: no barbero ni Cesia) -->
+  <div class="card" *ngIf="!esBarbero && !esCesia">
     <div class="card-header"><h5>Lista de Ventas</h5></div>
     <div class="card-body">
       <div class="table-responsive" *ngIf="!cargando">

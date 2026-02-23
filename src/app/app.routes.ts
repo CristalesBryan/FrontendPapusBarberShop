@@ -80,12 +80,14 @@ export const routes: Routes = [
   {
     path: 'acerca-de-nosotros',
     loadComponent: () => import('./pages/acerca-de-nosotros/acerca-de-nosotros.component').then(m => m.AcercaDeNosotrosComponent),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'BARBERO'] }
   },
   {
     path: 'academia',
     loadComponent: () => import('./pages/academia/academia.component').then(m => m.AcademiaComponent),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'BARBERO'] }
   },
   {
     path: 'gestion-catalogo',

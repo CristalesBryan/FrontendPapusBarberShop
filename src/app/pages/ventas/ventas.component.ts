@@ -33,6 +33,7 @@ export class VentasComponent implements OnInit {
   ventaEditando: VentaProducto | null = null;
   cargando = true;
   esBarbero = false;
+  esCesia = false;
   
   // Modales dinámicos
   mostrarModalNotificacion = false;
@@ -63,11 +64,17 @@ export class VentasComponent implements OnInit {
 
   ngOnInit(): void {
     this.esBarbero = this.authService.isBarbero();
+    this.esCesia = this.authService.isCesia();
     
-    // Si es barbero, mostrar el formulario automáticamente y no cargar la lista
+    // Si es barbero o Cesia, mostrar el formulario automáticamente; Cesia no ve la lista
     if (this.esBarbero) {
       this.mostrarFormulario = true;
-    } else {
+    } else if (this.esCesia) {
+      this.mostrarFormulario = true;
+    }
+    
+    // Solo cargar la lista para ADMIN (ni barbero ni Cesia la ven)
+    if (!this.esBarbero && !this.esCesia) {
       this.cargarVentas();
     }
     
@@ -146,13 +153,12 @@ export class VentasComponent implements OnInit {
       
       this.ventaService.create(this.nuevaVenta).subscribe({
         next: () => {
-          // Si es barbero, no recargar la lista, solo recargar productos para actualizar stock
-          if (!this.esBarbero) {
+          // Solo recargar lista si no es barbero ni Cesia
+          if (!this.esBarbero && !this.esCesia) {
             this.cargarVentas();
           }
           this.cargarProductos(); // Recargar para actualizar stock
-          // Si es barbero, mantener el formulario visible
-          if (!this.esBarbero) {
+          if (!this.esBarbero && !this.esCesia) {
             this.mostrarFormulario = false;
           }
           this.resetearFormulario();

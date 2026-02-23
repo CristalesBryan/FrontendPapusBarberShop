@@ -102,15 +102,15 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   canShowItem(item: any): boolean {
-    // Enlaces externos y páginas sin restricción se muestran a todos los autenticados
+    // Ítems sin restricción (Acerca de Nosotros, Academia, redes): se muestran a ADMIN y BARBERO, no a CESIA
     if (!item.adminOnly && !item.adminAndBarbero && !item.adminAndCesia) {
-      return true;
+      return !this.authService.isCesia();
     }
     // BARBERO: solo Servicios y Ventas
     if (this.authService.isBarbero()) {
       return item.adminAndBarbero === true;
     }
-    // CESIA: Servicios, Ventas, Gestión Catálogo, Compra Aquí
+    // CESIA: solo Servicios, Ventas, Compra Aquí y Gestión de Catálogo (sin el resto de vistas)
     if (this.authService.isCesia()) {
       return item.adminAndBarbero === true || item.adminAndCesia === true;
     }
