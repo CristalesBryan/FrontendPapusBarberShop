@@ -1,10 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, from, throwError } from 'rxjs';
 import { map, switchMap, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 export interface PresignedUrlResponse {
   url: string;
@@ -106,8 +104,8 @@ export class S3Service {
 
     return this.getPresignedUploadUrl(fileName, folder, contentType).pipe(
       switchMap((presignedData: PresignedUrlResponse) => {
-        console.log(`[S3Service] URL presignada obtenida, subiendo archivo con Content-Type: ${contentType}`);
-        return this.uploadToS3(file, presignedData.url, contentType).pipe(
+        console.log(`[S3Service] URL presignada obtenida, subiendo con PUT sin headers extra`);
+        return this.uploadToS3(file, presignedData.url).pipe(
           map(() => ({
             key: presignedData.key,
             url: this.getPublicUrl(presignedData.key),
@@ -121,26 +119,38 @@ export class S3Service {
 
   /**
    * Sube un archivo directamente a S3 usando la URL presignada.
-   * 
-   * IMPORTANTE: No se envían headers adicionales porque la URL presignada
-   * solo firma el header "host". Cualquier header adicional podría causar problemas.
-   * 
-   * @param file Archivo a subir
-   * @param presignedUrl URL presignada obtenida del backend
-   * @param contentType Tipo de contenido del archivo (no se usa, mantenido por compatibilidad)
-   * @returns Observable que se completa cuando la subida termina
+   *
+   * Usa fetch() en lugar de HttpClient para no enviar ningún header extra:
+   * la URL presignada solo firma el header "host". Cualquier header adicional
+   * (p. ej. Content-Type que Angular añade con File) provoca preflight CORS
+   * o SignatureDoesNotMatch.
+   *
+   * - Método: PUT
+   * - Body: contenido del archivo como ArrayBuffer (sin Content-Type)
+   * - Headers: ninguno personalizado
    */
-  private uploadToS3(file: File, presignedUrl: string, contentType: string): Observable<void> {
-    // PUT simple sin headers adicionales
-    // La URL presignada solo firma "host", por lo que no se envían headers personalizados
-    return this.http.put(presignedUrl, file).pipe(
+  private uploadToS3(file: File, presignedUrl: string): Observable<void> {
+    return from(
+      (async () => {
+        const arrayBuffer = await file.arrayBuffer();
+        const response = await fetch(presignedUrl, {
+          method: 'PUT',
+          body: arrayBuffer,
+          mode: 'cors'
+        });
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(`S3 upload failed: ${response.status} ${response.statusText}${text ? ' - ' + text : ''}`);
+        }
+      })()
+    ).pipe(
       map(() => {
         console.log('[S3Service] Archivo subido exitosamente');
         return;
       }),
       catchError(error => {
         console.error('[S3Service] Error al subir archivo a S3:', error);
-        return throwError(() => new Error(`Error al subir archivo: ${error.status || 'Unknown'} ${error.statusText || error.message || ''}`));
+        return throwError(() => error instanceof Error ? error : new Error(String(error)));
       })
     );
   }
