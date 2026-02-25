@@ -343,5 +343,14 @@ export class AuthService {
       newPassword
     }, { responseType: 'text' });
   }
+
+  /**
+   * Restablece la contraseña del usuario admin a "admin123".
+   * Útil cuando el admin no puede acceder (ej. olvidó la contraseña o un cambio no se guardó).
+   * No requiere autenticación.
+   */
+  resetAdminPassword(): Observable<string> {
+    return this.http.post(`${this.API_URL}/admin/reset-admin-password`, null, { responseType: 'text' });
+  }
 }
 

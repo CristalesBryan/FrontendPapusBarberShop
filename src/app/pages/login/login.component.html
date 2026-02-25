@@ -45,6 +45,16 @@
               Iniciando sesión...
             </span>
           </button>
+
+          <div class="mt-3 text-center">
+            <button type="button" class="btn btn-link btn-sm p-0 text-muted" (click)="restablecerPasswordAdmin()" [disabled]="loadingResetPassword">
+              <span *ngIf="!loadingResetPassword">¿Restablecer contraseña de admin?</span>
+              <span *ngIf="loadingResetPassword"><span class="spinner-border spinner-border-sm me-1"></span> Restableciendo...</span>
+            </button>
+          </div>
+          <div class="alert alert-success mt-2 mb-0" *ngIf="successMessage">
+            {{ successMessage }}
+          </div>
         </form>
       </div>
     </div>

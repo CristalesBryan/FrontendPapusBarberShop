@@ -18,7 +18,9 @@ export class LoginComponent {
   };
   
   loading = false;
+  loadingResetPassword = false;
   errorMessage = '';
+  successMessage = '';
 
   constructor(
     private authService: AuthService,
@@ -94,6 +96,27 @@ export class LoginComponent {
         } else {
           this.errorMessage = 'Error de conexión. Por favor, intente nuevamente.';
         }
+      }
+    });
+  }
+
+  /**
+   * Restablece la contraseña del usuario admin a "admin123".
+   * Útil cuando el admin no puede entrar porque cambió la contraseña y no se guardó o la olvidó.
+   */
+  restablecerPasswordAdmin(): void {
+    this.successMessage = '';
+    this.errorMessage = '';
+    this.loadingResetPassword = true;
+    this.authService.resetAdminPassword().subscribe({
+      next: (msg) => {
+        this.loadingResetPassword = false;
+        this.successMessage = (msg && msg.trim()) ? msg : 'Contraseña de admin restablecida a "admin123". Inicia sesión y cámbiala desde el menú.';
+      },
+      error: (err) => {
+        this.loadingResetPassword = false;
+        const msg = err?.error ?? err?.message ?? 'Error al restablecer. Comprueba que el backend esté en marcha.';
+        this.errorMessage = typeof msg === 'string' ? msg : JSON.stringify(msg);
       }
     });
   }
