@@ -27,6 +27,7 @@ export class LoginComponent {
     private router: Router
   ) {}
 
+
   /**
    * Maneja el envío del formulario de login.
    * Valida las credenciales, guarda el token en sessionStorage (y localStorage para compatibilidad),

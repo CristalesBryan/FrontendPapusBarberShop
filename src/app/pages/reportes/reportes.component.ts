@@ -1,9 +1,10 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReporteService } from '../../services/reporte.service';
 import { AuthService } from '../../services/auth.service';
 import { ResumenDiario, ResumenMensual, ResumenBarbero } from '../../models/reporte.model';
+
 
 @Component({
   selector: 'app-reportes',
@@ -12,14 +13,13 @@ import { ResumenDiario, ResumenMensual, ResumenBarbero } from '../../models/repo
   templateUrl: './reportes.component.html',
   styleUrls: ['./reportes.component.css']
 })
-export class ReportesComponent implements OnInit, OnDestroy {
+export class ReportesComponent implements OnInit {
   resumenDiario: ResumenDiario | null = null;
   resumenMensual: ResumenMensual | null = null;
   fechaConsulta: string = this.obtenerFechaLocal();
   mesConsulta: string = this.obtenerMesLocal();
   cargando = true;
   vista: 'diario' | 'mensual' = 'diario';
-  private autoRefreshInterval?: any;
 
   constructor(
     private reporteService: ReporteService,
@@ -27,24 +27,11 @@ export class ReportesComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Asegurar que el usuario esté inicializado antes de cargar los reportes
     this.authService.ensureUserInitialized();
-    
-    // Esperar un momento para asegurar que el token esté disponible
+
     setTimeout(() => {
       this.cargarTodosLosReportes();
-      
-      // Auto-refrescar cada 30 segundos para mantener los datos actualizados
-      this.autoRefreshInterval = setInterval(() => {
-        this.cargarTodosLosReportes();
-      }, 30000);
     }, 100);
-  }
-
-  ngOnDestroy(): void {
-    if (this.autoRefreshInterval) {
-      clearInterval(this.autoRefreshInterval);
-    }
   }
 
   cargarTodosLosReportes(): void {
@@ -54,7 +41,7 @@ export class ReportesComponent implements OnInit, OnDestroy {
 
   cargarResumenDiario(): void {
     this.cargando = true;
-    this.reporteService.getResumenDiario().subscribe({
+    this.reporteService.getResumenPorFecha(this.fechaConsulta).subscribe({
       next: (data) => {
         this.resumenDiario = data;
         this.cargando = false;
@@ -78,17 +65,7 @@ export class ReportesComponent implements OnInit, OnDestroy {
   }
 
   consultarPorFecha(): void {
-    this.cargando = true;
-    this.reporteService.getResumenPorFecha(this.fechaConsulta).subscribe({
-      next: (data) => {
-        this.resumenDiario = data;
-        this.cargando = false;
-      },
-      error: (error) => {
-        console.error('Error al consultar por fecha:', error);
-        this.cargando = false;
-      }
-    });
+    this.cargarResumenDiario();
   }
 
   consultarPorMes(): void {
@@ -111,12 +88,6 @@ export class ReportesComponent implements OnInit, OnDestroy {
 
   cambiarVista(nuevaVista: 'diario' | 'mensual'): void {
     this.vista = nuevaVista;
-    // Recargar los datos cuando se cambia de vista
-    if (nuevaVista === 'diario') {
-      this.cargarResumenDiario();
-    } else {
-      this.cargarResumenMensual();
-    }
   }
 
   /**
