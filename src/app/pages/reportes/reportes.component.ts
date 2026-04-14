@@ -20,6 +20,8 @@ export class ReportesComponent implements OnInit {
   mesConsulta: string = this.obtenerMesLocal();
   cargando = true;
   vista: 'diario' | 'mensual' = 'diario';
+  private barberosExpandidosDiario = new Set<number>();
+  private barberosExpandidosMensual = new Set<number>();
 
   constructor(
     private reporteService: ReporteService,
@@ -88,6 +90,20 @@ export class ReportesComponent implements OnInit {
 
   cambiarVista(nuevaVista: 'diario' | 'mensual'): void {
     this.vista = nuevaVista;
+  }
+
+  alternarDetalleBarbero(barberoId: number, vista: 'diario' | 'mensual'): void {
+    const setObjetivo = vista === 'diario' ? this.barberosExpandidosDiario : this.barberosExpandidosMensual;
+    if (setObjetivo.has(barberoId)) {
+      setObjetivo.delete(barberoId);
+      return;
+    }
+    setObjetivo.add(barberoId);
+  }
+
+  detalleVisible(barberoId: number, vista: 'diario' | 'mensual'): boolean {
+    const setObjetivo = vista === 'diario' ? this.barberosExpandidosDiario : this.barberosExpandidosMensual;
+    return setObjetivo.has(barberoId);
   }
 
   /**

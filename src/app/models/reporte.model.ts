@@ -1,3 +1,21 @@
+export interface DetalleCorte {
+  fecha: string;
+  hora: string;
+  tipoCorte: string;
+  metodoPago: string;
+  precio: number;
+}
+
+export interface DetalleVentaProducto {
+  fecha: string;
+  hora: string;
+  producto: string;
+  cantidad: number;
+  precioUnitario: number;
+  importe: number;
+  metodoPago: string;
+}
+
 export interface ResumenBarbero {
   barberoId: number;
   barberoNombre: string;
@@ -9,6 +27,8 @@ export interface ResumenBarbero {
   pagoBarbero: number;
   cantidadServicios: number;
   cantidadVentas: number;
+  detallesCortes: DetalleCorte[];
+  detallesVentas: DetalleVentaProducto[];
 }
 
 export interface ResumenDiario {

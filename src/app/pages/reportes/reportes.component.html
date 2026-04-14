@@ -85,10 +85,12 @@
                   <th>Total Comisiones</th>
                   <th>Total Generado</th>
                   <th>Pago Barbero</th>
+                  <th>Detalle</th>
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let resumen of resumenDiario.resumenBarberos">
+                <ng-container *ngFor="let resumen of resumenDiario.resumenBarberos">
+                <tr>
                   <td>{{ resumen.barberoNombre }}</td>
                   <td>{{ resumen.porcentajeServicio }}%</td>
                   <td>Q{{ resumen.totalServicios | number:'1.2-2' }}</td>
@@ -96,7 +98,79 @@
                   <td>Q{{ resumen.totalComisiones | number:'1.2-2' }}</td>
                   <td>Q{{ resumen.totalGenerado | number:'1.2-2' }}</td>
                   <td><strong>Q{{ resumen.pagoBarbero | number:'1.2-2' }}</strong></td>
+                  <td>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-primary"
+                      (click)="alternarDetalleBarbero(resumen.barberoId, 'diario')">
+                      {{ detalleVisible(resumen.barberoId, 'diario') ? 'Ocultar' : 'Ver detalle' }}
+                    </button>
+                  </td>
                 </tr>
+                <tr *ngIf="detalleVisible(resumen.barberoId, 'diario')">
+                  <td colspan="8" class="bg-light">
+                    <div class="py-2">
+                      <h6 class="mb-2">Cortes realizados</h6>
+                      <div class="table-responsive mb-3">
+                        <table class="table table-sm table-bordered mb-0">
+                          <thead>
+                            <tr>
+                              <th>Fecha</th>
+                              <th>Hora</th>
+                              <th>Tipo de corte</th>
+                              <th>Método de pago</th>
+                              <th>Precio</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr *ngFor="let corte of resumen.detallesCortes">
+                              <td>{{ corte.fecha }}</td>
+                              <td>{{ corte.hora }}</td>
+                              <td>{{ corte.tipoCorte }}</td>
+                              <td>{{ corte.metodoPago }}</td>
+                              <td>Q{{ corte.precio | number:'1.2-2' }}</td>
+                            </tr>
+                            <tr *ngIf="!resumen.detallesCortes?.length">
+                              <td colspan="5" class="text-center text-muted">Sin cortes para este rango.</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <h6 class="mb-2">Productos vendidos</h6>
+                      <div class="table-responsive">
+                        <table class="table table-sm table-bordered mb-0">
+                          <thead>
+                            <tr>
+                              <th>Fecha</th>
+                              <th>Hora</th>
+                              <th>Producto</th>
+                              <th>Cantidad</th>
+                              <th>Precio unitario</th>
+                              <th>Importe</th>
+                              <th>Método de pago</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr *ngFor="let venta of resumen.detallesVentas">
+                              <td>{{ venta.fecha }}</td>
+                              <td>{{ venta.hora }}</td>
+                              <td>{{ venta.producto }}</td>
+                              <td>{{ venta.cantidad }}</td>
+                              <td>Q{{ venta.precioUnitario | number:'1.2-2' }}</td>
+                              <td>Q{{ venta.importe | number:'1.2-2' }}</td>
+                              <td>{{ venta.metodoPago }}</td>
+                            </tr>
+                            <tr *ngIf="!resumen.detallesVentas?.length">
+                              <td colspan="7" class="text-center text-muted">Sin ventas de productos para este rango.</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                </ng-container>
               </tbody>
             </table>
           </div>
@@ -166,10 +240,12 @@
                 <th>Total Comisiones</th>
                 <th>Total Generado</th>
                 <th>Pago Barbero</th>
+                <th>Detalle</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let resumen of resumenMensual.resumenBarberos">
+              <ng-container *ngFor="let resumen of resumenMensual.resumenBarberos">
+              <tr>
                 <td>{{ resumen.barberoNombre }}</td>
                 <td>{{ resumen.porcentajeServicio }}%</td>
                 <td>Q{{ resumen.totalServicios | number:'1.2-2' }}</td>
@@ -177,7 +253,79 @@
                 <td>Q{{ resumen.totalComisiones | number:'1.2-2' }}</td>
                 <td>Q{{ resumen.totalGenerado | number:'1.2-2' }}</td>
                 <td><strong>Q{{ resumen.pagoBarbero | number:'1.2-2' }}</strong></td>
+                <td>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-primary"
+                    (click)="alternarDetalleBarbero(resumen.barberoId, 'mensual')">
+                    {{ detalleVisible(resumen.barberoId, 'mensual') ? 'Ocultar' : 'Ver detalle' }}
+                  </button>
+                </td>
               </tr>
+              <tr *ngIf="detalleVisible(resumen.barberoId, 'mensual')">
+                <td colspan="8" class="bg-light">
+                  <div class="py-2">
+                    <h6 class="mb-2">Cortes realizados</h6>
+                    <div class="table-responsive mb-3">
+                      <table class="table table-sm table-bordered mb-0">
+                        <thead>
+                          <tr>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Tipo de corte</th>
+                            <th>Método de pago</th>
+                            <th>Precio</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr *ngFor="let corte of resumen.detallesCortes">
+                            <td>{{ corte.fecha }}</td>
+                            <td>{{ corte.hora }}</td>
+                            <td>{{ corte.tipoCorte }}</td>
+                            <td>{{ corte.metodoPago }}</td>
+                            <td>Q{{ corte.precio | number:'1.2-2' }}</td>
+                          </tr>
+                          <tr *ngIf="!resumen.detallesCortes?.length">
+                            <td colspan="5" class="text-center text-muted">Sin cortes para este rango.</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <h6 class="mb-2">Productos vendidos</h6>
+                    <div class="table-responsive">
+                      <table class="table table-sm table-bordered mb-0">
+                        <thead>
+                          <tr>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Precio unitario</th>
+                            <th>Importe</th>
+                            <th>Método de pago</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr *ngFor="let venta of resumen.detallesVentas">
+                            <td>{{ venta.fecha }}</td>
+                            <td>{{ venta.hora }}</td>
+                            <td>{{ venta.producto }}</td>
+                            <td>{{ venta.cantidad }}</td>
+                            <td>Q{{ venta.precioUnitario | number:'1.2-2' }}</td>
+                            <td>Q{{ venta.importe | number:'1.2-2' }}</td>
+                            <td>{{ venta.metodoPago }}</td>
+                          </tr>
+                          <tr *ngIf="!resumen.detallesVentas?.length">
+                            <td colspan="7" class="text-center text-muted">Sin ventas de productos para este rango.</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              </ng-container>
             </tbody>
             </table>
           </div>
