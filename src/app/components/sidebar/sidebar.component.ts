@@ -102,20 +102,20 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   canShowItem(item: any): boolean {
-    // Ítems sin restricción (Acerca de Nosotros, Academia, redes): se muestran a ADMIN y BARBERO, no a CESIA
-    if (!item.adminOnly && !item.adminAndBarbero && !item.adminAndCesia) {
-      return !this.authService.isCesia();
-    }
-    // BARBERO: solo Servicios y Ventas
+    // BARBERO: solo Servicios y Ventas (evaluar antes que ítems “sin bandera” como Acerca/Academia/redes)
     if (this.authService.isBarbero()) {
       return item.adminAndBarbero === true;
     }
-    // CESIA: solo Servicios, Ventas, Compra Aquí y Gestión de Catálogo (sin el resto de vistas)
+    // CESIA: Servicios, Ventas, Compra Aquí y Gestión de Catálogo
     if (this.authService.isCesia()) {
       return item.adminAndBarbero === true || item.adminAndCesia === true;
     }
-    // ADMIN: todo
+    // ADMIN: todo el menú
     if (this.authService.isAdmin()) {
+      return true;
+    }
+    // Ítems sin restricción de rol (Acerca, Academia, redes): solo si no es CESIA (ya cubierto arriba)
+    if (!item.adminOnly && !item.adminAndBarbero && !item.adminAndCesia) {
       return true;
     }
     return false;

@@ -80,6 +80,7 @@
                 <tr>
                   <th>Barbero</th>
                   <th>% Servicio</th>
+                  <th>N.° Cortes</th>
                   <th>Total Servicios</th>
                   <th>Total Ventas</th>
                   <th>Total Comisiones</th>
@@ -93,6 +94,7 @@
                 <tr>
                   <td>{{ resumen.barberoNombre }}</td>
                   <td>{{ resumen.porcentajeServicio }}%</td>
+                  <td class="text-center">{{ resumen.cantidadServicios }}</td>
                   <td>Q{{ resumen.totalServicios | number:'1.2-2' }}</td>
                   <td>Q{{ resumen.totalVentas | number:'1.2-2' }}</td>
                   <td>Q{{ resumen.totalComisiones | number:'1.2-2' }}</td>
@@ -108,7 +110,7 @@
                   </td>
                 </tr>
                 <tr *ngIf="detalleVisible(resumen.barberoId, 'diario')">
-                  <td colspan="8" class="bg-light">
+                  <td colspan="9" class="bg-light">
                     <div class="py-2">
                       <h6 class="mb-2">Cortes realizados</h6>
                       <div class="table-responsive mb-3">
@@ -235,6 +237,7 @@
               <tr>
                 <th>Barbero</th>
                 <th>% Servicio</th>
+                <th>N.° Cortes</th>
                 <th>Total Servicios</th>
                 <th>Total Ventas</th>
                 <th>Total Comisiones</th>
@@ -248,6 +251,7 @@
               <tr>
                 <td>{{ resumen.barberoNombre }}</td>
                 <td>{{ resumen.porcentajeServicio }}%</td>
+                <td class="text-center">{{ resumen.cantidadServicios }}</td>
                 <td>Q{{ resumen.totalServicios | number:'1.2-2' }}</td>
                 <td>Q{{ resumen.totalVentas | number:'1.2-2' }}</td>
                 <td>Q{{ resumen.totalComisiones | number:'1.2-2' }}</td>
@@ -263,7 +267,7 @@
                 </td>
               </tr>
               <tr *ngIf="detalleVisible(resumen.barberoId, 'mensual')">
-                <td colspan="8" class="bg-light">
+                <td colspan="9" class="bg-light">
                   <div class="py-2">
                     <h6 class="mb-2">Cortes realizados</h6>
                     <div class="table-responsive mb-3">
