@@ -25,6 +25,8 @@ export interface ResumenBarbero {
   totalComisiones: number;
   totalGenerado: number;
   pagoBarbero: number;
+  /** Total generado − pago al barbero (lo que queda para la barbería) */
+  gananciaBarberia: number;
   cantidadServicios: number;
   cantidadVentas: number;
   detallesCortes: DetalleCorte[];
@@ -37,6 +39,8 @@ export interface ResumenDiario {
   totalVentas: number;
   totalComisiones: number;
   totalGeneral: number;
+  /** Suma de ganancias netas para la barbería (por barbero) */
+  totalGananciaBarberia: number;
   cantidadServicios: number;
   cantidadVentas: number;
   resumenBarberos: ResumenBarbero[];
@@ -48,6 +52,7 @@ export interface ResumenMensual {
   totalVentas: number;
   totalComisiones: number;
   totalGeneral: number;
+  totalGananciaBarberia: number;
   cantidadServicios: number;
   cantidadVentas: number;
   resumenBarberos: ResumenBarbero[];

@@ -72,6 +72,17 @@
               </div>
             </div>
           </div>
+          <div class="row mb-4">
+            <div class="col-md-6 col-lg-4">
+              <div class="card border-secondary shadow-sm">
+                <div class="card-body">
+                  <h6 class="text-muted mb-1"><i class="fas fa-store me-1"></i>Ganancia barbería (neto)</h6>
+                  <p class="small text-muted mb-2">Después de pagos a barberos (total generado − pago barberos)</p>
+                  <h3 class="mb-0 text-success">Q{{ resumenDiario.totalGananciaBarberia | number:'1.2-2' }}</h3>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <h5 class="mb-3">Resumen por Barbero</h5>
           <div class="table-responsive">
@@ -86,6 +97,7 @@
                   <th>Total Comisiones</th>
                   <th>Total Generado</th>
                   <th>Pago Barbero</th>
+                  <th>Ganancia barbería</th>
                   <th>Detalle</th>
                 </tr>
               </thead>
@@ -100,6 +112,7 @@
                   <td>Q{{ resumen.totalComisiones | number:'1.2-2' }}</td>
                   <td>Q{{ resumen.totalGenerado | number:'1.2-2' }}</td>
                   <td><strong>Q{{ resumen.pagoBarbero | number:'1.2-2' }}</strong></td>
+                  <td><strong class="text-success">Q{{ resumen.gananciaBarberia | number:'1.2-2' }}</strong></td>
                   <td>
                     <button
                       type="button"
@@ -110,7 +123,7 @@
                   </td>
                 </tr>
                 <tr *ngIf="detalleVisible(resumen.barberoId, 'diario')">
-                  <td colspan="9" class="bg-light">
+                  <td colspan="10" class="bg-light">
                     <div class="py-2">
                       <h6 class="mb-2">Cortes realizados</h6>
                       <div class="table-responsive mb-3">
@@ -229,6 +242,17 @@
             </div>
           </div>
         </div>
+        <div class="row mb-4">
+          <div class="col-md-6 col-lg-4">
+            <div class="card border-secondary shadow-sm">
+              <div class="card-body">
+                <h6 class="text-muted mb-1"><i class="fas fa-store me-1"></i>Ganancia barbería (neto)</h6>
+                <p class="small text-muted mb-2">Después de pagos a barberos</p>
+                <h3 class="mb-0 text-success">Q{{ resumenMensual.totalGananciaBarberia | number:'1.2-2' }}</h3>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <h5 class="mb-3">Resumen por Barbero</h5>
         <div class="table-responsive">
@@ -243,6 +267,7 @@
                 <th>Total Comisiones</th>
                 <th>Total Generado</th>
                 <th>Pago Barbero</th>
+                <th>Ganancia barbería</th>
                 <th>Detalle</th>
               </tr>
             </thead>
@@ -257,6 +282,7 @@
                 <td>Q{{ resumen.totalComisiones | number:'1.2-2' }}</td>
                 <td>Q{{ resumen.totalGenerado | number:'1.2-2' }}</td>
                 <td><strong>Q{{ resumen.pagoBarbero | number:'1.2-2' }}</strong></td>
+                <td><strong class="text-success">Q{{ resumen.gananciaBarberia | number:'1.2-2' }}</strong></td>
                 <td>
                   <button
                     type="button"
@@ -267,7 +293,7 @@
                 </td>
               </tr>
               <tr *ngIf="detalleVisible(resumen.barberoId, 'mensual')">
-                <td colspan="9" class="bg-light">
+                <td colspan="10" class="bg-light">
                   <div class="py-2">
                     <h6 class="mb-2">Cortes realizados</h6>
                     <div class="table-responsive mb-3">

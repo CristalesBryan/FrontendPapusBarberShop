@@ -12,8 +12,21 @@ export class ReporteService {
 
   constructor(private http: HttpClient) { }
 
+  /**
+   * Resumen del día usando la fecha local del navegador (evita ceros cuando el servidor está en UTC
+   * y "hoy" del servidor no coincide con el día de los registros en Guatemala).
+   */
   getResumenDiario(): Observable<ResumenDiario> {
-    return this.http.get<ResumenDiario>(`${this.API_URL}/diario`);
+    const fecha = this.fechaLocalHoy();
+    return this.http.get<ResumenDiario>(`${this.API_URL}/diario?fecha=${fecha}`);
+  }
+
+  private fechaLocalHoy(): string {
+    const ahora = new Date();
+    const y = ahora.getFullYear();
+    const m = String(ahora.getMonth() + 1).padStart(2, '0');
+    const d = String(ahora.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
   }
 
   getResumenMensual(mes?: string): Observable<ResumenMensual> {
