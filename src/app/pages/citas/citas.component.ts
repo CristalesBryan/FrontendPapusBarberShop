@@ -278,10 +278,10 @@ export class CitasComponent implements OnInit {
   }
 
   formatearFecha(fecha: Date): string {
-    const año = fecha.getFullYear();
+    const anio = fecha.getFullYear();
     const mes = String(fecha.getMonth() + 1).padStart(2, '0');
     const dia = String(fecha.getDate()).padStart(2, '0');
-    return `${año}-${mes}-${dia}`;
+    return `${anio}-${mes}-${dia}`;
   }
 
   abrirFormularioConFecha(fecha: Date, barberoId?: number): void {
@@ -313,10 +313,10 @@ export class CitasComponent implements OnInit {
 
   establecerFechaHoy(): void {
     const hoy = new Date();
-    const año = hoy.getFullYear();
+    const anio = hoy.getFullYear();
     const mes = String(hoy.getMonth() + 1).padStart(2, '0');
     const dia = String(hoy.getDate()).padStart(2, '0');
-    const fechaStr = `${año}-${mes}-${dia}`;
+    const fechaStr = `${anio}-${mes}-${dia}`;
     this.fechaSeleccionada = fechaStr;
     this.nuevaCita.fecha = fechaStr;
     this.cargarDisponibilidad();

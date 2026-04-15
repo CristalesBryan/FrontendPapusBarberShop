@@ -103,7 +103,7 @@ export class ServiciosComponent implements OnInit, OnDestroy {
       },
       error: error => {
         console.error('Error al cargar barberos:', error);
-        this.mostrarNotificacion('Error al cargar la lista de barberos. Por favor, recargue la p?gina.', 'error');
+        this.mostrarNotificacion('Error al cargar la lista de barberos. Por favor, recargue la pagina.', 'error');
       }
     });
   }
@@ -115,7 +115,7 @@ export class ServiciosComponent implements OnInit, OnDestroy {
       },
       error: error => {
         console.error('Error al cargar tipos de corte:', error);
-        this.mostrarNotificacion('Error al cargar los tipos de corte. Por favor, recargue la p?gina.', 'error');
+        this.mostrarNotificacion('Error al cargar los tipos de corte. Por favor, recargue la pagina.', 'error');
       }
     });
   }
@@ -137,10 +137,10 @@ export class ServiciosComponent implements OnInit, OnDestroy {
       });
     } else {
       const ahora = new Date();
-      const a?o = ahora.getFullYear();
+      const anio = ahora.getFullYear();
       const mes = String(ahora.getMonth() + 1).padStart(2, '0');
       const dia = String(ahora.getDate()).padStart(2, '0');
-      this.nuevoServicio.fecha = `${a?o}-${mes}-${dia}`;
+      this.nuevoServicio.fecha = `${anio}-${mes}-${dia}`;
       this.nuevoServicio.hora = ahora.toTimeString().slice(0, 5);
 
       this.servicioService.create(this.nuevoServicio).subscribe({
@@ -202,7 +202,8 @@ export class ServiciosComponent implements OnInit, OnDestroy {
   }
 
   eliminar(servicio: Servicio): void {
-    this.mensajeConfirmacion = `?Est? seguro de que desea eliminar el servicio del ${servicio.fecha} a las ${servicio.hora}?`;
+    this.mensajeConfirmacion =
+      'Seguro que desea eliminar el servicio del ' + servicio.fecha + ' a las ' + servicio.hora + '?';
     this.accionConfirmacion = () => {
       this.servicioService.delete(servicio.id).subscribe({
         next: () => {

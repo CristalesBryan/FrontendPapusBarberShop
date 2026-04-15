@@ -137,10 +137,10 @@ export class VentasComponent implements OnInit {
       });
     } else {
       const ahora = new Date();
-      const año = ahora.getFullYear();
+      const anio = ahora.getFullYear();
       const mes = String(ahora.getMonth() + 1).padStart(2, '0');
       const dia = String(ahora.getDate()).padStart(2, '0');
-      this.nuevaVenta.fecha = `${año}-${mes}-${dia}`;
+      this.nuevaVenta.fecha = `${anio}-${mes}-${dia}`;
       this.nuevaVenta.hora = ahora.toTimeString().slice(0, 5);
 
       this.ventaService.create(this.nuevaVenta).subscribe({
@@ -233,7 +233,8 @@ export class VentasComponent implements OnInit {
   }
 
   eliminar(venta: VentaProducto): void {
-    this.mensajeConfirmacion = `¿Está seguro de que desea eliminar la venta del producto "${venta.productoNombre}"?`;
+    this.mensajeConfirmacion =
+      'Seguro que desea eliminar la venta del producto "' + (venta.productoNombre || '') + '"?';
     this.accionConfirmacion = () => {
       this.ventaService.delete(venta.id).subscribe({
         next: () => {

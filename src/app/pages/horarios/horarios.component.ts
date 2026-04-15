@@ -153,7 +153,7 @@ export class HorariosComponent implements OnInit {
       });
     }
     
-    // Actualizar mes y año actuales basados en la fecha seleccionada
+    // Actualizar mes y anio actuales segun la fecha seleccionada
     this.mesActual = this.fechaSeleccionada.getMonth();
     this.anioActual = this.fechaSeleccionada.getFullYear();
   }
@@ -213,10 +213,10 @@ export class HorariosComponent implements OnInit {
   }
 
   formatearFecha(fecha: Date): string {
-    const año = fecha.getFullYear();
+    const anio = fecha.getFullYear();
     const mes = String(fecha.getMonth() + 1).padStart(2, '0');
     const dia = String(fecha.getDate()).padStart(2, '0');
-    return `${año}-${mes}-${dia}`;
+    return `${anio}-${mes}-${dia}`;
   }
 
   esHoy(fecha: Date): boolean {
