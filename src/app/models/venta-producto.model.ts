@@ -8,7 +8,9 @@ export interface VentaProducto {
   productoNombre: string;
   cantidad: number;
   precioUnitario: number;
-  importe: number;
+  importeOriginal: number;
+  descuentoPorcentaje: number;
+  importe: number; // importe final con descuento
   stockAntes: number;
   stockDespues: number;
   metodoPago: string;
@@ -21,5 +23,5 @@ export interface VentaProductoCreate {
   productoId: number;
   cantidad: number;
   metodoPago: string;
+  descuentoPorcentaje: number;
 }
-

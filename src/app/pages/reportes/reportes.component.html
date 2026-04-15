@@ -68,6 +68,7 @@
                 <div class="card-body">
                   <h6>Total General</h6>
                   <h3>Q{{ resumenDiario.totalGeneral | number:'1.2-2' }}</h3>
+                  <small>Con descuento aplicado</small>
                 </div>
               </div>
             </div>
@@ -76,6 +77,8 @@
             <div class="col-md-6 col-lg-4">
               <div class="card border-secondary shadow-sm">
                 <div class="card-body">
+                  <h6 class="text-muted mb-1"><i class="fas fa-tag me-1"></i>Descuentos aplicados</h6>
+                  <h3 class="mb-2 text-warning">Q{{ resumenDiario.totalDescuentosAplicados | number:'1.2-2' }}</h3>
                   <h6 class="text-muted mb-1"><i class="fas fa-store me-1"></i>Ganancia barbería (neto)</h6>
                   <p class="small text-muted mb-2">Después de pagos a barberos (total generado − pago barberos)</p>
                   <h3 class="mb-0 text-success">Q{{ resumenDiario.totalGananciaBarberia | number:'1.2-2' }}</h3>
@@ -134,7 +137,9 @@
                               <th>Hora</th>
                               <th>Tipo de corte</th>
                               <th>Método de pago</th>
-                              <th>Precio</th>
+                              <th>Precio base</th>
+                              <th>Desc.%</th>
+                              <th>Total</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -143,10 +148,12 @@
                               <td>{{ corte.hora }}</td>
                               <td>{{ corte.tipoCorte }}</td>
                               <td>{{ corte.metodoPago }}</td>
+                              <td>Q{{ corte.precioOriginal | number:'1.2-2' }}</td>
+                              <td>{{ corte.descuentoPorcentaje | number:'1.0-2' }}%</td>
                               <td>Q{{ corte.precio | number:'1.2-2' }}</td>
                             </tr>
                             <tr *ngIf="!resumen.detallesCortes?.length">
-                              <td colspan="5" class="text-center text-muted">Sin cortes para este rango.</td>
+                              <td colspan="7" class="text-center text-muted">Sin cortes para este rango.</td>
                             </tr>
                           </tbody>
                         </table>
@@ -162,7 +169,9 @@
                               <th>Producto</th>
                               <th>Cantidad</th>
                               <th>Precio unitario</th>
-                              <th>Importe</th>
+                              <th>Importe base</th>
+                              <th>Desc.%</th>
+                              <th>Importe final</th>
                               <th>Método de pago</th>
                             </tr>
                           </thead>
@@ -173,11 +182,13 @@
                               <td>{{ venta.producto }}</td>
                               <td>{{ venta.cantidad }}</td>
                               <td>Q{{ venta.precioUnitario | number:'1.2-2' }}</td>
+                              <td>Q{{ venta.importeOriginal | number:'1.2-2' }}</td>
+                              <td>{{ venta.descuentoPorcentaje | number:'1.0-2' }}%</td>
                               <td>Q{{ venta.importe | number:'1.2-2' }}</td>
                               <td>{{ venta.metodoPago }}</td>
                             </tr>
                             <tr *ngIf="!resumen.detallesVentas?.length">
-                              <td colspan="7" class="text-center text-muted">Sin ventas de productos para este rango.</td>
+                              <td colspan="9" class="text-center text-muted">Sin ventas de productos para este rango.</td>
                             </tr>
                           </tbody>
                         </table>
@@ -238,6 +249,7 @@
               <div class="card-body">
                 <h6>Total General</h6>
                 <h3>Q{{ resumenMensual.totalGeneral | number:'1.2-2' }}</h3>
+                <small>Con descuento aplicado</small>
               </div>
             </div>
           </div>
@@ -246,6 +258,8 @@
           <div class="col-md-6 col-lg-4">
             <div class="card border-secondary shadow-sm">
               <div class="card-body">
+                <h6 class="text-muted mb-1"><i class="fas fa-tag me-1"></i>Descuentos aplicados</h6>
+                <h3 class="mb-2 text-warning">Q{{ resumenMensual.totalDescuentosAplicados | number:'1.2-2' }}</h3>
                 <h6 class="text-muted mb-1"><i class="fas fa-store me-1"></i>Ganancia barbería (neto)</h6>
                 <p class="small text-muted mb-2">Después de pagos a barberos</p>
                 <h3 class="mb-0 text-success">Q{{ resumenMensual.totalGananciaBarberia | number:'1.2-2' }}</h3>
@@ -304,7 +318,9 @@
                             <th>Hora</th>
                             <th>Tipo de corte</th>
                             <th>Método de pago</th>
-                            <th>Precio</th>
+                            <th>Precio base</th>
+                            <th>Desc.%</th>
+                            <th>Total</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -313,10 +329,12 @@
                             <td>{{ corte.hora }}</td>
                             <td>{{ corte.tipoCorte }}</td>
                             <td>{{ corte.metodoPago }}</td>
+                            <td>Q{{ corte.precioOriginal | number:'1.2-2' }}</td>
+                            <td>{{ corte.descuentoPorcentaje | number:'1.0-2' }}%</td>
                             <td>Q{{ corte.precio | number:'1.2-2' }}</td>
                           </tr>
                           <tr *ngIf="!resumen.detallesCortes?.length">
-                            <td colspan="5" class="text-center text-muted">Sin cortes para este rango.</td>
+                            <td colspan="7" class="text-center text-muted">Sin cortes para este rango.</td>
                           </tr>
                         </tbody>
                       </table>
@@ -332,7 +350,9 @@
                             <th>Producto</th>
                             <th>Cantidad</th>
                             <th>Precio unitario</th>
-                            <th>Importe</th>
+                            <th>Importe base</th>
+                            <th>Desc.%</th>
+                            <th>Importe final</th>
                             <th>Método de pago</th>
                           </tr>
                         </thead>
@@ -343,11 +363,13 @@
                             <td>{{ venta.producto }}</td>
                             <td>{{ venta.cantidad }}</td>
                             <td>Q{{ venta.precioUnitario | number:'1.2-2' }}</td>
+                            <td>Q{{ venta.importeOriginal | number:'1.2-2' }}</td>
+                            <td>{{ venta.descuentoPorcentaje | number:'1.0-2' }}%</td>
                             <td>Q{{ venta.importe | number:'1.2-2' }}</td>
                             <td>{{ venta.metodoPago }}</td>
                           </tr>
                           <tr *ngIf="!resumen.detallesVentas?.length">
-                            <td colspan="7" class="text-center text-muted">Sin ventas de productos para este rango.</td>
+                            <td colspan="9" class="text-center text-muted">Sin ventas de productos para este rango.</td>
                           </tr>
                         </tbody>
                       </table>

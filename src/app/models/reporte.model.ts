@@ -3,6 +3,8 @@ export interface DetalleCorte {
   hora: string;
   tipoCorte: string;
   metodoPago: string;
+  precioOriginal: number;
+  descuentoPorcentaje: number;
   precio: number;
 }
 
@@ -12,6 +14,8 @@ export interface DetalleVentaProducto {
   producto: string;
   cantidad: number;
   precioUnitario: number;
+  importeOriginal: number;
+  descuentoPorcentaje: number;
   importe: number;
   metodoPago: string;
 }
@@ -25,7 +29,6 @@ export interface ResumenBarbero {
   totalComisiones: number;
   totalGenerado: number;
   pagoBarbero: number;
-  /** Total generado − pago al barbero (lo que queda para la barbería) */
   gananciaBarberia: number;
   cantidadServicios: number;
   cantidadVentas: number;
@@ -39,7 +42,7 @@ export interface ResumenDiario {
   totalVentas: number;
   totalComisiones: number;
   totalGeneral: number;
-  /** Suma de ganancias netas para la barbería (por barbero) */
+  totalDescuentosAplicados: number;
   totalGananciaBarberia: number;
   cantidadServicios: number;
   cantidadVentas: number;
@@ -52,9 +55,9 @@ export interface ResumenMensual {
   totalVentas: number;
   totalComisiones: number;
   totalGeneral: number;
+  totalDescuentosAplicados: number;
   totalGananciaBarberia: number;
   cantidadServicios: number;
   cantidadVentas: number;
   resumenBarberos: ResumenBarbero[];
 }
-

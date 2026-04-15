@@ -6,7 +6,9 @@ export interface Servicio {
   barberoNombre: string;
   tipoCorte: string;
   metodoPago: string;
-  precio: number;
+  precioOriginal: number;
+  descuentoPorcentaje: number;
+  precio: number; // precio final con descuento
 }
 
 export interface ServicioCreate {
@@ -15,6 +17,6 @@ export interface ServicioCreate {
   barberoId: number;
   tipoCorte: string;
   metodoPago: string;
-  precio: number;
+  precio: number; // precio base
+  descuentoPorcentaje: number;
 }
-

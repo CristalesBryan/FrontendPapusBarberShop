@@ -22,30 +22,29 @@ export class ServiciosComponent implements OnInit, OnDestroy {
   tiposCorte: TipoCorteAPI[] = [];
   tipoCorteSeleccionado: TipoCorteAPI | null = null;
   nuevoServicio: ServicioCreate = {
-    fecha: '', // Se establecerá automáticamente al guardar
-    hora: '', // Se establecerá automáticamente al guardar
+    fecha: '',
+    hora: '',
     barberoId: 0,
     tipoCorte: '',
     metodoPago: 'Efectivo',
-    precio: 0
+    precio: 0,
+    descuentoPorcentaje: 0
   };
-  tipoCorteIdSeleccionado: number = 0;
+  tipoCorteIdSeleccionado = 0;
   mostrarFormulario = false;
   editando = false;
   servicioEditando: Servicio | null = null;
   cargando = true;
   esBarbero = false;
   esCesia = false;
-  
-  // Modales dinámicos
+
   mostrarModalNotificacion = false;
   mensajeNotificacion = '';
   tipoNotificacion: 'success' | 'error' | 'info' | 'warning' = 'info';
   mostrarModalConfirmacion = false;
   mensajeConfirmacion = '';
   accionConfirmacion: (() => void) | null = null;
-  
-  // Referencias a los listeners para poder eliminarlos
+
   private barberosActualizadosListener = () => this.cargarBarberos();
   private tiposCorteActualizadosListener = () => this.cargarTiposCorte();
 
@@ -59,31 +58,23 @@ export class ServiciosComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.esBarbero = this.authService.isBarbero();
     this.esCesia = this.authService.isCesia();
-    
-    // Si es barbero o Cesia, mostrar el formulario automáticamente; Cesia no ve la lista
-    if (this.esBarbero) {
-      this.mostrarFormulario = true;
-    } else if (this.esCesia) {
+
+    if (this.esBarbero || this.esCesia) {
       this.mostrarFormulario = true;
     }
-    
-    // Solo cargar la lista para ADMIN (ni barbero ni Cesia la ven)
+
     if (!this.esBarbero && !this.esCesia) {
       this.cargarServicios();
     }
-    
+
     this.cargarBarberos();
     this.cargarTiposCorte();
-    
-    // Escuchar eventos de actualización de barberos
+
     window.addEventListener('barberosActualizados', this.barberosActualizadosListener);
-    
-    // Escuchar eventos de actualización de tipos de corte
     window.addEventListener('tiposCorteActualizados', this.tiposCorteActualizadosListener);
   }
 
   ngOnDestroy(): void {
-    // Limpiar listeners al destruir el componente
     window.removeEventListener('barberosActualizados', this.barberosActualizadosListener);
     window.removeEventListener('tiposCorteActualizados', this.tiposCorteActualizadosListener);
   }
@@ -91,11 +82,11 @@ export class ServiciosComponent implements OnInit, OnDestroy {
   cargarServicios(): void {
     this.cargando = true;
     this.servicioService.getAll().subscribe({
-      next: (data) => {
+      next: data => {
         this.servicios = data;
         this.cargando = false;
       },
-      error: (error) => {
+      error: error => {
         console.error('Error al cargar servicios:', error);
         this.cargando = false;
       }
@@ -104,73 +95,64 @@ export class ServiciosComponent implements OnInit, OnDestroy {
 
   cargarBarberos(): void {
     this.barberoService.getAll().subscribe({
-      next: (data) => {
+      next: data => {
         this.barberos = data;
         if (data.length > 0) {
           this.nuevoServicio.barberoId = data[0].id;
-        } else {
-          console.warn('No hay barberos disponibles');
         }
       },
-      error: (error) => {
+      error: error => {
         console.error('Error al cargar barberos:', error);
-        this.mostrarNotificacion('Error al cargar la lista de barberos. Por favor, recargue la página.', 'error');
+        this.mostrarNotificacion('Error al cargar la lista de barberos. Por favor, recargue la p?gina.', 'error');
       }
     });
   }
 
   cargarTiposCorte(): void {
     this.tipoCorteService.obtenerTodosActivos().subscribe({
-      next: (data) => {
+      next: data => {
         this.tiposCorte = data;
-        if (data.length === 0) {
-          console.warn('No hay tipos de corte activos disponibles');
-        }
       },
-      error: (error) => {
+      error: error => {
         console.error('Error al cargar tipos de corte:', error);
-        this.mostrarNotificacion('Error al cargar los tipos de corte. Por favor, recargue la página.', 'error');
+        this.mostrarNotificacion('Error al cargar los tipos de corte. Por favor, recargue la p?gina.', 'error');
       }
     });
   }
 
   guardarServicio(): void {
-    // Los barberos no pueden editar servicios
+    this.normalizarDescuentoServicio();
+
     if (this.editando && this.servicioEditando && !this.esBarbero) {
-      // Actualizar servicio existente
       this.servicioService.update(this.servicioEditando.id, this.nuevoServicio).subscribe({
         next: () => {
           this.cargarServicios();
           this.mostrarFormulario = false;
           this.resetearFormulario();
         },
-        error: (error) => {
+        error: error => {
           console.error('Error al actualizar servicio:', error);
           this.mostrarNotificacion(error.error?.message || 'Error al actualizar el servicio', 'error');
         }
       });
     } else {
-      // Crear nuevo servicio - Establecer fecha y hora automáticamente antes de guardar
       const ahora = new Date();
-      const año = ahora.getFullYear();
+      const a?o = ahora.getFullYear();
       const mes = String(ahora.getMonth() + 1).padStart(2, '0');
       const dia = String(ahora.getDate()).padStart(2, '0');
-      this.nuevoServicio.fecha = `${año}-${mes}-${dia}`;
+      this.nuevoServicio.fecha = `${a?o}-${mes}-${dia}`;
       this.nuevoServicio.hora = ahora.toTimeString().slice(0, 5);
-      
+
       this.servicioService.create(this.nuevoServicio).subscribe({
         next: () => {
-          // Solo recargar lista si no es barbero ni Cesia
           if (!this.esBarbero && !this.esCesia) {
             this.cargarServicios();
-          }
-          if (!this.esBarbero && !this.esCesia) {
             this.mostrarFormulario = false;
           }
           this.resetearFormulario();
           this.mostrarNotificacion('Servicio registrado exitosamente.', 'success');
         },
-        error: (error) => {
+        error: error => {
           console.error('Error al guardar servicio:', error);
           this.mostrarNotificacion(error.error?.message || 'Error al guardar el servicio', 'error');
         }
@@ -180,12 +162,13 @@ export class ServiciosComponent implements OnInit, OnDestroy {
 
   resetearFormulario(): void {
     this.nuevoServicio = {
-      fecha: '', // Se establecerá automáticamente al guardar
-      hora: '', // Se establecerá automáticamente al guardar
+      fecha: '',
+      hora: '',
       barberoId: this.barberos.length > 0 ? this.barberos[0].id : 0,
       tipoCorte: '',
       metodoPago: 'Efectivo',
-      precio: 0
+      precio: 0,
+      descuentoPorcentaje: 0
     };
     this.tipoCorteIdSeleccionado = 0;
     this.tipoCorteSeleccionado = null;
@@ -202,15 +185,15 @@ export class ServiciosComponent implements OnInit, OnDestroy {
       barberoId: servicio.barberoId,
       tipoCorte: servicio.tipoCorte,
       metodoPago: servicio.metodoPago,
-      precio: servicio.precio
+      precio: servicio.precioOriginal ?? servicio.precio,
+      descuentoPorcentaje: servicio.descuentoPorcentaje ?? 0
     };
-    // Buscar el tipo de corte seleccionado por nombre
+
     const tipoEncontrado = this.tiposCorte.find(t => t.nombre === servicio.tipoCorte);
     if (tipoEncontrado) {
       this.tipoCorteIdSeleccionado = tipoEncontrado.id;
       this.tipoCorteSeleccionado = tipoEncontrado;
     } else {
-      // Si no se encuentra, intentar recargar tipos de corte y buscar de nuevo
       this.cargarTiposCorte();
       this.tipoCorteIdSeleccionado = 0;
       this.tipoCorteSeleccionado = null;
@@ -219,14 +202,14 @@ export class ServiciosComponent implements OnInit, OnDestroy {
   }
 
   eliminar(servicio: Servicio): void {
-    this.mensajeConfirmacion = `¿Está seguro de que desea eliminar el servicio del ${servicio.fecha} a las ${servicio.hora}?`;
+    this.mensajeConfirmacion = `?Est? seguro de que desea eliminar el servicio del ${servicio.fecha} a las ${servicio.hora}?`;
     this.accionConfirmacion = () => {
       this.servicioService.delete(servicio.id).subscribe({
         next: () => {
           this.cargarServicios();
           this.mostrarNotificacion('Servicio eliminado exitosamente', 'success');
         },
-        error: (error) => {
+        error: error => {
           console.error('Error al eliminar servicio:', error);
           this.mostrarNotificacion(error.error?.message || 'Error al eliminar el servicio', 'error');
         }
@@ -238,10 +221,9 @@ export class ServiciosComponent implements OnInit, OnDestroy {
   onTipoCorteChange(): void {
     const tipoEncontrado = this.tiposCorte.find(t => t.id === this.tipoCorteIdSeleccionado);
     this.tipoCorteSeleccionado = tipoEncontrado || null;
-    
+
     if (tipoEncontrado) {
       this.nuevoServicio.tipoCorte = tipoEncontrado.nombre;
-      // Establecer el precio automáticamente si está disponible
       if (tipoEncontrado.precio > 0) {
         this.nuevoServicio.precio = tipoEncontrado.precio;
       }
@@ -250,22 +232,26 @@ export class ServiciosComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Convierte minutos a formato legible (ej: 85 minutos -> "1h 25min")
-   */
+  normalizarDescuentoServicio(): void {
+    if (this.nuevoServicio.descuentoPorcentaje == null || isNaN(this.nuevoServicio.descuentoPorcentaje as any)) {
+      this.nuevoServicio.descuentoPorcentaje = 0;
+    }
+    this.nuevoServicio.descuentoPorcentaje = Math.max(0, this.nuevoServicio.descuentoPorcentaje);
+  }
+
+  getPrecioFinalServicio(): number {
+    const base = this.nuevoServicio.precio || 0;
+    const descuento = this.nuevoServicio.descuentoPorcentaje || 0;
+    return +Math.max(0, (base * (1 - descuento / 100))).toFixed(2);
+  }
+
   convertirTiempoALegible(minutos: number): string {
     if (!minutos || minutos < 0) return '0min';
-    
     const horas = Math.floor(minutos / 60);
     const mins = minutos % 60;
-    
-    if (horas > 0 && mins > 0) {
-      return `${horas}h ${mins}min`;
-    } else if (horas > 0) {
-      return `${horas}h`;
-    } else {
-      return `${mins}min`;
-    }
+    if (horas > 0 && mins > 0) return `${horas}h ${mins}min`;
+    if (horas > 0) return `${horas}h`;
+    return `${mins}min`;
   }
 
   mostrarNotificacion(mensaje: string, tipo: 'success' | 'error' | 'info' | 'warning' = 'info'): void {
@@ -294,4 +280,3 @@ export class ServiciosComponent implements OnInit, OnDestroy {
     this.accionConfirmacion = null;
   }
 }
-

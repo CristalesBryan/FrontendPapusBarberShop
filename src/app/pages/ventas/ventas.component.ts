@@ -21,12 +21,13 @@ export class VentasComponent implements OnInit {
   barberos: Barbero[] = [];
   productos: Producto[] = [];
   nuevaVenta: VentaProductoCreate = {
-    fecha: '', // Se establecerá automáticamente al guardar
-    hora: '', // Se establecerá automáticamente al guardar
+    fecha: '',
+    hora: '',
     barberoId: 0,
     productoId: 0,
     cantidad: 1,
-    metodoPago: 'Efectivo'
+    metodoPago: 'Efectivo',
+    descuentoPorcentaje: 0
   };
   mostrarFormulario = false;
   editando = false;
@@ -34,8 +35,7 @@ export class VentasComponent implements OnInit {
   cargando = true;
   esBarbero = false;
   esCesia = false;
-  
-  // Modales dinámicos
+
   mostrarModalNotificacion = false;
   mensajeNotificacion = '';
   tipoNotificacion: 'success' | 'error' | 'info' | 'warning' = 'info';
@@ -55,7 +55,6 @@ export class VentasComponent implements OnInit {
       this.cancelarEdicion();
     } else {
       this.mostrarFormulario = !this.mostrarFormulario;
-      // Recargar productos cuando se muestra el formulario para tener datos actualizados
       if (this.mostrarFormulario) {
         this.cargarProductos();
       }
@@ -65,23 +64,18 @@ export class VentasComponent implements OnInit {
   ngOnInit(): void {
     this.esBarbero = this.authService.isBarbero();
     this.esCesia = this.authService.isCesia();
-    
-    // Si es barbero o Cesia, mostrar el formulario automáticamente; Cesia no ve la lista
-    if (this.esBarbero) {
-      this.mostrarFormulario = true;
-    } else if (this.esCesia) {
+
+    if (this.esBarbero || this.esCesia) {
       this.mostrarFormulario = true;
     }
-    
-    // Solo cargar la lista para ADMIN (ni barbero ni Cesia la ven)
+
     if (!this.esBarbero && !this.esCesia) {
       this.cargarVentas();
     }
-    
+
     this.cargarBarberos();
     this.cargarProductos();
-    
-    // Escuchar eventos de actualización de barberos
+
     window.addEventListener('barberosActualizados', () => {
       this.cargarBarberos();
     });
@@ -90,11 +84,11 @@ export class VentasComponent implements OnInit {
   cargarVentas(): void {
     this.cargando = true;
     this.ventaService.getAll().subscribe({
-      next: (data) => {
+      next: data => {
         this.ventas = data;
         this.cargando = false;
       },
-      error: (error) => {
+      error: error => {
         console.error('Error al cargar ventas:', error);
         this.cargando = false;
       }
@@ -103,7 +97,7 @@ export class VentasComponent implements OnInit {
 
   cargarBarberos(): void {
     this.barberoService.getAll().subscribe({
-      next: (data) => {
+      next: data => {
         this.barberos = data;
         if (data.length > 0) {
           this.nuevaVenta.barberoId = data[0].id;
@@ -115,9 +109,8 @@ export class VentasComponent implements OnInit {
   cargarProductos(): void {
     const productoIdActual = this.nuevaVenta.productoId;
     this.productoService.getAll().subscribe({
-      next: (data) => {
+      next: data => {
         this.productos = data;
-        // Solo establecer el primer producto si no hay uno seleccionado
         if (data.length > 0 && (!productoIdActual || productoIdActual === 0)) {
           this.nuevaVenta.productoId = data[0].id;
         }
@@ -126,45 +119,41 @@ export class VentasComponent implements OnInit {
   }
 
   guardarVenta(): void {
+    this.normalizarDescuentoVenta();
+
     if (this.editando && this.ventaEditando) {
-      // Actualizar venta existente
       this.ventaService.update(this.ventaEditando.id, this.nuevaVenta).subscribe({
         next: () => {
           this.cargarVentas();
-          this.cargarProductos(); // Recargar para actualizar stock
+          this.cargarProductos();
           this.mostrarFormulario = false;
           this.resetearFormulario();
           this.mostrarNotificacion('Venta actualizada exitosamente.', 'success');
         },
-        error: (error) => {
+        error: error => {
           console.error('Error al actualizar venta:', error);
           this.mostrarNotificacion(error.error?.message || 'Error al actualizar la venta', 'error');
         }
       });
     } else {
-      // Crear nueva venta
-      // Establecer fecha y hora automáticamente antes de guardar
       const ahora = new Date();
-      const año = ahora.getFullYear();
+      const a�o = ahora.getFullYear();
       const mes = String(ahora.getMonth() + 1).padStart(2, '0');
       const dia = String(ahora.getDate()).padStart(2, '0');
-      this.nuevaVenta.fecha = `${año}-${mes}-${dia}`;
+      this.nuevaVenta.fecha = `${a�o}-${mes}-${dia}`;
       this.nuevaVenta.hora = ahora.toTimeString().slice(0, 5);
-      
+
       this.ventaService.create(this.nuevaVenta).subscribe({
         next: () => {
-          // Solo recargar lista si no es barbero ni Cesia
           if (!this.esBarbero && !this.esCesia) {
             this.cargarVentas();
-          }
-          this.cargarProductos(); // Recargar para actualizar stock
-          if (!this.esBarbero && !this.esCesia) {
             this.mostrarFormulario = false;
           }
+          this.cargarProductos();
           this.resetearFormulario();
           this.mostrarNotificacion('Venta registrada exitosamente.', 'success');
         },
-        error: (error) => {
+        error: error => {
           console.error('Error al guardar venta:', error);
           this.mostrarNotificacion(error.error?.message || 'Error al guardar la venta', 'error');
         }
@@ -174,27 +163,48 @@ export class VentasComponent implements OnInit {
 
   resetearFormulario(): void {
     this.nuevaVenta = {
-      fecha: '', // Se establecerá automáticamente al guardar
-      hora: '', // Se establecerá automáticamente al guardar
+      fecha: '',
+      hora: '',
       barberoId: this.barberos.length > 0 ? this.barberos[0].id : 0,
       productoId: this.productos.length > 0 ? this.productos[0].id : 0,
       cantidad: 1,
-      metodoPago: 'Efectivo'
+      metodoPago: 'Efectivo',
+      descuentoPorcentaje: 0
     };
     this.editando = false;
     this.ventaEditando = null;
   }
 
   onProductoSeleccionado(event: any): void {
-    // Convertir productoId a número si viene como string del select
     const value = event?.target?.value;
     if (value) {
       this.nuevaVenta.productoId = parseInt(value, 10);
     }
   }
 
+  normalizarDescuentoVenta(): void {
+    if (this.nuevaVenta.descuentoPorcentaje == null || isNaN(this.nuevaVenta.descuentoPorcentaje as any)) {
+      this.nuevaVenta.descuentoPorcentaje = 0;
+    }
+    this.nuevaVenta.descuentoPorcentaje = Math.max(0, this.nuevaVenta.descuentoPorcentaje);
+  }
+
+  getPrecioUnitarioSeleccionado(): number {
+    const producto = this.productos.find(p => p.id === this.nuevaVenta.productoId);
+    return producto?.precioVenta || 0;
+  }
+
+  getImporteOriginalVenta(): number {
+    return +(this.getPrecioUnitarioSeleccionado() * (this.nuevaVenta.cantidad || 0)).toFixed(2);
+  }
+
+  getImporteFinalVenta(): number {
+    const original = this.getImporteOriginalVenta();
+    const descuento = this.nuevaVenta.descuentoPorcentaje || 0;
+    return +Math.max(0, (original * (1 - descuento / 100))).toFixed(2);
+  }
+
   getProductoStock(productoId: number | string | null | undefined): number {
-    // Convertir a número si es string o null/undefined
     if (!productoId || productoId === '' || productoId === 0) {
       return 0;
     }
@@ -213,25 +223,25 @@ export class VentasComponent implements OnInit {
       fecha: venta.fecha,
       hora: venta.hora,
       barberoId: venta.barberoId,
-      productoId: venta.productoId,
+      productoId: venta.productoId || 0,
       cantidad: venta.cantidad,
-      metodoPago: venta.metodoPago
+      metodoPago: venta.metodoPago,
+      descuentoPorcentaje: venta.descuentoPorcentaje ?? 0
     };
     this.mostrarFormulario = true;
-    // Asegurar que los productos estén cargados
     this.cargarProductos();
   }
 
   eliminar(venta: VentaProducto): void {
-    this.mensajeConfirmacion = `¿Está seguro de que desea eliminar la venta del producto "${venta.productoNombre}"?`;
+    this.mensajeConfirmacion = `�Est� seguro de que desea eliminar la venta del producto "${venta.productoNombre}"?`;
     this.accionConfirmacion = () => {
       this.ventaService.delete(venta.id).subscribe({
         next: () => {
           this.cargarVentas();
-          this.cargarProductos(); // Recargar para actualizar stock
+          this.cargarProductos();
           this.mostrarNotificacion('Venta eliminada exitosamente.', 'success');
         },
-        error: (error) => {
+        error: error => {
           console.error('Error al eliminar venta:', error);
           this.mostrarNotificacion(error.error?.message || 'Error al eliminar la venta', 'error');
         }
