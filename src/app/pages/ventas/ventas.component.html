@@ -37,10 +37,10 @@
           <div class="col-md-4 mb-3">
             <label class="form-label">Precio del Producto</label>
             <input type="text" class="form-control" [value]="'Q' + (getPrecioUnitarioSeleccionado() | number:'1.2-2')" readonly>
-            <small class="text-muted">Se actualiza automùticamente al seleccionar producto</small>
+            <small class="text-muted">Se actualiza autom·ticamente al seleccionar producto</small>
           </div>
           <div class="col-md-4 mb-3">
-            <label class="form-label">Mùtodo de Pago</label>
+            <label class="form-label">MÈtodo de Pago</label>
             <select class="form-select" [(ngModel)]="nuevaVenta.metodoPago" name="metodoPago" required>
               <option value="Efectivo">Efectivo</option>
               <option value="Tarjeta">Tarjeta</option>
@@ -62,16 +62,30 @@
           </div>
         </div>
 
-        <div class="alert alert-info mb-3" role="alert" *ngIf="!editando"><strong>Fecha y hora:</strong> Se registrarùn automùticamente al guardar la venta.</div>
+        <div class="alert alert-info mb-3" role="alert" *ngIf="!editando"><strong>Fecha y hora:</strong> Se registrar·n autom·ticamente al guardar la venta.</div>
 
         <div class="row" *ngIf="editando">
           <div class="col-md-6 mb-3"><label class="form-label">Fecha</label><input type="date" class="form-control" [(ngModel)]="nuevaVenta.fecha" name="fecha" readonly></div>
           <div class="col-md-6 mb-3"><label class="form-label">Hora</label><input type="time" class="form-control" [(ngModel)]="nuevaVenta.hora" name="hora" readonly></div>
         </div>
 
-        <div class="d-flex gap-2 mt-3">
-          <button type="submit" class="save-button" [attr.aria-label]="editando ? 'Actualizar' : 'Guardar'"><span>{{ editando ? 'Actualizar' : 'Guardar' }}</span></button>
-          <button type="button" class="button" (click)="toggleFormulario()"><span>Cancelar</span></button>
+        <div class="d-flex flex-wrap align-items-center gap-2 mt-4 pt-3 ventas-form-actions">
+          <button type="submit" class="save-button" [attr.aria-label]="editando ? 'Actualizar' : 'Guardar'">
+            <div class="svg-wrapper-1">
+              <div class="svg-wrapper">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30" class="icon" aria-hidden="true">
+                  <path d="M22,15.04C22,17.23 20.24,19 18.07,19H5.93C3.76,19 2,17.23 2,15.04C2,13.07 3.43,11.44 5.31,11.14C5.28,11 5.27,10.86 5.27,10.71C5.27,9.33 6.38,8.2 7.76,8.2C8.37,8.2 8.94,8.43 9.37,8.8C10.14,7.05 11.13,5.44 13.91,5.44C17.28,5.44 18.87,8.06 18.87,10.83C18.87,10.94 18.87,11.06 18.86,11.17C20.65,11.54 22,13.13 22,15.04Z"></path>
+                </svg>
+              </div>
+            </div>
+            <span>{{ editando ? 'Actualizar' : 'Guardar' }}</span>
+          </button>
+          <button type="button" class="button" (click)="toggleFormulario()">
+            <span>Cancelar</span>
+            <span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-miterlimit="2" stroke-linejoin="round" fill-rule="evenodd" clip-rule="evenodd" aria-hidden="true"><path fill-rule="nonzero" d="m12.002 2.005c5.518 0 9.998 4.48 9.998 9.997 0 5.518-4.48 9.998-9.998 9.998-5.517 0-9.997-4.48-9.997-9.998 0-5.517 4.48-9.997 9.997-9.997zm0 1.5c-4.69 0-8.497 3.807-8.497 8.497s3.807 8.498 8.497 8.498 8.498-3.808 8.498-8.498-3.808-8.497-8.498-8.497zm0 7.425 2.717-2.718c.146-.146.339-.219.531-.219.404 0 .75.325.75.75 0 .193-.073.384-.219.531l-2.717 2.717 2.727 2.728c.147.147.22.339.22.531 0 .427-.349.75-.75.75-.192 0-.384-.073-.53-.219l-2.729-2.728-2.728 2.728c-.146.146-.338.219-.53.219-.401 0-.751-.323-.751-.75 0-.192.073-.384.22-.531l2.728-2.728-2.722-2.722c-.146-.147-.219-.338-.219-.531 0-.425.346-.749.75-.749.192 0 .385.073.531.219z"></path></svg>
+            </span>
+          </button>
         </div>
       </form>
     </div>
@@ -84,7 +98,7 @@
         <table class="table table-striped">
           <thead>
             <tr>
-              <th>Fecha</th><th>Hora</th><th>Barbero</th><th>Producto</th><th>Cantidad</th><th>Precio Unit.</th><th>Importe Base</th><th>Desc. %</th><th>Importe Final</th><th>Mùtodo Pago</th><th>Acciones</th>
+              <th>Fecha</th><th>Hora</th><th>Barbero</th><th>Producto</th><th>Cantidad</th><th>Precio Unit.</th><th>Importe Base</th><th>Desc. %</th><th>Importe Final</th><th>MÈtodo de Pago</th><th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -130,11 +144,11 @@
     </div>
   </div>
 
-  <!-- Modal de Confirmaciùn -->
-  <div class="modal fade" [class.show]="mostrarModalConfirmacion" [style.display]="mostrarModalConfirmacion ? 'block' : 'none'" tabindex="-1" role="dialog" [attr.aria-hidden]="!mostrarModalConfirmacion"><div class="modal-dialog modal-dialog-centered" role="document"><div class="modal-content"><div class="modal-header bg-warning"><h5 class="modal-title text-white">Confirmar Acciùn</h5><button type="button" class="btn-close btn-close-white" (click)="cerrarModalConfirmacion()" aria-label="Close"></button></div><div class="modal-body"><p class="mb-0">{{ mensajeConfirmacion }}</p></div><div class="modal-footer"><button type="button" class="button" (click)="cerrarModalConfirmacion()"><span>Cancelar</span></button><button type="button" class="btn btn-danger" (click)="confirmarAccion()">Confirmar</button></div></div></div></div>
+  <!-- Modal de ConfirmaciÛn -->
+  <div class="modal fade" [class.show]="mostrarModalConfirmacion" [style.display]="mostrarModalConfirmacion ? 'block' : 'none'" tabindex="-1" role="dialog" [attr.aria-hidden]="!mostrarModalConfirmacion"><div class="modal-dialog modal-dialog-centered" role="document"><div class="modal-content"><div class="modal-header bg-warning"><h5 class="modal-title text-white">Confirmar AcciÛn</h5><button type="button" class="btn-close btn-close-white" (click)="cerrarModalConfirmacion()" aria-label="Close"></button></div><div class="modal-body"><p class="mb-0">{{ mensajeConfirmacion }}</p></div><div class="modal-footer"><button type="button" class="button" (click)="cerrarModalConfirmacion()"><span>Cancelar</span></button><button type="button" class="btn btn-danger" (click)="confirmarAccion()">Confirmar</button></div></div></div></div>
   <div class="modal-backdrop fade" [class.show]="mostrarModalConfirmacion" [style.display]="mostrarModalConfirmacion ? 'block' : 'none'" (click)="cerrarModalConfirmacion()"></div>
 
-  <!-- Modal de Notificaciùn -->
-  <div class="modal fade" [class.show]="mostrarModalNotificacion" [style.display]="mostrarModalNotificacion ? 'block' : 'none'" tabindex="-1" role="dialog" [attr.aria-hidden]="!mostrarModalNotificacion"><div class="modal-dialog modal-dialog-centered modal-sm" role="document"><div class="modal-content"><div class="modal-header" [ngClass]="{ 'bg-success': tipoNotificacion === 'success', 'bg-danger': tipoNotificacion === 'error', 'bg-warning': tipoNotificacion === 'warning', 'bg-info': tipoNotificacion === 'info' }"><h5 class="modal-title text-white">{{ tipoNotificacion === 'success' ? 'ùxito' : tipoNotificacion === 'error' ? 'Error' : tipoNotificacion === 'warning' ? 'Advertencia' : 'Informaciùn' }}</h5><button type="button" class="btn-close btn-close-white" (click)="cerrarModalNotificacion()" aria-label="Close"></button></div><div class="modal-body"><p class="mb-0">{{ mensajeNotificacion }}</p></div><div class="modal-footer"><button type="button" class="btn btn-primary" (click)="cerrarModalNotificacion()">Aceptar</button></div></div></div></div>
+  <!-- Modal de NotificaciÛn -->
+  <div class="modal fade" [class.show]="mostrarModalNotificacion" [style.display]="mostrarModalNotificacion ? 'block' : 'none'" tabindex="-1" role="dialog" [attr.aria-hidden]="!mostrarModalNotificacion"><div class="modal-dialog modal-dialog-centered modal-sm" role="document"><div class="modal-content"><div class="modal-header" [ngClass]="{ 'bg-success': tipoNotificacion === 'success', 'bg-danger': tipoNotificacion === 'error', 'bg-warning': tipoNotificacion === 'warning', 'bg-info': tipoNotificacion === 'info' }"><h5 class="modal-title text-white">{{ tipoNotificacion === 'success' ? '…xito' : tipoNotificacion === 'error' ? 'Error' : tipoNotificacion === 'warning' ? 'Advertencia' : 'InformaciÛn' }}</h5><button type="button" class="btn-close btn-close-white" (click)="cerrarModalNotificacion()" aria-label="Close"></button></div><div class="modal-body"><p class="mb-0">{{ mensajeNotificacion }}</p></div><div class="modal-footer"><button type="button" class="btn btn-primary" (click)="cerrarModalNotificacion()">Aceptar</button></div></div></div></div>
   <div class="modal-backdrop fade" [class.show]="mostrarModalNotificacion" [style.display]="mostrarModalNotificacion ? 'block' : 'none'" (click)="cerrarModalNotificacion()"></div>
 </div>
