@@ -25,6 +25,7 @@ export interface ResumenBarbero {
   barberoNombre: string;
   porcentajeServicio: number;
   totalServicios: number;
+  totalVentasImporteOriginal: number;
   totalVentas: number;
   totalComisiones: number;
   totalGenerado: number;

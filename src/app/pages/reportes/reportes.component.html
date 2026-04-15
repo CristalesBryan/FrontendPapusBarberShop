@@ -49,9 +49,9 @@
             <div class="col-md-3">
               <div class="card bg-success text-white">
                 <div class="card-body">
-                  <h6>Total Ventas</h6>
+                  <h6>Total ventas (c/desc.)</h6>
                   <h3>Q{{ resumenDiario.totalVentas | number:'1.2-2' }}</h3>
-                  <small>{{ resumenDiario.cantidadVentas }} ventas</small>
+                  <small>{{ resumenDiario.cantidadVentas }} ventas · importe final</small>
                 </div>
               </div>
             </div>
@@ -80,7 +80,7 @@
                   <h6 class="text-muted mb-1"><i class="fas fa-tag me-1"></i>Descuentos aplicados</h6>
                   <h3 class="mb-2 text-warning">Q{{ resumenDiario.totalDescuentosAplicados | number:'1.2-2' }}</h3>
                   <h6 class="text-muted mb-1"><i class="fas fa-store me-1"></i>Ganancia barbería (neto)</h6>
-                  <p class="small text-muted mb-2">Después de pagos a barberos (total generado − pago barberos)</p>
+                  <p class="small text-muted mb-2">Solo cortes: total servicios − pago % al barbero. Las ventas se muestran aparte y no entran en este neto.</p>
                   <h3 class="mb-0 text-success">Q{{ resumenDiario.totalGananciaBarberia | number:'1.2-2' }}</h3>
                 </div>
               </div>
@@ -96,7 +96,8 @@
                   <th>% Servicio</th>
                   <th>N.° Cortes</th>
                   <th>Total Servicios</th>
-                  <th>Total Ventas</th>
+                  <th>Subtotal ventas</th>
+                  <th>Ventas (c/desc.)</th>
                   <th>Total Comisiones</th>
                   <th>Total Generado</th>
                   <th>Pago Barbero</th>
@@ -111,6 +112,7 @@
                   <td>{{ resumen.porcentajeServicio }}%</td>
                   <td class="text-center">{{ resumen.cantidadServicios }}</td>
                   <td>Q{{ resumen.totalServicios | number:'1.2-2' }}</td>
+                  <td>Q{{ resumen.totalVentasImporteOriginal | number:'1.2-2' }}</td>
                   <td>Q{{ resumen.totalVentas | number:'1.2-2' }}</td>
                   <td>Q{{ resumen.totalComisiones | number:'1.2-2' }}</td>
                   <td>Q{{ resumen.totalGenerado | number:'1.2-2' }}</td>
@@ -126,7 +128,7 @@
                   </td>
                 </tr>
                 <tr *ngIf="detalleVisible(resumen.barberoId, 'diario')">
-                  <td colspan="10" class="bg-light">
+                  <td colspan="11" class="bg-light">
                     <div class="py-2">
                       <h6 class="mb-2">Cortes realizados</h6>
                       <div class="table-responsive mb-3">
@@ -230,9 +232,9 @@
           <div class="col-md-3">
             <div class="card bg-success text-white">
               <div class="card-body">
-                <h6>Total Ventas</h6>
+                <h6>Total ventas (c/desc.)</h6>
                 <h3>Q{{ resumenMensual.totalVentas | number:'1.2-2' }}</h3>
-                <small>{{ resumenMensual.cantidadVentas }} ventas</small>
+                <small>{{ resumenMensual.cantidadVentas }} ventas · importe final</small>
               </div>
             </div>
           </div>
@@ -261,7 +263,7 @@
                 <h6 class="text-muted mb-1"><i class="fas fa-tag me-1"></i>Descuentos aplicados</h6>
                 <h3 class="mb-2 text-warning">Q{{ resumenMensual.totalDescuentosAplicados | number:'1.2-2' }}</h3>
                 <h6 class="text-muted mb-1"><i class="fas fa-store me-1"></i>Ganancia barbería (neto)</h6>
-                <p class="small text-muted mb-2">Después de pagos a barberos</p>
+                <p class="small text-muted mb-2">Solo cortes: total servicios − pago % al barbero. Las ventas no entran en este neto.</p>
                 <h3 class="mb-0 text-success">Q{{ resumenMensual.totalGananciaBarberia | number:'1.2-2' }}</h3>
               </div>
             </div>
@@ -277,7 +279,8 @@
                 <th>% Servicio</th>
                 <th>N.° Cortes</th>
                 <th>Total Servicios</th>
-                <th>Total Ventas</th>
+                <th>Subtotal ventas</th>
+                <th>Ventas (c/desc.)</th>
                 <th>Total Comisiones</th>
                 <th>Total Generado</th>
                 <th>Pago Barbero</th>
@@ -292,6 +295,7 @@
                 <td>{{ resumen.porcentajeServicio }}%</td>
                 <td class="text-center">{{ resumen.cantidadServicios }}</td>
                 <td>Q{{ resumen.totalServicios | number:'1.2-2' }}</td>
+                <td>Q{{ resumen.totalVentasImporteOriginal | number:'1.2-2' }}</td>
                 <td>Q{{ resumen.totalVentas | number:'1.2-2' }}</td>
                 <td>Q{{ resumen.totalComisiones | number:'1.2-2' }}</td>
                 <td>Q{{ resumen.totalGenerado | number:'1.2-2' }}</td>
@@ -307,7 +311,7 @@
                 </td>
               </tr>
               <tr *ngIf="detalleVisible(resumen.barberoId, 'mensual')">
-                <td colspan="10" class="bg-light">
+                <td colspan="11" class="bg-light">
                   <div class="py-2">
                     <h6 class="mb-2">Cortes realizados</h6>
                     <div class="table-responsive mb-3">
