@@ -82,7 +82,15 @@ export class ProductosComponent implements OnInit, OnDestroy {
 
   editar(producto: Producto): void {
     this.productoEditando = producto;
-    this.nuevoProducto = { ...producto };
+    // Solo campos del DTO (sin id ni imagenUrl): en prod fail-on-unknown-properties=true rechaza JSON extra.
+    this.nuevoProducto = {
+      nombre: producto.nombre,
+      stock: producto.stock,
+      precioCosto: producto.precioCosto,
+      precioVenta: producto.precioVenta,
+      comision: producto.comision,
+      descripcion: producto.descripcion
+    };
     this.mostrarFormulario = true;
   }
 
