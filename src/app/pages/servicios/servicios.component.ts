@@ -45,6 +45,11 @@ export class ServiciosComponent implements OnInit, OnDestroy {
   mensajeConfirmacion = '';
   accionConfirmacion: (() => void) | null = null;
 
+  /** Vacío = sin filtro por fecha; formato `yyyy-MM-dd` del input type="date". */
+  filtroFecha = '';
+  /** null = todos los barberos */
+  filtroBarberoId: number | null = null;
+
   private barberosActualizadosListener = () => this.cargarBarberos();
   private tiposCorteActualizadosListener = () => this.cargarTiposCorte();
 
@@ -279,5 +284,21 @@ export class ServiciosComponent implements OnInit, OnDestroy {
     this.mostrarModalConfirmacion = false;
     this.mensajeConfirmacion = '';
     this.accionConfirmacion = null;
+  }
+
+  get serviciosFiltrados(): Servicio[] {
+    return this.servicios.filter(s => {
+      if (this.filtroFecha) {
+        const fechaServicio = (s.fecha || '').slice(0, 10);
+        if (fechaServicio !== this.filtroFecha) return false;
+      }
+      if (this.filtroBarberoId != null && s.barberoId !== this.filtroBarberoId) return false;
+      return true;
+    });
+  }
+
+  limpiarFiltrosLista(): void {
+    this.filtroFecha = '';
+    this.filtroBarberoId = null;
   }
 }
