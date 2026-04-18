@@ -43,6 +43,16 @@ export class VentasComponent implements OnInit {
   mensajeConfirmacion = '';
   accionConfirmacion: (() => void) | null = null;
 
+  /** Vacío = sin filtro por fecha; formato `yyyy-MM-dd` del input type="date". */
+  filtroFecha = '';
+  /** null = todos los barberos */
+  filtroBarberoId: number | null = null;
+
+  paginaActual = 1;
+  tamanoPagina = 10;
+  tamanoPaginaSelect = 10;
+  tamanoPaginaCustom = 15;
+
   constructor(
     private ventaService: VentaProductoService,
     private barberoService: BarberoService,
@@ -87,6 +97,7 @@ export class VentasComponent implements OnInit {
       next: data => {
         this.ventas = data;
         this.cargando = false;
+        this.sincronizarPagina();
       },
       error: error => {
         console.error('Error al cargar ventas:', error);
@@ -282,5 +293,97 @@ export class VentasComponent implements OnInit {
     this.mostrarModalConfirmacion = false;
     this.mensajeConfirmacion = '';
     this.accionConfirmacion = null;
+  }
+
+  get ventasFiltradas(): VentaProducto[] {
+    return this.ventas.filter(v => {
+      if (this.filtroFecha) {
+        const fechaVenta = (v.fecha || '').slice(0, 10);
+        if (fechaVenta !== this.filtroFecha) return false;
+      }
+      if (this.filtroBarberoId != null && v.barberoId !== this.filtroBarberoId) return false;
+      return true;
+    });
+  }
+
+  get totalFiltrados(): number {
+    return this.ventasFiltradas.length;
+  }
+
+  get totalPaginas(): number {
+    const n = this.totalFiltrados;
+    if (this.tamanoPagina === 0 || n === 0) return 1;
+    return Math.max(1, Math.ceil(n / this.tamanoPagina));
+  }
+
+  get ventasPagina(): VentaProducto[] {
+    const list = this.ventasFiltradas;
+    if (this.tamanoPagina === 0) return list;
+    const start = (this.paginaActual - 1) * this.tamanoPagina;
+    return list.slice(start, start + this.tamanoPagina);
+  }
+
+  get inicioVisible(): number {
+    if (this.totalFiltrados === 0) return 0;
+    if (this.tamanoPagina === 0) return 1;
+    return (this.paginaActual - 1) * this.tamanoPagina + 1;
+  }
+
+  get finVisible(): number {
+    if (this.totalFiltrados === 0) return 0;
+    if (this.tamanoPagina === 0) return this.totalFiltrados;
+    return Math.min(this.paginaActual * this.tamanoPagina, this.totalFiltrados);
+  }
+
+  onFiltroListaChange(): void {
+    this.paginaActual = 1;
+  }
+
+  onTamanoPaginaChange(): void {
+    this.paginaActual = 1;
+    this.sincronizarPagina();
+  }
+
+  onTamanoPaginaSelectChange(): void {
+    if (this.tamanoPaginaSelect === -1) {
+      let t = Math.floor(Number(this.tamanoPaginaCustom));
+      if (!Number.isFinite(t) || t < 1) t = 15;
+      if (t > 9999) t = 9999;
+      this.tamanoPaginaCustom = t;
+      this.tamanoPagina = t;
+    } else {
+      this.tamanoPagina = this.tamanoPaginaSelect;
+    }
+    this.onTamanoPaginaChange();
+  }
+
+  onTamanoPaginaCustomChange(): void {
+    if (this.tamanoPaginaSelect !== -1) return;
+    let t = Math.floor(Number(this.tamanoPaginaCustom));
+    if (!Number.isFinite(t) || t < 1) t = 1;
+    if (t > 9999) t = 9999;
+    this.tamanoPaginaCustom = t;
+    this.tamanoPagina = t;
+    this.onTamanoPaginaChange();
+  }
+
+  paginaAnterior(): void {
+    if (this.paginaActual > 1) this.paginaActual--;
+  }
+
+  paginaSiguiente(): void {
+    if (this.paginaActual < this.totalPaginas) this.paginaActual++;
+  }
+
+  private sincronizarPagina(): void {
+    const tp = this.totalPaginas;
+    if (this.paginaActual > tp) this.paginaActual = tp;
+    if (this.paginaActual < 1) this.paginaActual = 1;
+  }
+
+  limpiarFiltrosLista(): void {
+    this.filtroFecha = '';
+    this.filtroBarberoId = null;
+    this.paginaActual = 1;
   }
 }

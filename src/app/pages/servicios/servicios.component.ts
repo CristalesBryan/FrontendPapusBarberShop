@@ -50,6 +50,14 @@ export class ServiciosComponent implements OnInit, OnDestroy {
   /** null = todos los barberos */
   filtroBarberoId: number | null = null;
 
+  /** Página actual (1-based). */
+  paginaActual = 1;
+  /** Filas por página efectivas; `0` = mostrar todos sin paginar. */
+  tamanoPagina = 10;
+  /** Valor del desplegable: número, `0` = todos, `-1` = personalizado. */
+  tamanoPaginaSelect = 10;
+  tamanoPaginaCustom = 15;
+
   private barberosActualizadosListener = () => this.cargarBarberos();
   private tiposCorteActualizadosListener = () => this.cargarTiposCorte();
 
@@ -90,6 +98,7 @@ export class ServiciosComponent implements OnInit, OnDestroy {
       next: data => {
         this.servicios = data;
         this.cargando = false;
+        this.sincronizarPagina();
       },
       error: error => {
         console.error('Error al cargar servicios:', error);
@@ -297,8 +306,85 @@ export class ServiciosComponent implements OnInit, OnDestroy {
     });
   }
 
+  get totalFiltrados(): number {
+    return this.serviciosFiltrados.length;
+  }
+
+  get totalPaginas(): number {
+    const n = this.totalFiltrados;
+    if (this.tamanoPagina === 0 || n === 0) return 1;
+    return Math.max(1, Math.ceil(n / this.tamanoPagina));
+  }
+
+  get serviciosPagina(): Servicio[] {
+    const list = this.serviciosFiltrados;
+    if (this.tamanoPagina === 0) return list;
+    const start = (this.paginaActual - 1) * this.tamanoPagina;
+    return list.slice(start, start + this.tamanoPagina);
+  }
+
+  get inicioVisible(): number {
+    if (this.totalFiltrados === 0) return 0;
+    if (this.tamanoPagina === 0) return 1;
+    return (this.paginaActual - 1) * this.tamanoPagina + 1;
+  }
+
+  get finVisible(): number {
+    if (this.totalFiltrados === 0) return 0;
+    if (this.tamanoPagina === 0) return this.totalFiltrados;
+    return Math.min(this.paginaActual * this.tamanoPagina, this.totalFiltrados);
+  }
+
+  /** Reinicia a la primera página al cambiar filtros. */
+  onFiltroListaChange(): void {
+    this.paginaActual = 1;
+  }
+
+  onTamanoPaginaChange(): void {
+    this.paginaActual = 1;
+    this.sincronizarPagina();
+  }
+
+  onTamanoPaginaSelectChange(): void {
+    if (this.tamanoPaginaSelect === -1) {
+      let t = Math.floor(Number(this.tamanoPaginaCustom));
+      if (!Number.isFinite(t) || t < 1) t = 15;
+      if (t > 9999) t = 9999;
+      this.tamanoPaginaCustom = t;
+      this.tamanoPagina = t;
+    } else {
+      this.tamanoPagina = this.tamanoPaginaSelect;
+    }
+    this.onTamanoPaginaChange();
+  }
+
+  onTamanoPaginaCustomChange(): void {
+    if (this.tamanoPaginaSelect !== -1) return;
+    let t = Math.floor(Number(this.tamanoPaginaCustom));
+    if (!Number.isFinite(t) || t < 1) t = 1;
+    if (t > 9999) t = 9999;
+    this.tamanoPaginaCustom = t;
+    this.tamanoPagina = t;
+    this.onTamanoPaginaChange();
+  }
+
+  paginaAnterior(): void {
+    if (this.paginaActual > 1) this.paginaActual--;
+  }
+
+  paginaSiguiente(): void {
+    if (this.paginaActual < this.totalPaginas) this.paginaActual++;
+  }
+
+  private sincronizarPagina(): void {
+    const tp = this.totalPaginas;
+    if (this.paginaActual > tp) this.paginaActual = tp;
+    if (this.paginaActual < 1) this.paginaActual = 1;
+  }
+
   limpiarFiltrosLista(): void {
     this.filtroFecha = '';
     this.filtroBarberoId = null;
+    this.paginaActual = 1;
   }
 }

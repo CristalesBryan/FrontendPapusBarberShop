@@ -37,10 +37,10 @@
           <div class="col-md-4 mb-3">
             <label class="form-label">Precio del Producto</label>
             <input type="text" class="form-control" [value]="'Q' + (getPrecioUnitarioSeleccionado() | number:'1.2-2')" readonly>
-            <small class="text-muted">Se actualiza autom·ticamente al seleccionar producto</small>
+            <small class="text-muted">Se actualiza automùticamente al seleccionar producto</small>
           </div>
           <div class="col-md-4 mb-3">
-            <label class="form-label">MÈtodo de Pago</label>
+            <label class="form-label">Mùtodo de Pago</label>
             <select class="form-select" [(ngModel)]="nuevaVenta.metodoPago" name="metodoPago" required>
               <option value="Efectivo">Efectivo</option>
               <option value="Tarjeta">Tarjeta</option>
@@ -62,7 +62,7 @@
           </div>
         </div>
 
-        <div class="alert alert-info mb-3" role="alert" *ngIf="!editando"><strong>Fecha y hora:</strong> Se registrar·n autom·ticamente al guardar la venta.</div>
+        <div class="alert alert-info mb-3" role="alert" *ngIf="!editando"><strong>Fecha y hora:</strong> Se registrarùn automùticamente al guardar la venta.</div>
 
         <div class="row" *ngIf="editando">
           <div class="col-md-6 mb-3"><label class="form-label">Fecha</label><input type="date" class="form-control" [(ngModel)]="nuevaVenta.fecha" name="fecha" readonly></div>
@@ -94,15 +94,64 @@
   <div class="card" *ngIf="!esBarbero && !esCesia">
     <div class="card-header"><h5>Lista de Ventas</h5></div>
     <div class="card-body">
+      <div class="row g-3 align-items-end mb-3" *ngIf="!cargando">
+        <div class="col-sm-6 col-md-4 col-lg-3">
+          <label class="form-label mb-1" for="filtroFechaVentas">Fecha</label>
+          <input id="filtroFechaVentas" type="date" class="form-control" [(ngModel)]="filtroFecha" name="filtroFechaVentas" (ngModelChange)="onFiltroListaChange()">
+        </div>
+        <div class="col-sm-6 col-md-4 col-lg-3">
+          <label class="form-label mb-1" for="filtroBarberoVentas">Barbero</label>
+          <select id="filtroBarberoVentas" class="form-select" [(ngModel)]="filtroBarberoId" name="filtroBarberoVentas" (ngModelChange)="onFiltroListaChange()">
+            <option [ngValue]="null">Todos</option>
+            <option *ngFor="let barbero of barberos" [ngValue]="barbero.id">{{ barbero.nombre }}</option>
+          </select>
+        </div>
+        <div class="col-sm-6 col-md-4 col-lg-3">
+          <label class="form-label mb-1" for="tamanoListaVentas">Filas por pùgina</label>
+          <select id="tamanoListaVentas" class="form-select form-select-sm" [(ngModel)]="tamanoPaginaSelect" name="tamanoListaVentas" (ngModelChange)="onTamanoPaginaSelectChange()">
+            <option [ngValue]="10">10</option>
+            <option [ngValue]="25">25</option>
+            <option [ngValue]="50">50</option>
+            <option [ngValue]="100">100</option>
+            <option [ngValue]="0">Todos</option>
+            <option [ngValue]="-1">Personalizadoù</option>
+          </select>
+        </div>
+        <div class="col-sm-6 col-md-3 col-lg-2" *ngIf="tamanoPaginaSelect === -1">
+          <label class="form-label mb-1" for="tamanoCustomVentas">Cantidad</label>
+          <input id="tamanoCustomVentas" type="number" class="form-control form-control-sm" min="1" max="9999"
+            [(ngModel)]="tamanoPaginaCustom" name="tamanoCustomVentas" (ngModelChange)="onTamanoPaginaCustomChange()">
+        </div>
+        <div class="col-auto">
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="limpiarFiltrosLista()" [disabled]="!filtroFecha && filtroBarberoId == null">Limpiar filtros</button>
+        </div>
+      </div>
       <div class="table-responsive" *ngIf="!cargando">
+        <p class="text-muted mb-2 small" *ngIf="ventas.length > 0 && totalFiltrados > 0">
+          <ng-container *ngIf="tamanoPagina > 0">
+            Mostrando {{ inicioVisible }} - {{ finVisible }} de {{ totalFiltrados }} ventas
+          </ng-container>
+          <ng-container *ngIf="tamanoPagina === 0">
+            Mostrando las {{ totalFiltrados }} ventas (sin paginar)
+          </ng-container>
+          <ng-container *ngIf="filtroFecha || filtroBarberoId != null">
+            <span class="ms-1">({{ ventas.length }} en total)</span>
+          </ng-container>
+        </p>
         <table class="table table-striped">
           <thead>
             <tr>
-              <th>Fecha</th><th>Hora</th><th>Barbero</th><th>Producto</th><th>Cantidad</th><th>Precio Unit.</th><th>Importe Base</th><th>Desc. %</th><th>Importe Final</th><th>MÈtodo de Pago</th><th>Acciones</th>
+              <th>Fecha</th><th>Hora</th><th>Barbero</th><th>Producto</th><th>Cantidad</th><th>Precio Unit.</th><th>Importe Base</th><th>Desc. %</th><th>Importe Final</th><th>Mùtodo de Pago</th><th>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let venta of ventas">
+            <tr *ngIf="ventas.length === 0">
+              <td colspan="11" class="text-center text-muted py-4">No hay ventas registradas.</td>
+            </tr>
+            <tr *ngIf="ventas.length > 0 && ventasFiltradas.length === 0">
+              <td colspan="11" class="text-center text-muted py-4">No hay ventas que coincidan con los filtros.</td>
+            </tr>
+            <tr *ngFor="let venta of ventasPagina">
               <td>{{ venta.fecha }}</td>
               <td>{{ venta.hora }}</td>
               <td>{{ venta.barberoNombre }}</td>
@@ -140,15 +189,20 @@
           </tbody>
         </table>
       </div>
+      <nav class="d-flex flex-wrap align-items-center justify-content-center gap-3 mt-3 px-1" *ngIf="!cargando && tamanoPagina > 0 && totalFiltrados > 0 && totalPaginas > 1" aria-label="PaginaciÛn de la lista de ventas">
+        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="paginaAnterior()" [disabled]="paginaActual <= 1">Anterior</button>
+        <span class="text-muted small">P·gina {{ paginaActual }} de {{ totalPaginas }}</span>
+        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="paginaSiguiente()" [disabled]="paginaActual >= totalPaginas">Siguiente</button>
+      </nav>
       <div class="text-center" *ngIf="cargando"><div class="spinner-border text-primary" role="status"></div></div>
     </div>
   </div>
 
-  <!-- Modal de ConfirmaciÛn -->
-  <div class="modal fade" [class.show]="mostrarModalConfirmacion" [style.display]="mostrarModalConfirmacion ? 'block' : 'none'" tabindex="-1" role="dialog" [attr.aria-hidden]="!mostrarModalConfirmacion"><div class="modal-dialog modal-dialog-centered" role="document"><div class="modal-content"><div class="modal-header bg-warning"><h5 class="modal-title text-white">Confirmar AcciÛn</h5><button type="button" class="btn-close btn-close-white" (click)="cerrarModalConfirmacion()" aria-label="Close"></button></div><div class="modal-body"><p class="mb-0">{{ mensajeConfirmacion }}</p></div><div class="modal-footer"><button type="button" class="button" (click)="cerrarModalConfirmacion()"><span>Cancelar</span></button><button type="button" class="btn btn-danger" (click)="confirmarAccion()">Confirmar</button></div></div></div></div>
+  <!-- Modal de Confirmaciùn -->
+  <div class="modal fade" [class.show]="mostrarModalConfirmacion" [style.display]="mostrarModalConfirmacion ? 'block' : 'none'" tabindex="-1" role="dialog" [attr.aria-hidden]="!mostrarModalConfirmacion"><div class="modal-dialog modal-dialog-centered" role="document"><div class="modal-content"><div class="modal-header bg-warning"><h5 class="modal-title text-white">Confirmar Acciùn</h5><button type="button" class="btn-close btn-close-white" (click)="cerrarModalConfirmacion()" aria-label="Close"></button></div><div class="modal-body"><p class="mb-0">{{ mensajeConfirmacion }}</p></div><div class="modal-footer"><button type="button" class="button" (click)="cerrarModalConfirmacion()"><span>Cancelar</span></button><button type="button" class="btn btn-danger" (click)="confirmarAccion()">Confirmar</button></div></div></div></div>
   <div class="modal-backdrop fade" [class.show]="mostrarModalConfirmacion" [style.display]="mostrarModalConfirmacion ? 'block' : 'none'" (click)="cerrarModalConfirmacion()"></div>
 
-  <!-- Modal de NotificaciÛn -->
-  <div class="modal fade" [class.show]="mostrarModalNotificacion" [style.display]="mostrarModalNotificacion ? 'block' : 'none'" tabindex="-1" role="dialog" [attr.aria-hidden]="!mostrarModalNotificacion"><div class="modal-dialog modal-dialog-centered modal-sm" role="document"><div class="modal-content"><div class="modal-header" [ngClass]="{ 'bg-success': tipoNotificacion === 'success', 'bg-danger': tipoNotificacion === 'error', 'bg-warning': tipoNotificacion === 'warning', 'bg-info': tipoNotificacion === 'info' }"><h5 class="modal-title text-white">{{ tipoNotificacion === 'success' ? '…xito' : tipoNotificacion === 'error' ? 'Error' : tipoNotificacion === 'warning' ? 'Advertencia' : 'InformaciÛn' }}</h5><button type="button" class="btn-close btn-close-white" (click)="cerrarModalNotificacion()" aria-label="Close"></button></div><div class="modal-body"><p class="mb-0">{{ mensajeNotificacion }}</p></div><div class="modal-footer"><button type="button" class="btn btn-primary" (click)="cerrarModalNotificacion()">Aceptar</button></div></div></div></div>
+  <!-- Modal de Notificaciùn -->
+  <div class="modal fade" [class.show]="mostrarModalNotificacion" [style.display]="mostrarModalNotificacion ? 'block' : 'none'" tabindex="-1" role="dialog" [attr.aria-hidden]="!mostrarModalNotificacion"><div class="modal-dialog modal-dialog-centered modal-sm" role="document"><div class="modal-content"><div class="modal-header" [ngClass]="{ 'bg-success': tipoNotificacion === 'success', 'bg-danger': tipoNotificacion === 'error', 'bg-warning': tipoNotificacion === 'warning', 'bg-info': tipoNotificacion === 'info' }"><h5 class="modal-title text-white">{{ tipoNotificacion === 'success' ? 'ùxito' : tipoNotificacion === 'error' ? 'Error' : tipoNotificacion === 'warning' ? 'Advertencia' : 'Informaciùn' }}</h5><button type="button" class="btn-close btn-close-white" (click)="cerrarModalNotificacion()" aria-label="Close"></button></div><div class="modal-body"><p class="mb-0">{{ mensajeNotificacion }}</p></div><div class="modal-footer"><button type="button" class="btn btn-primary" (click)="cerrarModalNotificacion()">Aceptar</button></div></div></div></div>
   <div class="modal-backdrop fade" [class.show]="mostrarModalNotificacion" [style.display]="mostrarModalNotificacion ? 'block' : 'none'" (click)="cerrarModalNotificacion()"></div>
 </div>

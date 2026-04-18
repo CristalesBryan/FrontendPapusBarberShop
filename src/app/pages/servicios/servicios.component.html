@@ -101,22 +101,46 @@
       <div class="row g-3 align-items-end mb-3" *ngIf="!cargando">
         <div class="col-sm-6 col-md-4 col-lg-3">
           <label class="form-label mb-1" for="filtroFechaServicios">Fecha</label>
-          <input id="filtroFechaServicios" type="date" class="form-control" [(ngModel)]="filtroFecha" name="filtroFechaServicios">
+          <input id="filtroFechaServicios" type="date" class="form-control" [(ngModel)]="filtroFecha" name="filtroFechaServicios" (ngModelChange)="onFiltroListaChange()">
         </div>
         <div class="col-sm-6 col-md-4 col-lg-3">
           <label class="form-label mb-1" for="filtroBarberoServicios">Barbero</label>
-          <select id="filtroBarberoServicios" class="form-select" [(ngModel)]="filtroBarberoId" name="filtroBarberoServicios">
+          <select id="filtroBarberoServicios" class="form-select" [(ngModel)]="filtroBarberoId" name="filtroBarberoServicios" (ngModelChange)="onFiltroListaChange()">
             <option [ngValue]="null">Todos</option>
             <option *ngFor="let barbero of barberos" [ngValue]="barbero.id">{{ barbero.nombre }}</option>
           </select>
+        </div>
+        <div class="col-sm-6 col-md-4 col-lg-3">
+          <label class="form-label mb-1" for="tamanoListaSrv">Filas por pùgina</label>
+          <select id="tamanoListaSrv" class="form-select form-select-sm" [(ngModel)]="tamanoPaginaSelect" name="tamanoListaSrv" (ngModelChange)="onTamanoPaginaSelectChange()">
+            <option [ngValue]="10">10</option>
+            <option [ngValue]="25">25</option>
+            <option [ngValue]="50">50</option>
+            <option [ngValue]="100">100</option>
+            <option [ngValue]="0">Todos</option>
+            <option [ngValue]="-1">Personalizadoù</option>
+          </select>
+        </div>
+        <div class="col-sm-6 col-md-3 col-lg-2" *ngIf="tamanoPaginaSelect === -1">
+          <label class="form-label mb-1" for="tamanoCustomSrv">Cantidad</label>
+          <input id="tamanoCustomSrv" type="number" class="form-control form-control-sm" min="1" max="9999"
+            [(ngModel)]="tamanoPaginaCustom" name="tamanoCustomSrv" (ngModelChange)="onTamanoPaginaCustomChange()">
         </div>
         <div class="col-auto">
           <button type="button" class="btn btn-outline-secondary btn-sm" (click)="limpiarFiltrosLista()" [disabled]="!filtroFecha && filtroBarberoId == null">Limpiar filtros</button>
         </div>
       </div>
       <div class="table-responsive" *ngIf="!cargando">
-        <p class="text-muted mb-2 small" *ngIf="filtroFecha || filtroBarberoId != null">
-          Mostrando {{ serviciosFiltrados.length }} de {{ servicios.length }} servicios.
+        <p class="text-muted mb-2 small" *ngIf="servicios.length > 0 && totalFiltrados > 0">
+          <ng-container *ngIf="tamanoPagina > 0">
+            Mostrando {{ inicioVisible }} - {{ finVisible }} de {{ totalFiltrados }} servicios
+          </ng-container>
+          <ng-container *ngIf="tamanoPagina === 0">
+            Mostrando los {{ totalFiltrados }} servicios (sin paginar)
+          </ng-container>
+          <ng-container *ngIf="filtroFecha || filtroBarberoId != null">
+            <span class="ms-1">({{ servicios.length }} en total)</span>
+          </ng-container>
         </p>
         <table class="table table-striped">
           <thead>
@@ -131,7 +155,7 @@
             <tr *ngIf="servicios.length > 0 && serviciosFiltrados.length === 0">
               <td colspan="9" class="text-center text-muted py-4">No hay servicios que coincidan con los filtros.</td>
             </tr>
-            <tr *ngFor="let servicio of serviciosFiltrados">
+            <tr *ngFor="let servicio of serviciosPagina">
               <td>{{ servicio.fecha }}</td>
               <td>{{ servicio.hora }}</td>
               <td>{{ servicio.barberoNombre }}</td>
@@ -167,6 +191,11 @@
           </tbody>
         </table>
       </div>
+      <nav class="d-flex flex-wrap align-items-center justify-content-center gap-3 mt-3 px-1" *ngIf="!cargando && tamanoPagina > 0 && totalFiltrados > 0 && totalPaginas > 1" aria-label="Paginaciùn de la lista de servicios">
+        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="paginaAnterior()" [disabled]="paginaActual <= 1">Anterior</button>
+        <span class="text-muted small">Pùgina {{ paginaActual }} de {{ totalPaginas }}</span>
+        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="paginaSiguiente()" [disabled]="paginaActual >= totalPaginas">Siguiente</button>
+      </nav>
       <div class="text-center" *ngIf="cargando"><div class="spinner-border text-primary" role="status"></div></div>
     </div>
   </div>
