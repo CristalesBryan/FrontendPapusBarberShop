@@ -1,7 +1,9 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs/operators';
 import { ServicioService } from '../../services/servicio.service';
+import { ReporteService } from '../../services/reporte.service';
 import { BarberoService } from '../../services/barbero.service';
 import { TipoCorteService } from '../../services/tipo-corte.service';
 import { AuthService } from '../../services/auth.service';
@@ -35,6 +37,8 @@ export class ServiciosComponent implements OnInit, OnDestroy {
   editando = false;
   servicioEditando: Servicio | null = null;
   cargando = true;
+  /** Evita doble envío del formulario (doble clic / doble POST). */
+  guardandoServicio = false;
   esBarbero = false;
   esCesia = false;
 
@@ -65,7 +69,8 @@ export class ServiciosComponent implements OnInit, OnDestroy {
     private servicioService: ServicioService,
     private barberoService: BarberoService,
     private tipoCorteService: TipoCorteService,
-    private authService: AuthService
+    private authService: AuthService,
+    private reporteService: ReporteService
   ) {}
 
   ngOnInit(): void {
@@ -135,20 +140,26 @@ export class ServiciosComponent implements OnInit, OnDestroy {
   }
 
   guardarServicio(): void {
+    if (this.guardandoServicio) return;
     this.normalizarDescuentoServicio();
 
     if (this.editando && this.servicioEditando && !this.esBarbero) {
-      this.servicioService.update(this.servicioEditando.id, this.nuevoServicio).subscribe({
-        next: () => {
-          this.cargarServicios();
-          this.mostrarFormulario = false;
-          this.resetearFormulario();
-        },
-        error: error => {
-          console.error('Error al actualizar servicio:', error);
-          this.mostrarNotificacion(error.error?.message || 'Error al actualizar el servicio', 'error');
-        }
-      });
+      this.guardandoServicio = true;
+      this.servicioService
+        .update(this.servicioEditando.id, this.nuevoServicio)
+        .pipe(finalize(() => (this.guardandoServicio = false)))
+        .subscribe({
+          next: () => {
+            this.cargarServicios();
+            this.mostrarFormulario = false;
+            this.resetearFormulario();
+            this.reporteService.notificarCambioDatosReporte();
+          },
+          error: error => {
+            console.error('Error al actualizar servicio:', error);
+            this.mostrarNotificacion(error.error?.message || 'Error al actualizar el servicio', 'error');
+          }
+        });
     } else {
       const ahora = new Date();
       const anio = ahora.getFullYear();
@@ -157,20 +168,25 @@ export class ServiciosComponent implements OnInit, OnDestroy {
       this.nuevoServicio.fecha = `${anio}-${mes}-${dia}`;
       this.nuevoServicio.hora = ahora.toTimeString().slice(0, 5);
 
-      this.servicioService.create(this.nuevoServicio).subscribe({
-        next: () => {
-          if (!this.esBarbero && !this.esCesia) {
-            this.cargarServicios();
-            this.mostrarFormulario = false;
+      this.guardandoServicio = true;
+      this.servicioService
+        .create(this.nuevoServicio)
+        .pipe(finalize(() => (this.guardandoServicio = false)))
+        .subscribe({
+          next: () => {
+            if (!this.esBarbero && !this.esCesia) {
+              this.cargarServicios();
+              this.mostrarFormulario = false;
+            }
+            this.resetearFormulario();
+            this.mostrarNotificacion('Servicio registrado exitosamente.', 'success');
+            this.reporteService.notificarCambioDatosReporte();
+          },
+          error: error => {
+            console.error('Error al guardar servicio:', error);
+            this.mostrarNotificacion(error.error?.message || 'Error al guardar el servicio', 'error');
           }
-          this.resetearFormulario();
-          this.mostrarNotificacion('Servicio registrado exitosamente.', 'success');
-        },
-        error: error => {
-          console.error('Error al guardar servicio:', error);
-          this.mostrarNotificacion(error.error?.message || 'Error al guardar el servicio', 'error');
-        }
-      });
+        });
     }
   }
 
@@ -223,6 +239,7 @@ export class ServiciosComponent implements OnInit, OnDestroy {
         next: () => {
           this.cargarServicios();
           this.mostrarNotificacion('Servicio eliminado exitosamente', 'success');
+          this.reporteService.notificarCambioDatosReporte();
         },
         error: error => {
           console.error('Error al eliminar servicio:', error);

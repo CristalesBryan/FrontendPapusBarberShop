@@ -4,6 +4,9 @@ import { Observable } from 'rxjs';
 import { ResumenDiario, ResumenMensual } from '../models/reporte.model';
 import { environment } from '../../environments/environment';
 
+/** Mismo nombre en `ReportesComponent` (addEventListener). */
+export const REPORTES_ACTUALIZADOS_EVENT = 'reportesActualizados';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -11,6 +14,14 @@ export class ReporteService {
   private readonly API_URL = `${environment.apiUrl}/reportes`;
 
   constructor(private http: HttpClient) { }
+
+  /**
+   * Tras crear/editar/eliminar cortes o ventas, avisa a la vista de reportes (si está abierta)
+   * para que vuelva a pedir datos al API sin recargar el navegador.
+   */
+  notificarCambioDatosReporte(): void {
+    window.dispatchEvent(new CustomEvent(REPORTES_ACTUALIZADOS_EVENT));
+  }
 
   /**
    * Resumen del día usando la fecha local del navegador (evita ceros cuando el servidor está en UTC

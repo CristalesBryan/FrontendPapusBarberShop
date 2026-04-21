@@ -5,6 +5,7 @@ import { VentaProductoService } from '../../services/venta-producto.service';
 import { BarberoService } from '../../services/barbero.service';
 import { ProductoService } from '../../services/producto.service';
 import { AuthService } from '../../services/auth.service';
+import { ReporteService } from '../../services/reporte.service';
 import { VentaProducto, VentaProductoCreate } from '../../models/venta-producto.model';
 import { Barbero } from '../../models/barbero.model';
 import { Producto } from '../../models/producto.model';
@@ -57,7 +58,8 @@ export class VentasComponent implements OnInit {
     private ventaService: VentaProductoService,
     private barberoService: BarberoService,
     private productoService: ProductoService,
-    private authService: AuthService
+    private authService: AuthService,
+    private reporteService: ReporteService
   ) {}
 
   toggleFormulario(): void {
@@ -140,6 +142,7 @@ export class VentasComponent implements OnInit {
           this.mostrarFormulario = false;
           this.resetearFormulario();
           this.mostrarNotificacion('Venta actualizada exitosamente.', 'success');
+          this.reporteService.notificarCambioDatosReporte();
         },
         error: error => {
           console.error('Error al actualizar venta:', error);
@@ -163,6 +166,7 @@ export class VentasComponent implements OnInit {
           this.cargarProductos();
           this.resetearFormulario();
           this.mostrarNotificacion('Venta registrada exitosamente.', 'success');
+          this.reporteService.notificarCambioDatosReporte();
         },
         error: error => {
           console.error('Error al guardar venta:', error);
@@ -252,6 +256,7 @@ export class VentasComponent implements OnInit {
           this.cargarVentas();
           this.cargarProductos();
           this.mostrarNotificacion('Venta eliminada exitosamente.', 'success');
+          this.reporteService.notificarCambioDatosReporte();
         },
         error: error => {
           console.error('Error al eliminar venta:', error);

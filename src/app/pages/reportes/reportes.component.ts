@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ReporteService } from '../../services/reporte.service';
+import { ReporteService, REPORTES_ACTUALIZADOS_EVENT } from '../../services/reporte.service';
 import { AuthService } from '../../services/auth.service';
 import { ResumenDiario, ResumenMensual, ResumenBarbero } from '../../models/reporte.model';
 
@@ -13,7 +13,7 @@ import { ResumenDiario, ResumenMensual, ResumenBarbero } from '../../models/repo
   templateUrl: './reportes.component.html',
   styleUrls: ['./reportes.component.css']
 })
-export class ReportesComponent implements OnInit {
+export class ReportesComponent implements OnInit, OnDestroy {
   resumenDiario: ResumenDiario | null = null;
   resumenMensual: ResumenMensual | null = null;
   fechaConsulta: string = this.obtenerFechaLocal();
@@ -22,6 +22,8 @@ export class ReportesComponent implements OnInit {
   vista: 'diario' | 'mensual' = 'diario';
   private barberosExpandidosDiario = new Set<number>();
   private barberosExpandidosMensual = new Set<number>();
+
+  private readonly onReportesDatosExternos = () => this.refrescar();
 
   constructor(
     private reporteService: ReporteService,
@@ -34,6 +36,12 @@ export class ReportesComponent implements OnInit {
     setTimeout(() => {
       this.cargarTodosLosReportes();
     }, 100);
+
+    window.addEventListener(REPORTES_ACTUALIZADOS_EVENT, this.onReportesDatosExternos);
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener(REPORTES_ACTUALIZADOS_EVENT, this.onReportesDatosExternos);
   }
 
   cargarTodosLosReportes(): void {
