@@ -53,6 +53,9 @@ export class VentasComponent implements OnInit {
   tamanoPagina = 10;
   tamanoPaginaSelect = 10;
   tamanoPaginaCustom = 15;
+  precioUnitarioEditable = 0;
+  importeOriginalEditable = 0;
+  importeFinalEditable = 0;
 
   constructor(
     private ventaService: VentaProductoService,
@@ -127,6 +130,7 @@ export class VentasComponent implements OnInit {
         if (data.length > 0 && (!productoIdActual || productoIdActual === 0)) {
           this.nuevaVenta.productoId = data[0].id;
         }
+        this.recalcularMontosDesdeProducto();
       }
     });
   }
@@ -186,6 +190,7 @@ export class VentasComponent implements OnInit {
       metodoPago: 'Efectivo',
       descuentoPorcentaje: 0
     };
+    this.recalcularMontosDesdeProducto();
     this.editando = false;
     this.ventaEditando = null;
   }
@@ -195,6 +200,7 @@ export class VentasComponent implements OnInit {
     if (value) {
       this.nuevaVenta.productoId = parseInt(value, 10);
     }
+    this.recalcularMontosDesdeProducto();
   }
 
   normalizarDescuentoVenta(): void {
@@ -205,18 +211,15 @@ export class VentasComponent implements OnInit {
   }
 
   getPrecioUnitarioSeleccionado(): number {
-    const producto = this.productos.find(p => p.id === this.nuevaVenta.productoId);
-    return producto?.precioVenta || 0;
+    return +(this.precioUnitarioEditable || 0).toFixed(2);
   }
 
   getImporteOriginalVenta(): number {
-    return +(this.getPrecioUnitarioSeleccionado() * (this.nuevaVenta.cantidad || 0)).toFixed(2);
+    return +(this.importeOriginalEditable || 0).toFixed(2);
   }
 
   getImporteFinalVenta(): number {
-    const original = this.getImporteOriginalVenta();
-    const descuento = this.nuevaVenta.descuentoPorcentaje || 0;
-    return +Math.max(0, (original * (1 - descuento / 100))).toFixed(2);
+    return +(this.importeFinalEditable || 0).toFixed(2);
   }
 
   getProductoStock(productoId: number | string | null | undefined): number {
@@ -243,6 +246,9 @@ export class VentasComponent implements OnInit {
       metodoPago: venta.metodoPago,
       descuentoPorcentaje: venta.descuentoPorcentaje ?? 0
     };
+    this.precioUnitarioEditable = +(venta.precioUnitario || 0);
+    this.importeOriginalEditable = +(venta.importeOriginal || 0);
+    this.importeFinalEditable = +(venta.importe || 0);
     this.mostrarFormulario = true;
     this.cargarProductos();
   }
@@ -390,5 +396,62 @@ export class VentasComponent implements OnInit {
     this.filtroFecha = '';
     this.filtroBarberoId = null;
     this.paginaActual = 1;
+  }
+
+  onCantidadChange(): void {
+    if (!Number.isFinite(this.nuevaVenta.cantidad) || this.nuevaVenta.cantidad < 1) {
+      this.nuevaVenta.cantidad = 1;
+    }
+    this.recalcularDesdePrecioYDescuento();
+  }
+
+  onDescuentoChange(): void {
+    this.normalizarDescuentoVenta();
+    this.recalcularTotalDesdeSubtotalYDescuento();
+  }
+
+  onPrecioUnitarioChange(): void {
+    this.precioUnitarioEditable = this.normalizarMonto(this.precioUnitarioEditable);
+    this.recalcularDesdePrecioYDescuento();
+  }
+
+  onImporteOriginalChange(): void {
+    this.importeOriginalEditable = this.normalizarMonto(this.importeOriginalEditable);
+    const cantidad = this.nuevaVenta.cantidad || 1;
+    this.precioUnitarioEditable = this.normalizarMonto(this.importeOriginalEditable / cantidad);
+    this.recalcularTotalDesdeSubtotalYDescuento();
+  }
+
+  onImporteFinalChange(): void {
+    this.importeFinalEditable = this.normalizarMonto(this.importeFinalEditable);
+    const descuento = this.nuevaVenta.descuentoPorcentaje || 0;
+    const factor = 1 - descuento / 100;
+    if (factor > 0) {
+      this.importeOriginalEditable = this.normalizarMonto(this.importeFinalEditable / factor);
+      const cantidad = this.nuevaVenta.cantidad || 1;
+      this.precioUnitarioEditable = this.normalizarMonto(this.importeOriginalEditable / cantidad);
+    }
+  }
+
+  private recalcularMontosDesdeProducto(): void {
+    const producto = this.productos.find(p => p.id === this.nuevaVenta.productoId);
+    this.precioUnitarioEditable = this.normalizarMonto(producto?.precioVenta || 0);
+    this.recalcularDesdePrecioYDescuento();
+  }
+
+  private recalcularDesdePrecioYDescuento(): void {
+    this.importeOriginalEditable = this.normalizarMonto(this.precioUnitarioEditable * (this.nuevaVenta.cantidad || 0));
+    this.recalcularTotalDesdeSubtotalYDescuento();
+  }
+
+  private recalcularTotalDesdeSubtotalYDescuento(): void {
+    const descuento = this.nuevaVenta.descuentoPorcentaje || 0;
+    this.importeFinalEditable = this.normalizarMonto(Math.max(0, this.importeOriginalEditable * (1 - descuento / 100)));
+  }
+
+  private normalizarMonto(valor: number): number {
+    const n = Number(valor);
+    if (!Number.isFinite(n) || n < 0) return 0;
+    return +n.toFixed(2);
   }
 }

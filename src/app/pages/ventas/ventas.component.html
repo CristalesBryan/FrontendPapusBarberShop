@@ -30,14 +30,14 @@
           </div>
           <div class="col-md-4 mb-3">
             <label class="form-label">Cantidad</label>
-            <input type="number" class="form-control" [(ngModel)]="nuevaVenta.cantidad" name="cantidad" min="1" required>
+            <input type="number" class="form-control" [(ngModel)]="nuevaVenta.cantidad" name="cantidad" min="1" (ngModelChange)="onCantidadChange()" required>
             <small class="text-muted" *ngIf="nuevaVenta.productoId">Stock disponible: {{ getProductoStock(nuevaVenta.productoId) }}</small>
             <small class="text-muted" *ngIf="!nuevaVenta.productoId">Seleccione un producto para ver el stock disponible</small>
           </div>
           <div class="col-md-4 mb-3">
             <label class="form-label">Precio del Producto</label>
-            <input type="text" class="form-control" [value]="'Q' + (getPrecioUnitarioSeleccionado() | number:'1.2-2')" readonly>
-            <small class="text-muted">Se actualiza automáticamente al seleccionar producto</small>
+            <input type="number" class="form-control" [(ngModel)]="precioUnitarioEditable" name="precioUnitarioEditable" step="0.01" min="0" (ngModelChange)="onPrecioUnitarioChange()">
+            <small class="text-muted">Se autocompleta al elegir producto, pero puedes editarlo.</small>
           </div>
           <div class="col-md-4 mb-3">
             <label class="form-label">Método de Pago</label>
@@ -49,16 +49,16 @@
           </div>
           <div class="col-md-4 mb-3">
             <label class="form-label">Descuento (%)</label>
-            <input type="number" class="form-control" [(ngModel)]="nuevaVenta.descuentoPorcentaje" name="descuentoPorcentaje" step="0.01" min="0" (blur)="normalizarDescuentoVenta()">
+            <input type="number" class="form-control" [(ngModel)]="nuevaVenta.descuentoPorcentaje" name="descuentoPorcentaje" step="0.01" min="0" (ngModelChange)="onDescuentoChange()" (blur)="normalizarDescuentoVenta()">
             <small class="text-muted">Ejemplos: 30, 35, 40...</small>
           </div>
           <div class="col-md-4 mb-3">
             <label class="form-label">Subtotal (sin descuento)</label>
-            <input type="text" class="form-control" [value]="'Q' + (getImporteOriginalVenta() | number:'1.2-2')" readonly>
+            <input type="number" class="form-control" [(ngModel)]="importeOriginalEditable" name="importeOriginalEditable" step="0.01" min="0" (ngModelChange)="onImporteOriginalChange()">
           </div>
           <div class="col-md-4 mb-3">
             <label class="form-label">Total con Descuento</label>
-            <input type="text" class="form-control" [value]="'Q' + (getImporteFinalVenta() | number:'1.2-2')" readonly>
+            <input type="number" class="form-control" [(ngModel)]="importeFinalEditable" name="importeFinalEditable" step="0.01" min="0" (ngModelChange)="onImporteFinalChange()">
           </div>
         </div>
 
@@ -198,11 +198,11 @@
     </div>
   </div>
 
-  <!-- Modal de Confirmaci�n -->
+  <!-- Modal de Confirmación -->
   <div class="modal fade" [class.show]="mostrarModalConfirmacion" [style.display]="mostrarModalConfirmacion ? 'block' : 'none'" tabindex="-1" role="dialog" [attr.aria-hidden]="!mostrarModalConfirmacion"><div class="modal-dialog modal-dialog-centered" role="document"><div class="modal-content"><div class="modal-header bg-warning"><h5 class="modal-title text-white">Confirmar Acción</h5><button type="button" class="btn-close btn-close-white" (click)="cerrarModalConfirmacion()" aria-label="Close"></button></div><div class="modal-body"><p class="mb-0">{{ mensajeConfirmacion }}</p></div><div class="modal-footer"><button type="button" class="button" (click)="cerrarModalConfirmacion()"><span>Cancelar</span></button><button type="button" class="btn btn-danger" (click)="confirmarAccion()">Confirmar</button></div></div></div></div>
   <div class="modal-backdrop fade" [class.show]="mostrarModalConfirmacion" [style.display]="mostrarModalConfirmacion ? 'block' : 'none'" (click)="cerrarModalConfirmacion()"></div>
 
-  <!-- Modal de Notificaci�n -->
+  <!-- Modal de Notificación -->
   <div class="modal fade" [class.show]="mostrarModalNotificacion" [style.display]="mostrarModalNotificacion ? 'block' : 'none'" tabindex="-1" role="dialog" [attr.aria-hidden]="!mostrarModalNotificacion"><div class="modal-dialog modal-dialog-centered modal-sm" role="document"><div class="modal-content"><div class="modal-header" [ngClass]="{ 'bg-success': tipoNotificacion === 'success', 'bg-danger': tipoNotificacion === 'error', 'bg-warning': tipoNotificacion === 'warning', 'bg-info': tipoNotificacion === 'info' }"><h5 class="modal-title text-white">{{ tipoNotificacion === 'success' ? 'éxito' : tipoNotificacion === 'error' ? 'Error' : tipoNotificacion === 'warning' ? 'Advertencia' : 'Información' }}</h5><button type="button" class="btn-close btn-close-white" (click)="cerrarModalNotificacion()" aria-label="Close"></button></div><div class="modal-body"><p class="mb-0">{{ mensajeNotificacion }}</p></div><div class="modal-footer"><button type="button" class="btn btn-primary" (click)="cerrarModalNotificacion()">Aceptar</button></div></div></div></div>
   <div class="modal-backdrop fade" [class.show]="mostrarModalNotificacion" [style.display]="mostrarModalNotificacion ? 'block' : 'none'" (click)="cerrarModalNotificacion()"></div>
 </div>
