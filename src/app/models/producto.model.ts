@@ -4,7 +4,8 @@ export interface Producto {
   stock: number;
   precioCosto: number;
   precioVenta: number;
-  comision: number;
+  comision: number | null;
+  comisionHabilitada?: boolean;
   descripcion?: string;
   imagenUrl?: string; // URL presignada de la imagen en S3 (generada por el backend)
 }
@@ -14,7 +15,8 @@ export interface ProductoCreate {
   stock: number;
   precioCosto: number;
   precioVenta: number;
-  comision: number;
+  comision: number | null;
+  comisionHabilitada: boolean;
   descripcion?: string;
 }
 

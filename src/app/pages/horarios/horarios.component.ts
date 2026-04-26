@@ -385,7 +385,7 @@ export class HorariosComponent implements OnInit {
           this.cargarHorarios();
           this.cerrarModal();
           this.cargando = false;
-          this.mostrarNotificacion('Horario actualizado exitosamente.', 'success');
+          this.mostrarNotificacion('Guardado exitosamente.', 'success');
         },
         error: (error) => {
           console.error('Error al actualizar horario:', error);
@@ -400,7 +400,7 @@ export class HorariosComponent implements OnInit {
           this.cargarHorarios();
           this.cerrarModal();
           this.cargando = false;
-          this.mostrarNotificacion('Horario creado exitosamente.', 'success');
+          this.mostrarNotificacion('Guardado exitosamente.', 'success');
         },
         error: (error) => {
           console.error('Error al crear horario:', error);

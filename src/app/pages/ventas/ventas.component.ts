@@ -145,7 +145,7 @@ export class VentasComponent implements OnInit {
           this.cargarProductos();
           this.mostrarFormulario = false;
           this.resetearFormulario();
-          this.mostrarNotificacion('Venta actualizada exitosamente.', 'success');
+          this.mostrarNotificacion('Guardado exitosamente.', 'success');
           this.reporteService.notificarCambioDatosReporte();
         },
         error: error => {
@@ -169,7 +169,7 @@ export class VentasComponent implements OnInit {
           }
           this.cargarProductos();
           this.resetearFormulario();
-          this.mostrarNotificacion('Venta registrada exitosamente.', 'success');
+          this.mostrarNotificacion('Guardado exitosamente.', 'success');
           this.reporteService.notificarCambioDatosReporte();
         },
         error: error => {

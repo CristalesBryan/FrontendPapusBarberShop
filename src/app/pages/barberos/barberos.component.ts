@@ -100,6 +100,7 @@ export class BarberosComponent implements OnInit {
           this.modalAgregar.hide();
         }
         this.cargarBarberos();
+        alert('Guardado exitosamente.');
         // Notificar a otros componentes que recarguen los barberos
         this.notificarActualizacionBarberos();
       },
@@ -159,6 +160,7 @@ export class BarberosComponent implements OnInit {
           this.modalEditar.hide();
         }
         this.cargarBarberos();
+        alert('Guardado exitosamente.');
         // Notificar a otros componentes que recarguen los barberos
         this.notificarActualizacionBarberos();
         

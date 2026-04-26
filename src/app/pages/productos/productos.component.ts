@@ -13,7 +13,7 @@ import { Producto, ProductoCreate } from '../../models/producto.model';
 })
 export class ProductosComponent implements OnInit, OnDestroy {
   productos: Producto[] = [];
-  nuevoProducto: ProductoCreate = { nombre: '', stock: 0, precioCosto: 0, precioVenta: 0, comision: 1 };
+  nuevoProducto: ProductoCreate = { nombre: '', stock: 0, precioCosto: 0, precioVenta: 0, comision: 1, comisionHabilitada: true };
   productoEditando: Producto | null = null;
   mostrarFormulario = false;
   cargando = true;
@@ -64,8 +64,13 @@ export class ProductosComponent implements OnInit, OnDestroy {
         next: () => {
           this.cargarProductos();
           this.cancelar();
+          this.mostrarNotificacion('Guardado exitosamente.', 'success');
           // Disparar evento para actualizar otras vistas
           window.dispatchEvent(new Event('productoActualizado'));
+        },
+        error: (error) => {
+          console.error('Error al actualizar producto:', error);
+          this.mostrarNotificacion(error.error?.message || 'Error al guardar el producto', 'error');
         }
       });
     } else {
@@ -73,8 +78,13 @@ export class ProductosComponent implements OnInit, OnDestroy {
         next: () => {
           this.cargarProductos();
           this.cancelar();
+          this.mostrarNotificacion('Guardado exitosamente.', 'success');
           // Disparar evento para actualizar otras vistas
           window.dispatchEvent(new Event('productoActualizado'));
+        },
+        error: (error) => {
+          console.error('Error al crear producto:', error);
+          this.mostrarNotificacion(error.error?.message || 'Error al guardar el producto', 'error');
         }
       });
     }
@@ -88,7 +98,8 @@ export class ProductosComponent implements OnInit, OnDestroy {
       stock: producto.stock,
       precioCosto: producto.precioCosto,
       precioVenta: producto.precioVenta,
-      comision: producto.comision,
+      comision: producto.comision ?? 1,
+      comisionHabilitada: producto.comision != null,
       descripcion: producto.descripcion
     };
     this.mostrarFormulario = true;
@@ -97,7 +108,17 @@ export class ProductosComponent implements OnInit, OnDestroy {
   cancelar(): void {
     this.mostrarFormulario = false;
     this.productoEditando = null;
-    this.nuevoProducto = { nombre: '', stock: 0, precioCosto: 0, precioVenta: 0, comision: 1 };
+    this.nuevoProducto = { nombre: '', stock: 0, precioCosto: 0, precioVenta: 0, comision: 1, comisionHabilitada: true };
+  }
+
+  onComisionHabilitadaChange(): void {
+    if (!this.nuevoProducto.comisionHabilitada) {
+      this.nuevoProducto.comision = null;
+      return;
+    }
+    if (this.nuevoProducto.comision == null || this.nuevoProducto.comision < 1) {
+      this.nuevoProducto.comision = 1;
+    }
   }
 
   eliminar(producto: Producto): void {

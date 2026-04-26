@@ -149,6 +149,7 @@ export class TiposCorteComponent implements OnInit {
           this.guardando = false;
           this.cargarTiposCorte();
           this.cancelar();
+          alert('Guardado exitosamente.');
           this.notificarActualizacion();
         },
         error: (error) => {
@@ -164,6 +165,7 @@ export class TiposCorteComponent implements OnInit {
           this.guardando = false;
           this.cargarTiposCorte();
           this.cancelar();
+          alert('Guardado exitosamente.');
           this.notificarActualizacion();
         },
         error: (error) => {

@@ -153,6 +153,7 @@ export class ServiciosComponent implements OnInit, OnDestroy {
             this.cargarServicios();
             this.mostrarFormulario = false;
             this.resetearFormulario();
+            this.mostrarNotificacion('Guardado exitosamente.', 'success');
             this.reporteService.notificarCambioDatosReporte();
           },
           error: error => {
@@ -179,7 +180,7 @@ export class ServiciosComponent implements OnInit, OnDestroy {
               this.mostrarFormulario = false;
             }
             this.resetearFormulario();
-            this.mostrarNotificacion('Servicio registrado exitosamente.', 'success');
+            this.mostrarNotificacion('Guardado exitosamente.', 'success');
             this.reporteService.notificarCambioDatosReporte();
           },
           error: error => {

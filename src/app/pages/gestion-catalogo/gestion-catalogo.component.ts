@@ -47,6 +47,7 @@ export class GestionCatalogoComponent implements OnInit {
     precioCosto: 0,
     precioVenta: 0,
     comision: 1,
+    comisionHabilitada: true,
     descripcion: '',
     imagenUrl: ''
   };
@@ -303,6 +304,8 @@ export class GestionCatalogoComponent implements OnInit {
     this.productoEditando = producto;
     this.productoForm = {
       ...producto,
+      comision: producto.comision ?? 1,
+      comisionHabilitada: producto.comision != null,
       descripcion: producto.descripcion || '',
       imagenUrl: producto.imagenUrl || ''
     };
@@ -347,6 +350,7 @@ export class GestionCatalogoComponent implements OnInit {
       precioCosto: 0,
       precioVenta: 0,
       comision: 1,
+      comisionHabilitada: true,
       descripcion: '',
       imagenUrl: ''
     };
@@ -376,7 +380,8 @@ export class GestionCatalogoComponent implements OnInit {
       stock: this.productoForm.stock,
       precioCosto: this.productoForm.precioCosto,
       precioVenta: this.productoForm.precioVenta,
-      comision: this.productoForm.comision,
+      comision: this.productoForm.comisionHabilitada ? this.productoForm.comision : null,
+      comisionHabilitada: this.productoForm.comisionHabilitada ?? true,
       descripcion: this.productoForm.descripcion || undefined
     };
 
@@ -393,6 +398,7 @@ export class GestionCatalogoComponent implements OnInit {
           localStorage.setItem('productosUltimaActualizacion', new Date().getTime().toString());
         }, 100);
       }, 100);
+      this.mostrarNotificacion('Guardado exitosamente.', 'success');
       this.cancelar();
     };
 
@@ -453,6 +459,16 @@ export class GestionCatalogoComponent implements OnInit {
         // No tiene imagen S3, requerir subir una
         this.mostrarNotificacion('Por favor, selecciona una imagen para subir a S3.', 'warning');
       }
+    }
+  }
+
+  onComisionHabilitadaChange(): void {
+    if (!this.productoForm.comisionHabilitada) {
+      this.productoForm.comision = null;
+      return;
+    }
+    if (this.productoForm.comision == null || this.productoForm.comision < 1) {
+      this.productoForm.comision = 1;
     }
   }
 

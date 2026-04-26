@@ -989,7 +989,7 @@ export class CitasComponent implements OnInit {
     this.cargando = true;
     this.citaService.crearCita(citaParaGuardar).subscribe({
       next: () => {
-        this.mostrarNotificacion('Cita creada exitosamente. Se ha enviado un correo de confirmación.', 'success');
+        this.mostrarNotificacion('Guardado exitosamente. Se ha enviado un correo de confirmación.', 'success');
         // Recargar citas primero para tener información actualizada
         this.cargarCitas();
         // Recargar disponibilidad después de un pequeño delay para asegurar que las citas se hayan cargado
@@ -1405,7 +1405,7 @@ export class CitasComponent implements OnInit {
     this.citaService.update(this.citaSeleccionada.id, this.citaEditando).subscribe({
       next: () => {
         this.cargarCitas();
-        this.mostrarNotificacion('Cita actualizada exitosamente', 'success');
+        this.mostrarNotificacion('Guardado exitosamente.', 'success');
         this.editandoCita = false;
         this.cargando = false;
         // Recargar la cita actualizada

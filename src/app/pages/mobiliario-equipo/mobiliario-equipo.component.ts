@@ -57,6 +57,7 @@ export class MobiliarioEquipoComponent implements OnInit {
         next: () => {
           this.cargarMobiliarioEquipo();
           this.cancelar();
+          alert('Guardado exitosamente.');
         },
         error: (error) => {
           console.error('Error al actualizar elemento:', error);
@@ -68,6 +69,7 @@ export class MobiliarioEquipoComponent implements OnInit {
         next: () => {
           this.cargarMobiliarioEquipo();
           this.cancelar();
+          alert('Guardado exitosamente.');
         },
         error: (error) => {
           console.error('Error al crear elemento:', error);
