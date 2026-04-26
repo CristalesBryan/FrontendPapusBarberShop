@@ -114,7 +114,10 @@
               <td [class.text-danger]="producto.stock < 10">{{ producto.stock }}</td>
               <td>Q{{ producto.precioCosto | number:'1.2-2' }}</td>
               <td>Q{{ producto.precioVenta | number:'1.2-2' }}</td>
-              <td>{{ producto.comision != null ? ('Q' + producto.comision) : 'Sin comisión' }}</td>
+              <td>
+                <span *ngIf="producto.comision != null">Q{{ producto.comision }}</span>
+                <span *ngIf="producto.comision == null" class="badge bg-secondary">Comisión deshabilitada</span>
+              </td>
               <td>
                 <div class="d-flex gap-2">
                   <button class="editBtn" (click)="editar(producto)" title="Editar">

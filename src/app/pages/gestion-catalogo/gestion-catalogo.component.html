@@ -128,6 +128,11 @@
             <p class="text-muted mb-2">
               <strong>Stock:</strong> {{ producto.stock }} unidades
             </p>
+            <p class="text-muted mb-2">
+              <strong>Comisión:</strong>
+              <span *ngIf="producto.comision != null">Q{{ producto.comision }}</span>
+              <span *ngIf="producto.comision == null" class="badge bg-secondary">Deshabilitada</span>
+            </p>
             <p class="card-text" *ngIf="producto.descripcion">
               {{ producto.descripcion }}
             </p>
