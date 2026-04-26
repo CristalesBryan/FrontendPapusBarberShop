@@ -5,7 +5,7 @@ export interface Producto {
   precioCosto: number;
   precioVenta: number;
   comision: number | null;
-  comisionHabilitada?: boolean;
+  comisionHabilitada: boolean;
   descripcion?: string;
   imagenUrl?: string; // URL presignada de la imagen en S3 (generada por el backend)
 }
