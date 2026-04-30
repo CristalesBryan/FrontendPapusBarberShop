@@ -63,6 +63,8 @@ export class ServiciosComponent implements OnInit, OnDestroy {
   /** Valor del desplegable: número, `0` = todos, `-1` = personalizado. */
   tamanoPaginaSelect = 10;
   tamanoPaginaCustom = 15;
+  modoDescuento: 'porcentaje' | 'monto' = 'porcentaje';
+  descuentoMontoQ = 0;
   private readonly ORDEN_LOCAL_STORAGE_KEY = 'ordenManualServicios';
   servicioArrastradoId: number | null = null;
 
@@ -167,6 +169,7 @@ export class ServiciosComponent implements OnInit, OnDestroy {
 
   guardarServicio(): void {
     if (this.guardandoServicio) return;
+    this.sincronizarDescuentoPorcentajeAntesDeGuardar();
     this.normalizarDescuentoServicio();
 
     if (this.editando && this.servicioEditando && !this.esBarbero) {
@@ -229,6 +232,8 @@ export class ServiciosComponent implements OnInit, OnDestroy {
       precio: 0,
       descuentoPorcentaje: 0
     };
+    this.modoDescuento = 'porcentaje';
+    this.descuentoMontoQ = 0;
     this.tipoCorteIdSeleccionado = 0;
     this.tipoCorteSeleccionado = null;
     this.editando = false;
@@ -247,6 +252,8 @@ export class ServiciosComponent implements OnInit, OnDestroy {
       precio: servicio.precioOriginal ?? servicio.precio,
       descuentoPorcentaje: servicio.descuentoPorcentaje ?? 0
     };
+    this.modoDescuento = 'porcentaje';
+    this.actualizarDescuentoMontoDesdePorcentaje();
 
     const tipoEncontrado = this.tiposCorte.find(t => t.nombre === servicio.tipoCorte);
     if (tipoEncontrado) {
@@ -292,13 +299,40 @@ export class ServiciosComponent implements OnInit, OnDestroy {
     } else {
       this.nuevoServicio.tipoCorte = '';
     }
+    this.sincronizarDescuentoTrasCambioDePrecio();
   }
 
   normalizarDescuentoServicio(): void {
     if (this.nuevoServicio.descuentoPorcentaje == null || isNaN(this.nuevoServicio.descuentoPorcentaje as any)) {
       this.nuevoServicio.descuentoPorcentaje = 0;
     }
-    this.nuevoServicio.descuentoPorcentaje = Math.max(0, this.nuevoServicio.descuentoPorcentaje);
+    this.nuevoServicio.descuentoPorcentaje = Math.max(0, Math.min(100, this.nuevoServicio.descuentoPorcentaje));
+  }
+
+  onDescuentoChange(): void {
+    this.normalizarDescuentoServicio();
+    this.actualizarDescuentoMontoDesdePorcentaje();
+  }
+
+  onModoDescuentoChange(): void {
+    if (this.modoDescuento === 'monto') {
+      this.actualizarDescuentoMontoDesdePorcentaje();
+    } else {
+      this.actualizarPorcentajeDesdeMonto();
+    }
+  }
+
+  onDescuentoMontoChange(): void {
+    this.descuentoMontoQ = this.normalizarMonto(this.descuentoMontoQ);
+    if (this.descuentoMontoQ > this.nuevoServicio.precio) {
+      this.descuentoMontoQ = this.normalizarMonto(this.nuevoServicio.precio);
+    }
+    this.actualizarPorcentajeDesdeMonto();
+  }
+
+  onPrecioServicioChange(): void {
+    this.nuevoServicio.precio = this.normalizarMonto(this.nuevoServicio.precio);
+    this.sincronizarDescuentoTrasCambioDePrecio();
   }
 
   getPrecioFinalServicio(): number {
@@ -361,7 +395,6 @@ export class ServiciosComponent implements OnInit, OnDestroy {
     this.servicios.splice(indexDestino, 0, movido);
     this.guardarOrdenManual();
     this.servicioArrastradoId = null;
-    this.mostrarNotificacion('Orden actualizado.', 'success');
   }
 
   onDragEnd(): void {
@@ -484,5 +517,42 @@ export class ServiciosComponent implements OnInit, OnDestroy {
   private guardarOrdenManual(): void {
     const ordenIds = this.servicios.map(s => s.id);
     localStorage.setItem(this.ORDEN_LOCAL_STORAGE_KEY, JSON.stringify(ordenIds));
+  }
+
+  private sincronizarDescuentoTrasCambioDePrecio(): void {
+    if (this.modoDescuento === 'monto') {
+      if (this.descuentoMontoQ > this.nuevoServicio.precio) {
+        this.descuentoMontoQ = this.normalizarMonto(this.nuevoServicio.precio);
+      }
+      this.actualizarPorcentajeDesdeMonto();
+    } else {
+      this.actualizarDescuentoMontoDesdePorcentaje();
+    }
+  }
+
+  private actualizarDescuentoMontoDesdePorcentaje(): void {
+    const porcentaje = this.nuevoServicio.descuentoPorcentaje || 0;
+    this.descuentoMontoQ = this.normalizarMonto(this.nuevoServicio.precio * (porcentaje / 100));
+  }
+
+  private actualizarPorcentajeDesdeMonto(): void {
+    if (this.nuevoServicio.precio <= 0) {
+      this.nuevoServicio.descuentoPorcentaje = 0;
+      return;
+    }
+    const porcentaje = (this.descuentoMontoQ / this.nuevoServicio.precio) * 100;
+    this.nuevoServicio.descuentoPorcentaje = +Math.max(0, Math.min(100, porcentaje)).toFixed(2);
+  }
+
+  private sincronizarDescuentoPorcentajeAntesDeGuardar(): void {
+    if (this.modoDescuento === 'monto') {
+      this.actualizarPorcentajeDesdeMonto();
+    }
+  }
+
+  private normalizarMonto(valor: number): number {
+    const n = Number(valor);
+    if (!Number.isFinite(n) || n < 0) return 0;
+    return +n.toFixed(2);
   }
 }

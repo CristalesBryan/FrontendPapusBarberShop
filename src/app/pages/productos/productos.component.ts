@@ -167,7 +167,6 @@ export class ProductosComponent implements OnInit, OnDestroy {
     this.productos.splice(indexDestino, 0, movido);
     this.guardarOrdenManual();
     this.productoArrastradoId = null;
-    this.mostrarNotificacion('Orden actualizado.', 'success');
   }
 
   onDragEnd(): void {

@@ -53,12 +53,24 @@
           </div>
           <div class="col-md-4 mb-3">
             <label class="form-label">Precio Base</label>
-            <input type="number" class="form-control" [(ngModel)]="nuevoServicio.precio" name="precio" step="0.01" min="0" required>
+            <input type="number" class="form-control" [(ngModel)]="nuevoServicio.precio" name="precio" step="0.01" min="0" (ngModelChange)="onPrecioServicioChange()" required>
           </div>
           <div class="col-md-4 mb-3">
+            <label class="form-label">Modo de Descuento</label>
+            <select class="form-select" [(ngModel)]="modoDescuento" name="modoDescuentoServicio" (ngModelChange)="onModoDescuentoChange()">
+              <option value="porcentaje">Porcentaje (%)</option>
+              <option value="monto">Monto exacto (Q)</option>
+            </select>
+          </div>
+          <div class="col-md-4 mb-3" *ngIf="modoDescuento === 'porcentaje'">
             <label class="form-label">Descuento (%)</label>
-            <input type="number" class="form-control" [(ngModel)]="nuevoServicio.descuentoPorcentaje" name="descuentoPorcentaje" step="0.01" min="0" (blur)="normalizarDescuentoServicio()">
+            <input type="number" class="form-control" [(ngModel)]="nuevoServicio.descuentoPorcentaje" name="descuentoPorcentaje" step="0.01" min="0" (ngModelChange)="onDescuentoChange()" (blur)="normalizarDescuentoServicio()">
             <small class="text-muted">Ejemplos: 30, 35, 40...</small>
+          </div>
+          <div class="col-md-4 mb-3" *ngIf="modoDescuento === 'monto'">
+            <label class="form-label">Descuento en Quetzales (Q)</label>
+            <input type="number" class="form-control" [(ngModel)]="descuentoMontoQ" name="descuentoMontoQServicio" step="0.01" min="0" (ngModelChange)="onDescuentoMontoChange()">
+            <small class="text-muted">Ingresa la diferencia exacta que deseas descontar.</small>
           </div>
           <div class="col-md-4 mb-3">
             <label class="form-label">Total con Descuento</label>
