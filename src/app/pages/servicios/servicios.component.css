@@ -6,6 +6,15 @@
   padding-top: 80px; /* Espacio para que el navbar no cubra el contenido */
 }
 
+.servicios-tabs .nav-link {
+  cursor: pointer;
+  color: var(--bs-secondary-color, #6c757d);
+}
+
+.servicios-tabs .nav-link.active {
+  font-weight: 600;
+}
+
 .img-container-preview {
   display: flex;
   justify-content: center;

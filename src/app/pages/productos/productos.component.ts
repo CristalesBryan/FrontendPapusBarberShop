@@ -25,6 +25,8 @@ export class ProductosComponent implements OnInit, OnDestroy {
   mostrarModalNotificacion = false;
   mensajeNotificacion = '';
   tipoNotificacion: 'success' | 'error' | 'info' | 'warning' = 'info';
+  private readonly ORDEN_LOCAL_STORAGE_KEY = 'ordenManualProductos';
+  productoArrastradoId: number | null = null;
   
   // Listener para eventos de actualización de productos
   private productoActualizadoListener = () => {
@@ -49,6 +51,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
     this.productoService.getAll().subscribe({
       next: (data) => {
         this.productos = data;
+        this.aplicarOrdenManual();
         this.cargando = false;
       },
       error: (error) => {
@@ -145,6 +148,32 @@ export class ProductosComponent implements OnInit, OnDestroy {
     this.mostrarModalNotificacion = true;
   }
 
+  onDragStart(productoId: number): void {
+    this.productoArrastradoId = productoId;
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+  }
+
+  onDrop(productoDestinoId: number): void {
+    if (this.productoArrastradoId == null || this.productoArrastradoId === productoDestinoId) return;
+
+    const indexOrigen = this.productos.findIndex(p => p.id === this.productoArrastradoId);
+    const indexDestino = this.productos.findIndex(p => p.id === productoDestinoId);
+    if (indexOrigen < 0 || indexDestino < 0) return;
+
+    const [movido] = this.productos.splice(indexOrigen, 1);
+    this.productos.splice(indexDestino, 0, movido);
+    this.guardarOrdenManual();
+    this.productoArrastradoId = null;
+    this.mostrarNotificacion('Orden actualizado.', 'success');
+  }
+
+  onDragEnd(): void {
+    this.productoArrastradoId = null;
+  }
+
   cerrarModalNotificacion(): void {
     this.mostrarModalNotificacion = false;
     setTimeout(() => { this.mensajeNotificacion = ''; }, 300);
@@ -159,6 +188,31 @@ export class ProductosComponent implements OnInit, OnDestroy {
     this.mostrarModalConfirmacion = false;
     this.mensajeConfirmacion = '';
     this.accionConfirmacion = null;
+  }
+
+  private aplicarOrdenManual(): void {
+    const ordenRaw = localStorage.getItem(this.ORDEN_LOCAL_STORAGE_KEY);
+    if (!ordenRaw) return;
+
+    try {
+      const ordenIds = JSON.parse(ordenRaw) as number[];
+      if (!Array.isArray(ordenIds) || ordenIds.length === 0) return;
+
+      const posicion = new Map<number, number>();
+      ordenIds.forEach((id, index) => posicion.set(id, index));
+      this.productos.sort((a, b) => {
+        const posA = posicion.has(a.id) ? (posicion.get(a.id) as number) : Number.MAX_SAFE_INTEGER;
+        const posB = posicion.has(b.id) ? (posicion.get(b.id) as number) : Number.MAX_SAFE_INTEGER;
+        return posA - posB;
+      });
+    } catch {
+      localStorage.removeItem(this.ORDEN_LOCAL_STORAGE_KEY);
+    }
+  }
+
+  private guardarOrdenManual(): void {
+    const ordenIds = this.productos.map(p => p.id);
+    localStorage.setItem(this.ORDEN_LOCAL_STORAGE_KEY, JSON.stringify(ordenIds));
   }
 }
 

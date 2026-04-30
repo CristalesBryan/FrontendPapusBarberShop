@@ -1,7 +1,7 @@
 <div class="container-fluid page-container">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2><i class="fas fa-scissors"></i> Servicios</h2>
-    <button class="cssbuttons-io-button" (click)="mostrarFormulario = !mostrarFormulario" *ngIf="!esBarbero">
+    <button class="cssbuttons-io-button" (click)="toggleFormularioServicios()" *ngIf="!esBarbero">
       <svg height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path d="M0 0h24v24H0z" fill="none"></path>
         <path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z" fill="currentColor"></path>
@@ -10,7 +10,20 @@
     </button>
   </div>
 
-  <div class="card mb-4" *ngIf="mostrarFormulario">
+  <ul *ngIf="!esBarbero && !esCesia" class="nav nav-tabs mb-3 servicios-tabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button type="button" class="nav-link" [class.active]="pestanaActiva === 'lista'" (click)="pestanaActiva = 'lista'" role="tab" [attr.aria-selected]="pestanaActiva === 'lista'">
+        Lista de servicios
+      </button>
+    </li>
+    <li class="nav-item" role="presentation" *ngIf="mostrarFormulario">
+      <button type="button" class="nav-link" [class.active]="pestanaActiva === 'formulario'" (click)="pestanaActiva = 'formulario'" role="tab" [attr.aria-selected]="pestanaActiva === 'formulario'">
+        {{ editando ? 'Editar servicio' : 'Nuevo servicio' }}
+      </button>
+    </li>
+  </ul>
+
+  <div class="card mb-4" *ngIf="mostrarPanelFormulario">
     <div class="card-header">
       <h5>{{ editando && !esBarbero ? 'Editar Servicio' : 'Registrar Nuevo Servicio' }}</h5>
     </div>
@@ -89,13 +102,13 @@
             <div class="svg-wrapper-1"><div class="svg-wrapper"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30" class="icon"><path d="M22,15.04C22,17.23 20.24,19 18.07,19H5.93C3.76,19 2,17.23 2,15.04C2,13.07 3.43,11.44 5.31,11.14C5.28,11 5.27,10.86 5.27,10.71C5.27,9.33 6.38,8.2 7.76,8.2C8.37,8.2 8.94,8.43 9.37,8.8C10.14,7.05 11.13,5.44 13.91,5.44C17.28,5.44 18.87,8.06 18.87,10.83C18.87,10.94 18.87,11.06 18.86,11.17C20.65,11.54 22,13.13 22,15.04Z"></path></svg></div></div>
             <span>{{ guardandoServicio ? 'Guardando…' : 'Guardar' }}</span>
           </button>
-          <button type="button" class="button" (click)="mostrarFormulario = false" [disabled]="guardandoServicio"><span>Cancelar</span></button>
+          <button type="button" class="button" (click)="toggleFormularioServicios()" [disabled]="guardandoServicio"><span>Cancelar</span></button>
         </div>
       </form>
     </div>
   </div>
 
-  <div class="card" *ngIf="!esBarbero && !esCesia">
+  <div class="card" *ngIf="!esBarbero && !esCesia && pestanaActiva === 'lista'">
     <div class="card-header"><h5>Lista de Servicios</h5></div>
     <div class="card-body">
       <div class="row g-3 align-items-end mb-3" *ngIf="!cargando">
@@ -145,17 +158,26 @@
         <table class="table table-striped">
           <thead>
             <tr>
+              <th style="width: 44px;"></th>
               <th>Fecha</th><th>Hora</th><th>Barbero</th><th>Tipo de Corte</th><th>Método de Pago</th><th>Precio Base</th><th>Desc. %</th><th>Total</th><th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngIf="servicios.length === 0">
-              <td colspan="9" class="text-center text-muted py-4">No hay servicios registrados.</td>
+              <td colspan="10" class="text-center text-muted py-4">No hay servicios registrados.</td>
             </tr>
             <tr *ngIf="servicios.length > 0 && serviciosFiltrados.length === 0">
-              <td colspan="9" class="text-center text-muted py-4">No hay servicios que coincidan con los filtros.</td>
+              <td colspan="10" class="text-center text-muted py-4">No hay servicios que coincidan con los filtros.</td>
             </tr>
-            <tr *ngFor="let servicio of serviciosPagina">
+            <tr *ngFor="let servicio of serviciosPagina"
+                draggable="true"
+                (dragstart)="onDragStart(servicio.id)"
+                (dragover)="onDragOver($event)"
+                (drop)="onDrop(servicio.id)"
+                (dragend)="onDragEnd()">
+              <td class="text-muted text-center" title="Arrastra para ordenar" aria-label="Arrastrar para ordenar">
+                <i class="fas fa-grip-vertical"></i>
+              </td>
               <td>{{ servicio.fecha }}</td>
               <td>{{ servicio.hora }}</td>
               <td>{{ servicio.barberoNombre }}</td>

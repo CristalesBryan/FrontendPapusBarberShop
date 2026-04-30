@@ -10,3 +10,12 @@
   border-top: 1px solid rgba(0, 0, 0, 0.08);
 }
 
+.ventas-tabs .nav-link {
+  cursor: pointer;
+  color: var(--bs-secondary-color, #6c757d);
+}
+
+.ventas-tabs .nav-link.active {
+  font-weight: 600;
+}
+

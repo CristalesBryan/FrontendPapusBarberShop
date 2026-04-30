@@ -31,6 +31,8 @@ export class VentasComponent implements OnInit {
     descuentoPorcentaje: 0
   };
   mostrarFormulario = false;
+  /** Para admin: `lista` = tabla; `formulario` = crear/editar (evita tener que desplazarse arriba). */
+  pestanaActiva: 'lista' | 'formulario' = 'lista';
   editando = false;
   ventaEditando: VentaProducto | null = null;
   cargando = true;
@@ -56,6 +58,8 @@ export class VentasComponent implements OnInit {
   precioUnitarioEditable = 0;
   importeOriginalEditable = 0;
   importeFinalEditable = 0;
+  modoDescuento: 'porcentaje' | 'monto' = 'porcentaje';
+  descuentoMontoQ = 0;
 
   constructor(
     private ventaService: VentaProductoService,
@@ -65,13 +69,26 @@ export class VentasComponent implements OnInit {
     private reporteService: ReporteService
   ) {}
 
+  /** Muestra el panel del formulario cuando corresponde (barbero/cesía siempre que el form esté abierto; admin solo en pestaña formulario). */
+  get mostrarPanelFormulario(): boolean {
+    if (this.esBarbero || this.esCesia) {
+      return this.mostrarFormulario;
+    }
+    return this.mostrarFormulario && this.pestanaActiva === 'formulario';
+  }
+
   toggleFormulario(): void {
     if (this.editando) {
       this.cancelarEdicion();
     } else {
-      this.mostrarFormulario = !this.mostrarFormulario;
-      if (this.mostrarFormulario) {
+      const abriendo = !this.mostrarFormulario;
+      this.mostrarFormulario = abriendo;
+      if (abriendo) {
+        this.resetearFormulario();
         this.cargarProductos();
+        this.pestanaActiva = 'formulario';
+      } else {
+        this.pestanaActiva = 'lista';
       }
     }
   }
@@ -136,6 +153,7 @@ export class VentasComponent implements OnInit {
   }
 
   guardarVenta(): void {
+    this.sincronizarDescuentoPorcentajeAntesDeGuardar();
     this.normalizarDescuentoVenta();
 
     if (this.editando && this.ventaEditando) {
@@ -144,6 +162,7 @@ export class VentasComponent implements OnInit {
           this.cargarVentas();
           this.cargarProductos();
           this.mostrarFormulario = false;
+          this.pestanaActiva = 'lista';
           this.resetearFormulario();
           this.mostrarNotificacion('Guardado exitosamente.', 'success');
           this.reporteService.notificarCambioDatosReporte();
@@ -166,6 +185,7 @@ export class VentasComponent implements OnInit {
           if (!this.esBarbero && !this.esCesia) {
             this.cargarVentas();
             this.mostrarFormulario = false;
+            this.pestanaActiva = 'lista';
           }
           this.cargarProductos();
           this.resetearFormulario();
@@ -190,6 +210,8 @@ export class VentasComponent implements OnInit {
       metodoPago: 'Efectivo',
       descuentoPorcentaje: 0
     };
+    this.modoDescuento = 'porcentaje';
+    this.descuentoMontoQ = 0;
     this.recalcularMontosDesdeProducto();
     this.editando = false;
     this.ventaEditando = null;
@@ -207,7 +229,7 @@ export class VentasComponent implements OnInit {
     if (this.nuevaVenta.descuentoPorcentaje == null || isNaN(this.nuevaVenta.descuentoPorcentaje as any)) {
       this.nuevaVenta.descuentoPorcentaje = 0;
     }
-    this.nuevaVenta.descuentoPorcentaje = Math.max(0, this.nuevaVenta.descuentoPorcentaje);
+    this.nuevaVenta.descuentoPorcentaje = Math.max(0, Math.min(100, this.nuevaVenta.descuentoPorcentaje));
   }
 
   getPrecioUnitarioSeleccionado(): number {
@@ -249,7 +271,10 @@ export class VentasComponent implements OnInit {
     this.precioUnitarioEditable = +(venta.precioUnitario || 0);
     this.importeOriginalEditable = +(venta.importeOriginal || 0);
     this.importeFinalEditable = +(venta.importe || 0);
+    this.modoDescuento = 'porcentaje';
+    this.actualizarDescuentoMontoDesdePorcentaje();
     this.mostrarFormulario = true;
+    this.pestanaActiva = 'formulario';
     this.cargarProductos();
   }
 
@@ -278,6 +303,7 @@ export class VentasComponent implements OnInit {
     this.ventaEditando = null;
     this.resetearFormulario();
     this.mostrarFormulario = false;
+    this.pestanaActiva = 'lista';
   }
 
   mostrarNotificacion(mensaje: string, tipo: 'success' | 'error' | 'info' | 'warning' = 'info'): void {
@@ -408,6 +434,24 @@ export class VentasComponent implements OnInit {
   onDescuentoChange(): void {
     this.normalizarDescuentoVenta();
     this.recalcularTotalDesdeSubtotalYDescuento();
+    this.actualizarDescuentoMontoDesdePorcentaje();
+  }
+
+  onModoDescuentoChange(): void {
+    if (this.modoDescuento === 'monto') {
+      this.actualizarDescuentoMontoDesdePorcentaje();
+    } else {
+      this.actualizarPorcentajeDesdeMonto();
+    }
+  }
+
+  onDescuentoMontoChange(): void {
+    this.descuentoMontoQ = this.normalizarMonto(this.descuentoMontoQ);
+    if (this.descuentoMontoQ > this.importeOriginalEditable) {
+      this.descuentoMontoQ = this.normalizarMonto(this.importeOriginalEditable);
+    }
+    this.actualizarPorcentajeDesdeMonto();
+    this.recalcularTotalDesdeSubtotalYDescuento();
   }
 
   onPrecioUnitarioChange(): void {
@@ -419,6 +463,14 @@ export class VentasComponent implements OnInit {
     this.importeOriginalEditable = this.normalizarMonto(this.importeOriginalEditable);
     const cantidad = this.nuevaVenta.cantidad || 1;
     this.precioUnitarioEditable = this.normalizarMonto(this.importeOriginalEditable / cantidad);
+    if (this.modoDescuento === 'monto') {
+      if (this.descuentoMontoQ > this.importeOriginalEditable) {
+        this.descuentoMontoQ = this.normalizarMonto(this.importeOriginalEditable);
+      }
+      this.actualizarPorcentajeDesdeMonto();
+    } else {
+      this.actualizarDescuentoMontoDesdePorcentaje();
+    }
     this.recalcularTotalDesdeSubtotalYDescuento();
   }
 
@@ -431,6 +483,13 @@ export class VentasComponent implements OnInit {
       const cantidad = this.nuevaVenta.cantidad || 1;
       this.precioUnitarioEditable = this.normalizarMonto(this.importeOriginalEditable / cantidad);
     }
+    if (this.modoDescuento === 'monto') {
+      this.descuentoMontoQ = this.normalizarMonto(Math.max(0, this.importeOriginalEditable - this.importeFinalEditable));
+      this.actualizarPorcentajeDesdeMonto();
+    } else {
+      this.normalizarDescuentoVenta();
+      this.actualizarDescuentoMontoDesdePorcentaje();
+    }
   }
 
   private recalcularMontosDesdeProducto(): void {
@@ -441,6 +500,14 @@ export class VentasComponent implements OnInit {
 
   private recalcularDesdePrecioYDescuento(): void {
     this.importeOriginalEditable = this.normalizarMonto(this.precioUnitarioEditable * (this.nuevaVenta.cantidad || 0));
+    if (this.modoDescuento === 'monto') {
+      if (this.descuentoMontoQ > this.importeOriginalEditable) {
+        this.descuentoMontoQ = this.normalizarMonto(this.importeOriginalEditable);
+      }
+      this.actualizarPorcentajeDesdeMonto();
+    } else {
+      this.actualizarDescuentoMontoDesdePorcentaje();
+    }
     this.recalcularTotalDesdeSubtotalYDescuento();
   }
 
@@ -453,5 +520,25 @@ export class VentasComponent implements OnInit {
     const n = Number(valor);
     if (!Number.isFinite(n) || n < 0) return 0;
     return +n.toFixed(2);
+  }
+
+  private actualizarDescuentoMontoDesdePorcentaje(): void {
+    const porcentaje = this.nuevaVenta.descuentoPorcentaje || 0;
+    this.descuentoMontoQ = this.normalizarMonto(this.importeOriginalEditable * (porcentaje / 100));
+  }
+
+  private actualizarPorcentajeDesdeMonto(): void {
+    if (this.importeOriginalEditable <= 0) {
+      this.nuevaVenta.descuentoPorcentaje = 0;
+      return;
+    }
+    const porcentaje = (this.descuentoMontoQ / this.importeOriginalEditable) * 100;
+    this.nuevaVenta.descuentoPorcentaje = +Math.max(0, Math.min(100, porcentaje)).toFixed(2);
+  }
+
+  private sincronizarDescuentoPorcentajeAntesDeGuardar(): void {
+    if (this.modoDescuento === 'monto') {
+      this.actualizarPorcentajeDesdeMonto();
+    }
   }
 }

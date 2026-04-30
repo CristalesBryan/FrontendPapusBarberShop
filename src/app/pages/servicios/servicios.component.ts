@@ -34,6 +34,8 @@ export class ServiciosComponent implements OnInit, OnDestroy {
   };
   tipoCorteIdSeleccionado = 0;
   mostrarFormulario = false;
+  /** Admin: `lista` | `formulario` para ver el crear/editar sin subir en la página. */
+  pestanaActiva: 'lista' | 'formulario' = 'lista';
   editando = false;
   servicioEditando: Servicio | null = null;
   cargando = true;
@@ -61,9 +63,32 @@ export class ServiciosComponent implements OnInit, OnDestroy {
   /** Valor del desplegable: número, `0` = todos, `-1` = personalizado. */
   tamanoPaginaSelect = 10;
   tamanoPaginaCustom = 15;
+  private readonly ORDEN_LOCAL_STORAGE_KEY = 'ordenManualServicios';
+  servicioArrastradoId: number | null = null;
 
   private barberosActualizadosListener = () => this.cargarBarberos();
   private tiposCorteActualizadosListener = () => this.cargarTiposCorte();
+
+  /** Panel del formulario visible según rol y pestaña activa. */
+  get mostrarPanelFormulario(): boolean {
+    if (this.esBarbero || this.esCesia) {
+      return this.mostrarFormulario;
+    }
+    return this.mostrarFormulario && this.pestanaActiva === 'formulario';
+  }
+
+  /** Alterna nuevo servicio / cierra formulario y vuelve a la lista (admin). */
+  toggleFormularioServicios(): void {
+    if (this.mostrarFormulario) {
+      this.mostrarFormulario = false;
+      this.pestanaActiva = 'lista';
+      this.resetearFormulario();
+    } else {
+      this.resetearFormulario();
+      this.mostrarFormulario = true;
+      this.pestanaActiva = 'formulario';
+    }
+  }
 
   constructor(
     private servicioService: ServicioService,
@@ -102,6 +127,7 @@ export class ServiciosComponent implements OnInit, OnDestroy {
     this.servicioService.getAll().subscribe({
       next: data => {
         this.servicios = data;
+        this.aplicarOrdenManual();
         this.cargando = false;
         this.sincronizarPagina();
       },
@@ -152,6 +178,7 @@ export class ServiciosComponent implements OnInit, OnDestroy {
           next: () => {
             this.cargarServicios();
             this.mostrarFormulario = false;
+            this.pestanaActiva = 'lista';
             this.resetearFormulario();
             this.mostrarNotificacion('Guardado exitosamente.', 'success');
             this.reporteService.notificarCambioDatosReporte();
@@ -178,6 +205,7 @@ export class ServiciosComponent implements OnInit, OnDestroy {
             if (!this.esBarbero && !this.esCesia) {
               this.cargarServicios();
               this.mostrarFormulario = false;
+              this.pestanaActiva = 'lista';
             }
             this.resetearFormulario();
             this.mostrarNotificacion('Guardado exitosamente.', 'success');
@@ -230,6 +258,7 @@ export class ServiciosComponent implements OnInit, OnDestroy {
       this.tipoCorteSeleccionado = null;
     }
     this.mostrarFormulario = true;
+    this.pestanaActiva = 'formulario';
   }
 
   eliminar(servicio: Servicio): void {
@@ -311,6 +340,32 @@ export class ServiciosComponent implements OnInit, OnDestroy {
     this.mostrarModalConfirmacion = false;
     this.mensajeConfirmacion = '';
     this.accionConfirmacion = null;
+  }
+
+  onDragStart(servicioId: number): void {
+    this.servicioArrastradoId = servicioId;
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+  }
+
+  onDrop(servicioDestinoId: number): void {
+    if (this.servicioArrastradoId == null || this.servicioArrastradoId === servicioDestinoId) return;
+
+    const indexOrigen = this.servicios.findIndex(s => s.id === this.servicioArrastradoId);
+    const indexDestino = this.servicios.findIndex(s => s.id === servicioDestinoId);
+    if (indexOrigen < 0 || indexDestino < 0) return;
+
+    const [movido] = this.servicios.splice(indexOrigen, 1);
+    this.servicios.splice(indexDestino, 0, movido);
+    this.guardarOrdenManual();
+    this.servicioArrastradoId = null;
+    this.mostrarNotificacion('Orden actualizado.', 'success');
+  }
+
+  onDragEnd(): void {
+    this.servicioArrastradoId = null;
   }
 
   get serviciosFiltrados(): Servicio[] {
@@ -404,5 +459,30 @@ export class ServiciosComponent implements OnInit, OnDestroy {
     this.filtroFecha = '';
     this.filtroBarberoId = null;
     this.paginaActual = 1;
+  }
+
+  private aplicarOrdenManual(): void {
+    const ordenRaw = localStorage.getItem(this.ORDEN_LOCAL_STORAGE_KEY);
+    if (!ordenRaw) return;
+
+    try {
+      const ordenIds = JSON.parse(ordenRaw) as number[];
+      if (!Array.isArray(ordenIds) || ordenIds.length === 0) return;
+
+      const posicion = new Map<number, number>();
+      ordenIds.forEach((id, index) => posicion.set(id, index));
+      this.servicios.sort((a, b) => {
+        const posA = posicion.has(a.id) ? (posicion.get(a.id) as number) : Number.MAX_SAFE_INTEGER;
+        const posB = posicion.has(b.id) ? (posicion.get(b.id) as number) : Number.MAX_SAFE_INTEGER;
+        return posA - posB;
+      });
+    } catch {
+      localStorage.removeItem(this.ORDEN_LOCAL_STORAGE_KEY);
+    }
+  }
+
+  private guardarOrdenManual(): void {
+    const ordenIds = this.servicios.map(s => s.id);
+    localStorage.setItem(this.ORDEN_LOCAL_STORAGE_KEY, JSON.stringify(ordenIds));
   }
 }

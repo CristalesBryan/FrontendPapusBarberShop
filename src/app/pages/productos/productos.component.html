@@ -98,6 +98,7 @@
         <table class="table table-striped">
           <thead>
             <tr>
+              <th style="width: 44px;"></th>
               <th>ID</th>
               <th>Nombre</th>
               <th>Stock</th>
@@ -108,7 +109,15 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let producto of productos">
+            <tr *ngFor="let producto of productos"
+                draggable="true"
+                (dragstart)="onDragStart(producto.id)"
+                (dragover)="onDragOver($event)"
+                (drop)="onDrop(producto.id)"
+                (dragend)="onDragEnd()">
+              <td class="text-muted text-center" title="Arrastra para ordenar" aria-label="Arrastrar para ordenar">
+                <i class="fas fa-grip-vertical"></i>
+              </td>
               <td>{{ producto.id }}</td>
               <td>{{ producto.nombre }}</td>
               <td [class.text-danger]="producto.stock < 10">{{ producto.stock }}</td>
