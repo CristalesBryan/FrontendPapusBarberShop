@@ -1,36 +1,26 @@
-<div class="container-fluid page-container">
-  <h2 class="mb-4"><i class="fas fa-calendar-check"></i> Gestor de Citas</h2>
+<div class="container-fluid page-container papus-admin-page">
+  <header class="papus-page-header">
+    <h2><i class="fas fa-calendar-check"></i> Gestor de citas</h2>
+  </header>
 
-  <!-- Controles del Calendario -->
-  <div class="card mb-3">
-    <div class="card-body">
-      <div class="row align-items-center mb-3">
-        <div class="col-md-6">
-          <div class="d-flex align-items-center">
-            <button class="btn btn-outline-primary me-2" (click)="diaAnterior()" title="Día anterior">
-              <i class="fas fa-chevron-left"></i>
-            </button>
-            <h4 class="mb-0 mx-3">
-              {{ getRangoSemana() }}
-            </h4>
-            <button class="btn btn-outline-primary me-2" (click)="diaSiguiente()" title="Día siguiente">
-              <i class="fas fa-chevron-right"></i>
-            </button>
-            <button class="btn btn-outline-secondary" (click)="irAHoy()" title="Ir a hoy">
-              <i class="fas fa-calendar-day"></i> Hoy
-            </button>
-          </div>
-        </div>
-        <div class="col-md-6 text-end">
-          <button class="cssbuttons-io-button" (click)="toggleFormulario()">
-            <svg height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M0 0h24v24H0z" fill="none"></path>
-              <path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z" fill="currentColor"></path>
-            </svg>
-            <span>Nueva Cita</span>
-          </button>
-        </div>
+  <div class="papus-card mb-3">
+    <div class="papus-card-body papus-toolbar">
+      <div class="d-flex align-items-center flex-wrap gap-2">
+        <button type="button" class="btn btn-papus-ghost btn-sm" (click)="diaAnterior()" title="Dia anterior" aria-label="Dia anterior">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <h4 class="papus-calendar-range mb-0 mx-2">{{ getRangoSemana() }}</h4>
+        <button type="button" class="btn btn-papus-ghost btn-sm" (click)="diaSiguiente()" title="Dia siguiente" aria-label="Dia siguiente">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+        <button type="button" class="btn btn-papus-outline btn-sm" (click)="irAHoy()" title="Ir a hoy">
+          <i class="fas fa-calendar-day me-1"></i> Hoy
+        </button>
       </div>
+      <button type="button" class="btn btn-papus-primary" (click)="toggleFormulario()">
+        <i class="fas fa-plus"></i>
+        <span>Nueva cita</span>
+      </button>
     </div>
   </div>
 
@@ -39,12 +29,12 @@
        tabindex="-1" role="dialog" [attr.aria-hidden]="!mostrarFormulario">
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
       <div class="modal-content">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title text-white">
-            <i class="fas fa-calendar-check me-2 text-white"></i>
-            Registrar Nueva Cita
+        <div class="modal-header papus-modal-header-gold">
+          <h5 class="modal-title">
+            <i class="fas fa-calendar-check me-2"></i>
+            Registrar nueva cita
           </h5>
-          <button type="button" class="btn-close btn-close-white" (click)="toggleFormulario()" aria-label="Close"></button>
+          <button type="button" class="btn-close" (click)="toggleFormulario()" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <form (ngSubmit)="guardarCita()" id="formCita">
@@ -74,9 +64,9 @@
         </div>
 
         <!-- Información del Tipo de Corte Seleccionado -->
-        <div class="card mb-3" *ngIf="tipoCorteSeleccionado">
+        <div class="card papus-highlight-card mb-3" *ngIf="tipoCorteSeleccionado">
           <div class="card-body">
-            <h6 class="card-title">{{ tipoCorteSeleccionado.nombre }}</h6>
+            <h6 class="card-title text-gold">{{ tipoCorteSeleccionado.nombre }}</h6>
             <p class="card-text" *ngIf="tipoCorteSeleccionado.descripcion">
               <strong>Descripción:</strong> {{ tipoCorteSeleccionado.descripcion }}
             </p>
@@ -230,8 +220,11 @@
        [style.display]="mostrarFormulario ? 'block' : 'none'" (click)="toggleFormulario()"></div>
 
   <!-- Calendario Semanal -->
-  <div class="card" *ngIf="!cargando">
-    <div class="card-body p-0">
+  <div class="papus-card papus-calendar-card" *ngIf="!cargando">
+    <div class="papus-card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0"><i class="fas fa-calendar-week me-2"></i> Calendario semanal</h5>
+    </div>
+    <div class="papus-card-body p-0">
       <div class="schedule-table-container">
         <!-- Encabezado con columna de barberos y días de la semana -->
         <div class="schedule-table-header">
@@ -327,7 +320,7 @@
 
   <!-- Loading -->
   <div class="text-center" *ngIf="cargando">
-    <div class="spinner-border text-primary" role="status">
+    <div class="spinner-border" role="status">
       <span class="visually-hidden">Cargando...</span>
     </div>
   </div>
@@ -400,12 +393,12 @@
     <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
       <div class="modal-content">
         <div class="modal-header" [ngClass]="{
-          'bg-success': tipoNotificacion === 'success',
-          'bg-danger': tipoNotificacion === 'error',
-          'bg-warning': tipoNotificacion === 'warning',
-          'bg-info': tipoNotificacion === 'info'
+          'papus-modal-header-success': tipoNotificacion === 'success',
+          'papus-modal-header-danger': tipoNotificacion === 'error',
+          'papus-modal-header-warning': tipoNotificacion === 'warning',
+          'papus-modal-header-info': tipoNotificacion === 'info'
         }">
-          <h5 class="modal-title text-white">
+          <h5 class="modal-title">
             <i class="fas me-2" [ngClass]="{
               'fa-check-circle': tipoNotificacion === 'success',
               'fa-exclamation-circle': tipoNotificacion === 'error',
@@ -414,13 +407,13 @@
             }"></i>
             {{ tipoNotificacion === 'success' ? 'Éxito' : tipoNotificacion === 'error' ? 'Error' : tipoNotificacion === 'warning' ? 'Advertencia' : 'Información' }}
           </h5>
-          <button type="button" class="btn-close btn-close-white" (click)="cerrarModalNotificacion()" aria-label="Close"></button>
+          <button type="button" class="btn-close" (click)="cerrarModalNotificacion()" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <p class="mb-0">{{ mensajeNotificacion }}</p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary" (click)="cerrarModalNotificacion()">
+          <button type="button" class="btn btn-papus-primary" (click)="cerrarModalNotificacion()">
             Aceptar
           </button>
         </div>
@@ -433,12 +426,12 @@
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header" [ngClass]="{
-          'bg-success': citaSeleccionada.estado === 'CONFIRMADA',
-          'bg-warning': citaSeleccionada.estado === 'PENDIENTE',
-          'bg-danger': citaSeleccionada.estado === 'CANCELADA',
-          'bg-info': citaSeleccionada.estado === 'COMPLETADA'
+          'papus-modal-header-success': citaSeleccionada.estado === 'CONFIRMADA',
+          'papus-modal-header-warning': citaSeleccionada.estado === 'PENDIENTE',
+          'papus-modal-header-danger': citaSeleccionada.estado === 'CANCELADA',
+          'papus-modal-header-info': citaSeleccionada.estado === 'COMPLETADA'
         }">
-          <h5 class="modal-title text-white">
+          <h5 class="modal-title">
             <i class="fas fa-calendar-check me-2"></i>
             Detalles de la Cita
           </h5>
@@ -689,12 +682,12 @@
       <div class="modal-content modal-confirmacion">
         <div class="modal-header" 
              [ngClass]="{
-               'bg-success': confirmacionTipo === 'success',
-               'bg-warning': confirmacionTipo === 'warning',
-               'bg-danger': confirmacionTipo === 'danger',
-               'bg-info': confirmacionTipo === 'info'
+               'papus-modal-header-success': confirmacionTipo === 'success',
+               'papus-modal-header-warning': confirmacionTipo === 'warning',
+               'papus-modal-header-danger': confirmacionTipo === 'danger',
+               'papus-modal-header-info': confirmacionTipo === 'info'
              }">
-          <h5 class="modal-title text-white">
+          <h5 class="modal-title">
             <i class="fas" 
                [ngClass]="{
                  'fa-check-circle': confirmacionTipo === 'success',
@@ -705,13 +698,13 @@
                class="me-2"></i>
             {{ confirmacionTitulo }}
           </h5>
-          <button type="button" class="btn-close btn-close-white" (click)="cerrarModalConfirmacion()" aria-label="Cerrar"></button>
+          <button type="button" class="btn-close" (click)="cerrarModalConfirmacion()" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
           <p [innerHTML]="confirmacionMensaje"></p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" (click)="cerrarModalConfirmacion()">
+          <button type="button" class="btn btn-papus-ghost" (click)="cerrarModalConfirmacion()">
             <i class="fas fa-times me-1"></i> Cancelar
           </button>
           <button type="button" 
@@ -743,13 +736,13 @@
        [attr.aria-hidden]="!mostrarModalCitasDia">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
       <div class="modal-content">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title text-white">
+        <div class="modal-header papus-modal-header-gold">
+          <h5 class="modal-title">
             <i class="fas fa-calendar-day me-2"></i>
             Citas del {{ fechaModalDia ? (getDiaSemanaAbrev(fechaModalDia) + ' ' + getDiaNumero(fechaModalDia) + ' de ' + getMesNombre(fechaModalDia)) : '' }}
             <span *ngIf="barberoModalDia"> - {{ barberoModalDia.nombre }}</span>
           </h5>
-          <button type="button" class="btn-close btn-close-white" (click)="cerrarModalCitasDia()" aria-label="Cerrar"></button>
+          <button type="button" class="btn-close" (click)="cerrarModalCitasDia()" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
           <div *ngIf="citasModalDia.length === 0" class="text-center py-4">

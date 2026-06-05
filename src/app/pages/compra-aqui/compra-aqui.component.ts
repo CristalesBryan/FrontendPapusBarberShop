@@ -96,10 +96,16 @@ export class CompraAquiComponent implements OnInit, OnDestroy {
         // Mostrar todos los productos (sin filtrar por stock)
         // La descripción ahora viene del backend, no de localStorage
         // Las URLs presignadas ya vienen en imagenUrl desde el backend
-        this.productos = data.map(p => ({
-          ...p,
-          descripcion: p.descripcion || this.obtenerDescripcion(p.id) // Fallback a localStorage por compatibilidad
-        }));
+        this.productos = data.map(p => {
+          const productoNormalizado: Producto = {
+            ...p,
+            descripcion: p.descripcion || this.obtenerDescripcion(p.id) // Fallback a localStorage por compatibilidad
+          };
+
+          // Precalentar cache de imagen para evitar recomputaciones en template.
+          this.getProductoImagen(productoNormalizado);
+          return productoNormalizado;
+        });
         this.productosFiltrados = this.productos;
         this.cargando = false;
       },
@@ -145,6 +151,11 @@ export class CompraAquiComponent implements OnInit, OnDestroy {
    * @returns URL pública directa de S3 o placeholder si no hay imagen
    */
   getProductoImagen(producto: Producto): string {
+    const imagenCacheada = this.cacheImagenes.get(producto.id);
+    if (imagenCacheada) {
+      return imagenCacheada;
+    }
+
     // Si hay imagenUrl, extraer el s3Key y construir URL pública directa
     if (producto.imagenUrl) {
       // Extraer s3Key de la URL (puede ser presignada o pública)
@@ -156,11 +167,7 @@ export class CompraAquiComponent implements OnInit, OnDestroy {
         const region = environment.s3.region || 'us-east-2';
         const publicUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${s3Key}`;
         
-        // Cachear la URL pública
-        if (!this.cacheImagenes.has(producto.id)) {
-          this.cacheImagenes.set(producto.id, publicUrl);
-        }
-        
+        this.cacheImagenes.set(producto.id, publicUrl);
         return publicUrl;
       }
     }
@@ -168,11 +175,7 @@ export class CompraAquiComponent implements OnInit, OnDestroy {
     // Si no hay imagenUrl o no se pudo extraer el s3Key, usar placeholder
     const placeholderUrl = `data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5OTk5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5TaW4gaW1hZ2VuPC90ZXh0Pjwvc3ZnPg==`;
     
-    // Cachear el placeholder para evitar recrearlo
-    if (!this.cacheImagenes.has(producto.id)) {
-      this.cacheImagenes.set(producto.id, placeholderUrl);
-    }
-    
+    this.cacheImagenes.set(producto.id, placeholderUrl);
     return this.cacheImagenes.get(producto.id) || placeholderUrl;
   }
 
@@ -445,5 +448,13 @@ export class CompraAquiComponent implements OnInit, OnDestroy {
         img.parentElement.innerHTML = '<div class="modal-imagen-placeholder"><i class="fas fa-image fa-5x"></i><p>Imagen no disponible</p></div>';
       }
     }
+  }
+
+  trackByProductoId(index: number, producto: Producto): number {
+    return producto.id;
+  }
+
+  trackByCarritoProductoId(index: number, item: ItemCarrito): number {
+    return item.producto.id;
   }
 }

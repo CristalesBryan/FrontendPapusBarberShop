@@ -1,50 +1,47 @@
-<div class="container-fluid page-container">
-  <h2 class="mb-4"><i class="fas fa-calendar-alt"></i> Horarios de Barberos</h2>
+<div class="container-fluid page-container papus-admin-page">
+  <header class="papus-page-header">
+    <h2><i class="fas fa-calendar-alt"></i> Horarios de barberos</h2>
+  </header>
 
-  <!-- Controles del Calendario -->
-  <div class="card mb-3">
-    <div class="card-body">
-      <div class="row align-items-center mb-3">
-        <div class="col-md-6">
-          <div class="d-flex align-items-center">
-            <button class="btn btn-outline-primary me-2" (click)="diaAnterior()" title="Día anterior">
+  <div class="papus-card mb-3">
+    <div class="papus-card-body">
+      <div class="row align-items-end g-3">
+        <div class="col-lg-5">
+          <div class="d-flex align-items-center flex-wrap gap-2">
+            <button type="button" class="btn btn-papus-ghost btn-sm" (click)="diaAnterior()" title="Dia anterior">
               <i class="fas fa-chevron-left"></i>
             </button>
-            <h4 class="mb-0 mx-3">
-              {{ getRangoSemana() }}
-            </h4>
-            <button class="btn btn-outline-primary me-2" (click)="diaSiguiente()" title="Día siguiente">
+            <h4 class="papus-calendar-range mb-0">{{ getRangoSemana() }}</h4>
+            <button type="button" class="btn btn-papus-ghost btn-sm" (click)="diaSiguiente()" title="Dia siguiente">
               <i class="fas fa-chevron-right"></i>
             </button>
-            <button class="btn btn-outline-secondary" (click)="irAHoy()" title="Ir a hoy">
-              <i class="fas fa-calendar-day"></i> Hoy
+            <button type="button" class="btn btn-papus-outline btn-sm" (click)="irAHoy()">
+              <i class="fas fa-calendar-day me-1"></i> Hoy
             </button>
           </div>
         </div>
-        <div class="col-md-3">
-          <label class="form-label">Filtrar por Barbero</label>
+        <div class="col-md-4 col-lg-3">
+          <label class="form-label">Filtrar por barbero</label>
           <select class="form-select" [(ngModel)]="barberoFiltro" (change)="onFiltroCambiado()">
             <option [ngValue]="null">Todos los barberos</option>
             <option *ngFor="let barbero of barberos" [ngValue]="barbero.id">{{ barbero.nombre }}</option>
           </select>
         </div>
-        <div class="col-md-3 text-end">
-          <button class="cssbuttons-io-button" (click)="abrirFormularioNuevo()">
-            <svg height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M0 0h24v24H0z" fill="none"></path>
-              <path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z" fill="currentColor"></path>
-            </svg>
-            <span>Nuevo Horario</span>
+        <div class="col-md-8 col-lg-4 text-lg-end">
+          <button type="button" class="btn btn-papus-primary" (click)="abrirFormularioNuevo()">
+            <i class="fas fa-plus"></i>
+            <span>Nuevo horario</span>
           </button>
         </div>
       </div>
     </div>
   </div>
 
-
-  <!-- Calendario Semanal -->
-  <div class="card" *ngIf="!cargando">
-    <div class="card-body p-0">
+  <div class="papus-card papus-calendar-card" *ngIf="!cargando">
+    <div class="papus-card-header">
+      <h5 class="mb-0"><i class="fas fa-calendar-week me-2"></i> Calendario semanal</h5>
+    </div>
+    <div class="papus-card-body p-0">
       <div class="schedule-table-container">
         <!-- Encabezado con columna de barberos y días de la semana -->
         <div class="schedule-table-header">
@@ -104,7 +101,7 @@
 
   <!-- Loading -->
   <div class="text-center" *ngIf="cargando">
-    <div class="spinner-border text-primary" role="status">
+    <div class="spinner-border" role="status">
       <span class="visually-hidden">Cargando...</span>
     </div>
   </div>
@@ -114,7 +111,7 @@
        tabindex="-1" role="dialog" [attr.aria-hidden]="!mostrarFormulario">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
-        <div class="modal-header bg-primary text-white">
+        <div class="modal-header papus-modal-header-gold">
           <h5 class="modal-title text-white">
             <i class="fas fa-calendar-alt me-2 text-white"></i>
             {{ editando ? 'Editar Horario' : 'Registrar Nuevo Horario' }}
@@ -194,7 +191,7 @@
        tabindex="-1" role="dialog" [attr.aria-hidden]="!mostrarModalConfirmacion">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
-        <div class="modal-header bg-warning text-dark">
+        <div class="modal-header papus-modal-header-warning">
           <h5 class="modal-title text-dark">
             <i class="fas fa-exclamation-triangle me-2"></i>
             {{ tituloConfirmacion }}
@@ -247,7 +244,7 @@
           <p class="mb-0">{{ mensajeNotificacion }}</p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary" (click)="cerrarModalNotificacion()">
+          <button type="button" class="btn btn-papus-primary" (click)="cerrarModalNotificacion()">
             Aceptar
           </button>
         </div>

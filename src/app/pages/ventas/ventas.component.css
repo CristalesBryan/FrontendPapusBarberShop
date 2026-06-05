@@ -1,21 +1,11 @@
-.container-fluid {
-  padding: 20px;
-}
-
 .page-container {
-  padding-top: 80px; /* Espacio para que el navbar no cubra el contenido */
-}
-
-.ventas-form-actions {
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  padding-top: 0;
 }
 
 .ventas-tabs .nav-link {
   cursor: pointer;
-  color: var(--bs-secondary-color, #6c757d);
 }
 
-.ventas-tabs .nav-link.active {
-  font-weight: 600;
+.ventas-form-actions {
+  border-top: 1px solid var(--border-subtle);
 }
-

@@ -1,47 +1,84 @@
-.navbar {
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  z-index: 1030;
+.papus-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--navbar-height);
+  z-index: 1050;
+  background: rgba(10, 10, 10, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0 1.5rem;
 }
 
-.navbar-brand {
-  font-weight: 600;
-  font-size: 1.25rem;
+.papus-navbar .navbar-brand {
+  font-family: var(--font-display);
+  color: var(--gold) !important;
+  font-size: 1.1rem;
+  letter-spacing: 0.06em;
   display: flex;
   align-items: center;
+  gap: 0.75rem;
 }
 
 .navbar-logo {
-  height: 70px;
+  height: 36px;
   width: auto;
-  max-width: 200px;
-  object-fit: contain;
-  margin-left: 15px; /* Mover el logo un poco hacia la derecha */
-}
-
-.nav-link {
-  transition: all 0.3s ease;
-}
-
-.nav-link:hover {
-  background-color: rgba(255,255,255,0.1);
   border-radius: 4px;
 }
 
-.nav-link.active {
-  background-color: rgba(255,255,255,0.2);
+.papus-navbar .nav-link {
+  color: var(--cream-muted) !important;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.5rem 0.75rem !important;
+  transition: color var(--transition-base);
+}
+
+.papus-navbar .nav-link:hover,
+.papus-navbar .nav-link.active {
+  color: var(--gold) !important;
+}
+
+.papus-navbar .navbar-toggler {
+  border-color: var(--border-gold);
+}
+
+.papus-navbar .navbar-toggler-icon {
+  filter: invert(1);
+}
+
+.user-menu-trigger {
+  color: var(--cream) !important;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.role-badge {
+  background: rgba(201, 168, 76, 0.15) !important;
+  color: var(--gold) !important;
+  border: 1px solid var(--border-gold);
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+}
+
+.papus-navbar .dropdown-menu {
+  background: var(--ink-surface);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem;
+}
+
+.papus-navbar .dropdown-item {
+  color: var(--cream);
   border-radius: 4px;
+  font-size: 0.85rem;
 }
 
-.dropdown-menu {
-  border-radius: 6px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+.papus-navbar .dropdown-item:hover {
+  background: rgba(201, 168, 76, 0.12);
+  color: var(--gold);
 }
-
-.dropdown-item {
-  cursor: pointer;
-}
-
-.dropdown-item:hover {
-  background-color: #f8f9fa;
-}
-

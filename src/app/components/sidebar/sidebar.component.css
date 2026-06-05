@@ -1,214 +1,182 @@
 .sidebar {
-  width: 250px;
-  min-width: 250px;
-  height: calc(100vh - 56px);
-  background-color: #343a40;
-  color: white;
   position: fixed;
   left: 0;
-  top: 56px;
-  transition: width 0.3s ease, transform 0.3s ease;
-  z-index: 1000;
-  overflow-y: auto;
-  overflow-x: hidden;
+  top: var(--navbar-height);
+  height: calc(100vh - var(--navbar-height));
+  width: var(--sidebar-width);
+  background: var(--ink-deep);
+  border-right: 1px solid var(--border-subtle);
+  z-index: 1040;
   display: flex;
   flex-direction: column;
+  transition: width 0.35s var(--ease-out-expo);
+  overflow: hidden;
 }
 
 .sidebar.collapsed {
-  width: 60px;
-  min-width: 60px;
-}
-
-/* Asegurar que el sidebar se expanda al hacer hover incluso cuando está colapsado */
-.sidebar.collapsed:hover {
-  width: 250px;
-  min-width: 250px;
+  width: var(--sidebar-collapsed);
 }
 
 .sidebar-header {
-  padding: 15px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-subtle);
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  min-height: 56px;
 }
 
-.toggle-btn {
-  color: white;
-  padding: 5px 10px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border-gold);
+  flex-shrink: 0;
 }
 
-.toggle-btn:hover {
-  background-color: rgba(255,255,255,0.1);
-  border-radius: 4px;
+.sidebar-brand img {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+}
+
+.sidebar-brand-text {
+  font-family: var(--font-display);
+  color: var(--gold);
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.sidebar.collapsed .sidebar-brand-text,
+.sidebar.collapsed .nav-section-label,
+.sidebar.collapsed .nav-link span,
+.sidebar.collapsed .sidebar-user-info {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
 }
 
 .sidebar-content {
   flex: 1;
-  display: flex;
-  flex-direction: column;
   overflow-y: auto;
-}
-
-.sidebar-nav {
-  padding: 10px 0;
-  flex: 1;
-}
-
-.sidebar-nav .nav-item {
-  margin: 5px 10px;
+  overflow-x: hidden;
+  padding: 0.75rem 0;
 }
 
 .sidebar-nav .nav-link {
-  color: rgba(255,255,255,0.8);
-  padding: 12px 15px;
-  border-radius: 6px;
   display: flex;
   align-items: center;
-  transition: all 0.3s ease;
+  gap: 0.875rem;
+  padding: 0.75rem 1.25rem;
+  color: var(--cream-muted);
   text-decoration: none;
+  font-size: 0.85rem;
+  border-left: 2px solid transparent;
+  transition: color var(--transition-base), background var(--transition-base), border-color var(--transition-base);
+  white-space: nowrap;
 }
 
 .sidebar-nav .nav-link i {
   width: 20px;
-  margin-right: 10px;
   text-align: center;
-}
-
-.sidebar.collapsed .nav-link i {
-  margin-right: 0;
+  color: var(--cream-muted);
+  font-size: 1rem;
+  flex-shrink: 0;
 }
 
 .sidebar-nav .nav-link:hover {
-  background-color: rgba(255,255,255,0.1);
-  color: white;
+  color: var(--gold);
+  background: rgba(201, 168, 76, 0.06);
+}
+
+.sidebar-nav .nav-link:hover i {
+  color: var(--gold);
 }
 
 .sidebar-nav .nav-link.active {
-  background-color: #007bff;
-  color: white;
+  color: var(--gold);
+  background: rgba(201, 168, 76, 0.1);
+  border-left-color: var(--gold);
 }
 
-.sidebar.collapsed .nav-link span {
-  display: none;
+.sidebar-nav .nav-link.active i {
+  color: var(--gold);
 }
 
-/* Mostrar el texto cuando se hace hover en el sidebar colapsado */
-.sidebar.collapsed:hover .nav-link span {
-  display: inline;
+.nav-section-label {
+  padding: 1rem 1.25rem 0.35rem;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--gold-dark);
 }
 
-.sidebar.collapsed:hover .nav-link i {
-  margin-right: 10px;
+.nav-divider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 0.5rem 1rem;
 }
 
-/* Estilos para redes sociales */
-.social-section {
-  padding: 20px 15px;
-  border-top: 1px solid rgba(255,255,255,0.1);
-  margin-top: auto;
-}
-
-.social-card {
-  width: fit-content;
-  height: fit-content;
-  background-color: rgb(238, 238, 238);
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  padding: 15px 15px;
-  gap: 15px;
-  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.055);
-  border-radius: 8px;
-  margin: 0 auto;
-}
-
-/* for all social containers*/
-.socialContainer {
-  width: 52px;
-  height: 52px;
-  border-radius: 5px;
-  background-color: rgb(44, 44, 44);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  transition-duration: 0.3s;
+.toggle-btn {
+  color: var(--gold) !important;
+  padding: 0.25rem;
   text-decoration: none;
 }
 
-/* Tiktok*/
-.containerTwo:hover {
-  background-color: #25f4ee;
-  transition-duration: 0.3s;
+.sidebar-footer {
+  border-top: 1px solid var(--border-subtle);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
 }
 
-/* Facebook*/
-.containerThree:hover {
-  background-color: #1877f2;
-  transition-duration: 0.3s;
+.sidebar-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-deep);
+  font-weight: 600;
+  font-size: 0.9rem;
+  flex-shrink: 0;
 }
 
-.socialContainer:active {
-  transform: scale(0.9);
-  transition-duration: 0.3s;
+.sidebar-user-info {
+  min-width: 0;
 }
 
-.socialSvg {
-  width: 19px;
+.sidebar-user-name {
+  color: var(--cream);
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.largeIcon {
-  width: 27px; /* Ancho específico solo para el icono de TikTok */
+.sidebar-user-role {
+  font-size: 0.7rem;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
-.socialSvg path {
-  fill: rgb(255, 255, 255);
-}
-
-.socialContainer:hover .socialSvg {
-  animation: slide-in-top 0.3s both;
-}
-
-@keyframes slide-in-top {
-  0% {
-    transform: translateY(-50px);
-    opacity: 0;
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    width: var(--sidebar-width) !important;
   }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
   }
 }
-
-/* Ajustes para sidebar colapsado - siempre horizontal */
-.sidebar.collapsed .social-section {
-  padding: 15px 5px;
-}
-
-.sidebar.collapsed .social-card {
-  flex-direction: row;
-  padding: 10px 10px;
-  gap: 10px;
-}
-
-.sidebar.collapsed .socialContainer {
-  width: 45px;
-  height: 45px;
-}
-
-.sidebar.collapsed:hover .social-card {
-  flex-direction: row;
-  padding: 15px 15px;
-  gap: 15px;
-}
-
-.sidebar.collapsed:hover .socialContainer {
-  width: 52px;
-  height: 52px;
-}
-

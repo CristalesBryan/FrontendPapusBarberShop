@@ -1,9 +1,19 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import { AuthService, User } from '../../services/auth.service';
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
+
+interface SidebarMenuItem {
+  path: string;
+  icon: string;
+  label: string;
+  adminOnly?: boolean;
+  adminAndBarbero?: boolean;
+  adminAndCesia?: boolean;
+  external?: boolean;
+}
 
 @Component({
   selector: 'app-sidebar',
@@ -13,10 +23,12 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./sidebar.component.css']
 })
 export class SidebarComponent implements OnInit, OnDestroy {
-  isCollapsed = true; // Iniciar colapsado por defecto
+  isCollapsed = true;
+  currentUser: User | null = null;
   private routerSubscription?: Subscription;
+  private userSub?: Subscription;
 
-  menuItems = [
+  menuItemsOperaciones: SidebarMenuItem[] = [
     { path: '/dashboard', icon: 'fas fa-home', label: 'Dashboard', adminOnly: true },
     { path: '/barberos', icon: 'fas fa-user-tie', label: 'Barberos', adminOnly: true },
     { path: '/horarios', icon: 'fas fa-clock', label: 'Horarios', adminOnly: true },
@@ -25,15 +37,23 @@ export class SidebarComponent implements OnInit, OnDestroy {
     { path: '/ventas', icon: 'fas fa-shopping-cart', label: 'Ventas', adminAndBarbero: true },
     { path: '/compra-aqui', icon: 'fas fa-shopping-bag', label: 'Compra Aquí', adminAndCesia: true },
     { path: '/productos', icon: 'fas fa-box', label: 'Productos', adminOnly: true },
-    { path: '/gestion-catalogo', icon: 'fas fa-images', label: 'Gestión de Catálogo', adminAndCesia: true },
-    { path: '/mobiliario-equipo', icon: 'fas fa-couch', label: 'Mobiliario y Equipo', adminOnly: true },
-    { path: '/tipos-corte', icon: 'fas fa-cut', label: 'Gestión de Tipos de Corte', adminOnly: true },
-    { path: '/reportes', icon: 'fas fa-chart-bar', label: 'Reportes', adminOnly: true },
+    { path: '/gestion-catalogo', icon: 'fas fa-images', label: 'Gestión Catálogo', adminAndCesia: true },
+    { path: '/mobiliario-equipo', icon: 'fas fa-couch', label: 'Mobiliario', adminOnly: true },
+    { path: '/tipos-corte', icon: 'fas fa-cut', label: 'Tipos de Corte', adminOnly: true },
+    { path: '/reportes', icon: 'fas fa-chart-bar', label: 'Reportes', adminOnly: true }
+  ];
+
+  menuItemsInfo: SidebarMenuItem[] = [
     { path: '/acerca-de-nosotros', icon: 'fas fa-info-circle', label: 'Acerca de Nosotros' },
     { path: '/academia', icon: 'fas fa-graduation-cap', label: 'Academia' },
     { path: 'https://www.facebook.com/share/1XmXmG651q/?mibextid=wwXIfr', icon: 'fab fa-facebook', label: 'Facebook', external: true },
     { path: 'https://www.tiktok.com/@papusbarbershopgt?is_from_webapp=1&sender_device=pc', icon: 'fab fa-tiktok', label: 'TikTok', external: true }
   ];
+
+  get userInitials(): string {
+    const name = this.currentUser?.username ?? '?';
+    return name.slice(0, 2).toUpperCase();
+  }
 
   constructor(
     private router: Router,
@@ -41,6 +61,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
+    this.userSub = this.authService.currentUser$.subscribe(u => {
+      this.currentUser = u;
+    });
     // Aplicar el estado inicial (colapsado)
     this.updateBodyClass();
     
@@ -69,12 +92,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // Limpiar la clase al destruir el componente
     document.body.classList.remove('sidebar-collapsed');
-    // Cancelar la suscripción
-    if (this.routerSubscription) {
-      this.routerSubscription.unsubscribe();
-    }
+    this.routerSubscription?.unsubscribe();
+    this.userSub?.unsubscribe();
   }
 
   colapsarSidebar(): void {
@@ -101,7 +121,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     return this.router.url === path;
   }
 
-  canShowItem(item: any): boolean {
+  canShowItem(item: SidebarMenuItem): boolean {
     // BARBERO: solo Servicios y Ventas (evaluar antes que ítems “sin bandera” como Acerca/Academia/redes)
     if (this.authService.isBarbero()) {
       return item.adminAndBarbero === true;

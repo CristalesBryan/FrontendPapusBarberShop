@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -7,8 +7,8 @@ import { VentaProductoService } from '../../services/venta-producto.service';
 import { BarberoService } from '../../services/barbero.service';
 import { ProductoService } from '../../services/producto.service';
 import { ReporteService } from '../../services/reporte.service';
-
-declare var bootstrap: any;
+import { GsapAnimationService } from '../../services/gsap-animation.service';
+import { gsap } from 'gsap';
 
 @Component({
   selector: 'app-dashboard',
@@ -17,7 +17,10 @@ declare var bootstrap: any;
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild('statsRow') statsRow?: ElementRef<HTMLElement>;
+  private gsapCtx?: gsap.Context;
+
   estadisticas = {
     totalBarberos: 0,
     totalServicios: 0,
@@ -34,7 +37,8 @@ export class DashboardComponent implements OnInit {
     private ventaService: VentaProductoService,
     private barberoService: BarberoService,
     private productoService: ProductoService,
-    private reporteService: ReporteService
+    private reporteService: ReporteService,
+    private gsap: GsapAnimationService
   ) {}
 
   ngOnInit(): void {
@@ -79,8 +83,28 @@ export class DashboardComponent implements OnInit {
     this.productoService.getAll().subscribe({
       next: (productos) => {
         this.estadisticas.totalProductos = productos.length;
+        setTimeout(() => this.runCounterAnimations(), 100);
       }
     });
+  }
+
+  ngAfterViewInit(): void {
+    const row = this.statsRow?.nativeElement;
+    if (!row) return;
+    this.gsapCtx = this.gsap.context(row, () => {
+      this.gsap.scrollReveal(row, '.papus-stat-card');
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.gsap.revert(this.gsapCtx);
+  }
+
+  private runCounterAnimations(): void {
+    const row = this.statsRow?.nativeElement;
+    if (row) {
+      this.gsap.animateCounters(row);
+    }
   }
 }
 

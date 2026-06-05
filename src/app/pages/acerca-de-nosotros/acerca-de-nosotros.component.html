@@ -29,18 +29,19 @@
   
   <!-- Contenido -->
   <div class="content-overlay">
-    <div class="container-fluid page-container">
-    <!-- Encabezado con imagen -->
-    <img src="/assets/images/encabezado.png" alt="Encabezado Papus Barbershop" class="header-image mb-4">
+    <div class="container-fluid page-container papus-admin-page">
+    <img src="/assets/images/encabezado.png" alt="Encabezado Papus BarberShop" class="header-image mb-4">
     
-    <h2 class="mb-4"><i class="fas fa-info-circle"></i> Acerca de Nosotros</h2>
+    <header class="papus-page-header">
+      <h2><i class="fas fa-info-circle"></i> Acerca de nosotros</h2>
+    </header>
 
     <!-- Sección: ¿Cómo Empezó Todo? -->
-    <div class="card mb-4">
-      <div class="card-header">
+    <div class="papus-card mb-4">
+      <div class="papus-card-header">
         <h4><i class="fas fa-history"></i> ¿Cómo Empezó Todo?</h4>
       </div>
-      <div class="card-body">
+      <div class="papus-card-body">
         <div class="row">
           <div class="col-md-6 mb-3">
             <img src="/assets/images/EquipoPapus.png" alt="Equipo Papus Barbershop" class="section-image">
@@ -58,11 +59,11 @@
     </div>
 
     <!-- Sección: Nuestros Valores -->
-    <div class="card mb-4">
-      <div class="card-header">
+    <div class="papus-card mb-4">
+      <div class="papus-card-header">
         <h4><i class="fas fa-heart"></i> Nuestros Valores</h4>
       </div>
-      <div class="card-body">
+      <div class="papus-card-body">
         <div class="row">
           <div class="col-md-6 text-center d-flex flex-column justify-content-center">
             <p class="lead">
@@ -80,11 +81,11 @@
     </div>
 
     <!-- Sección: Nuestra Misión -->
-    <div class="card mb-4">
-      <div class="card-header">
+    <div class="papus-card mb-4">
+      <div class="papus-card-header">
         <h4><i class="fas fa-bullseye"></i> Nuestra Misión</h4>
       </div>
-      <div class="card-body">
+      <div class="papus-card-body">
         <div class="row">
           <div class="col-md-6 mb-3">
             <img src="/assets/images/corteVision.png" alt="Visión de Corte Papus Barbershop" class="section-image">
@@ -99,18 +100,18 @@
     </div>
 
     <!-- Sección: Redes Sociales -->
-    <div class="card mb-4">
-      <div class="card-header">
+    <div class="papus-card mb-4">
+      <div class="papus-card-header">
         <h4><i class="fas fa-share-alt"></i> Síguenos en Nuestras Redes Sociales</h4>
       </div>
-      <div class="card-body">
+      <div class="papus-card-body">
         <div class="row text-center">
           <div class="col-md-6 mb-3">
             <div class="social-link-card">
-              <i class="fab fa-facebook fa-3x mb-3 text-primary"></i>
+              <i class="fab fa-facebook fa-3x mb-3 papus-icon-gold"></i>
               <h5>Facebook</h5>
               <p>Fans de Facebook</p>
-              <a href="https://www.facebook.com/share/1XmXmG651q/?mibextid=wwXIfr" target="_blank" class="btn btn-primary">
+              <a href="https://www.facebook.com/share/1XmXmG651q/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" class="btn btn-papus-primary">
                 <i class="fab fa-facebook"></i> Visitar Facebook
               </a>
             </div>
@@ -130,18 +131,18 @@
     </div>
 
     <!-- Sección: Contáctanos -->
-    <div class="card mb-4">
-      <div class="card-header">
+    <div class="papus-card mb-4">
+      <div class="papus-card-header">
         <h4><i class="fas fa-phone"></i> Contáctanos</h4>
       </div>
-      <div class="card-body">
+      <div class="papus-card-body">
         <div class="row text-center">
           <div class="col-md-6 mb-3">
             <div class="social-link-card">
-              <i class="fas fa-calendar-check fa-3x mb-3 text-primary"></i>
+              <i class="fas fa-calendar-check fa-3x mb-3 papus-icon-gold"></i>
               <h5>¿Quieres agendar tu próxima experiencia?</h5>
               <p>Reserva tu cita ahora y vive la experiencia Papus Barbershop</p>
-              <a routerLink="/citas" class="btn btn-primary">
+              <a routerLink="/citas" class="btn btn-papus-primary">
                 <i class="fas fa-calendar-plus me-2"></i>
                 Agendar Cita
               </a>

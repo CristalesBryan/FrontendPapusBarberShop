@@ -1,16 +1,13 @@
-<div class="container-fluid page-container">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="fas fa-shopping-cart"></i> Ventas de Productos</h2>
-    <button class="cssbuttons-io-button" (click)="toggleFormulario()" *ngIf="!esBarbero">
-      <svg height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M0 0h24v24H0z" fill="none"></path>
-        <path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z" fill="currentColor"></path>
-      </svg>
-      <span>Nueva Venta</span>
+<div class="container-fluid page-container papus-admin-page">
+  <header class="papus-page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <h2><i class="fas fa-shopping-cart"></i> Ventas de productos</h2>
+    <button type="button" class="btn btn-papus-primary" (click)="toggleFormulario()" *ngIf="!esBarbero">
+      <i class="fas fa-plus"></i>
+      <span>Nueva venta</span>
     </button>
-  </div>
+  </header>
 
-  <ul *ngIf="!esBarbero && !esCesia" class="nav nav-tabs mb-3 ventas-tabs" role="tablist">
+  <ul *ngIf="!esBarbero && !esCesia" class="nav nav-tabs mb-3 papus-tabs ventas-tabs" role="tablist">
     <li class="nav-item" role="presentation">
       <button type="button" class="nav-link" [class.active]="pestanaActiva === 'lista'" (click)="pestanaActiva = 'lista'" role="tab" [attr.aria-selected]="pestanaActiva === 'lista'">
         Lista de ventas
@@ -23,9 +20,9 @@
     </li>
   </ul>
 
-  <div class="card mb-4" *ngIf="mostrarPanelFormulario">
-    <div class="card-header"><h5>{{ editando ? 'Editar Venta' : 'Registrar Nueva Venta' }}</h5></div>
-    <div class="card-body">
+  <div class="papus-card mb-4" *ngIf="mostrarPanelFormulario">
+    <div class="papus-card-header"><h5 class="mb-0">{{ editando ? 'Editar venta' : 'Registrar nueva venta' }}</h5></div>
+    <div class="papus-card-body">
       <form (ngSubmit)="guardarVenta()">
         <div class="row">
           <div class="col-md-4 mb-3">
@@ -116,9 +113,10 @@
     </div>
   </div>
 
-  <div class="card" *ngIf="!esBarbero && !esCesia && pestanaActiva === 'lista'">
-    <div class="card-header"><h5>Lista de Ventas</h5></div>
-    <div class="card-body">
+  <div class="papus-card" *ngIf="!esBarbero && !esCesia && pestanaActiva === 'lista'">
+    <div class="papus-card-header"><h5 class="mb-0">Lista de ventas</h5></div>
+    <div class="papus-card-body">
+      <div class="papus-filters-bar">
       <div class="row g-3 align-items-end mb-3" *ngIf="!cargando">
         <div class="col-sm-6 col-md-4 col-lg-3">
           <label class="form-label mb-1" for="filtroFechaVentas">Fecha</label>
@@ -148,8 +146,9 @@
             [(ngModel)]="tamanoPaginaCustom" name="tamanoCustomVentas" (ngModelChange)="onTamanoPaginaCustomChange()">
         </div>
         <div class="col-auto">
-          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="limpiarFiltrosLista()" [disabled]="!filtroFecha && filtroBarberoId == null">Limpiar filtros</button>
+          <button type="button" class="btn btn-papus-ghost btn-sm" (click)="limpiarFiltrosLista()" [disabled]="!filtroFecha && filtroBarberoId == null">Limpiar filtros</button>
         </div>
+      </div>
       </div>
       <div class="table-responsive" *ngIf="!cargando">
         <p class="text-muted mb-2 small" *ngIf="ventas.length > 0 && totalFiltrados > 0">
@@ -163,7 +162,7 @@
             <span class="ms-1">({{ ventas.length }} en total)</span>
           </ng-container>
         </p>
-        <table class="table table-striped">
+        <table class="table table-striped papus-table">
           <thead>
             <tr>
               <th>Fecha</th><th>Hora</th><th>Barbero</th><th>Producto</th><th>Cantidad</th><th>Precio Unit.</th><th>Importe Base</th><th>Desc. %</th><th>Importe Final</th><th>Método de Pago</th><th>Acciones</th>
@@ -185,7 +184,7 @@
               <td>Q{{ venta.precioUnitario | number:'1.2-2' }}</td>
               <td>Q{{ venta.importeOriginal | number:'1.2-2' }}</td>
               <td>{{ venta.descuentoPorcentaje | number:'1.0-2' }}%</td>
-              <td><strong>Q{{ venta.importe | number:'1.2-2' }}</strong></td>
+              <td class="papus-money-cell">Q{{ venta.importe | number:'1.2-2' }}</td>
               <td>{{ venta.metodoPago }}</td>
               <td>
                 <div class="d-flex gap-2">
@@ -214,20 +213,20 @@
           </tbody>
         </table>
       </div>
-      <nav class="d-flex flex-wrap align-items-center justify-content-center gap-3 mt-3 px-1" *ngIf="!cargando && tamanoPagina > 0 && totalFiltrados > 0 && totalPaginas > 1" aria-label="Paginaci�n de la lista de ventas">
-        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="paginaAnterior()" [disabled]="paginaActual <= 1">Anterior</button>
+      <nav class="papus-pagination d-flex flex-wrap align-items-center justify-content-center gap-3 mt-3 px-1" *ngIf="!cargando && tamanoPagina > 0 && totalFiltrados > 0 && totalPaginas > 1" aria-label="Paginaci�n de la lista de ventas">
+        <button type="button" class="btn btn-papus-ghost btn-sm" (click)="paginaAnterior()" [disabled]="paginaActual <= 1">Anterior</button>
         <span class="text-muted small">Página {{ paginaActual }} de {{ totalPaginas }}</span>
-        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="paginaSiguiente()" [disabled]="paginaActual >= totalPaginas">Siguiente</button>
+        <button type="button" class="btn btn-papus-ghost btn-sm" (click)="paginaSiguiente()" [disabled]="paginaActual >= totalPaginas">Siguiente</button>
       </nav>
-      <div class="text-center" *ngIf="cargando"><div class="spinner-border text-primary" role="status"></div></div>
+      <div class="text-center py-4" *ngIf="cargando"><div class="spinner-border" role="status"></div></div>
     </div>
   </div>
 
   <!-- Modal de Confirmación -->
-  <div class="modal fade" [class.show]="mostrarModalConfirmacion" [style.display]="mostrarModalConfirmacion ? 'block' : 'none'" tabindex="-1" role="dialog" [attr.aria-hidden]="!mostrarModalConfirmacion"><div class="modal-dialog modal-dialog-centered" role="document"><div class="modal-content"><div class="modal-header bg-warning"><h5 class="modal-title text-white">Confirmar Acción</h5><button type="button" class="btn-close btn-close-white" (click)="cerrarModalConfirmacion()" aria-label="Close"></button></div><div class="modal-body"><p class="mb-0">{{ mensajeConfirmacion }}</p></div><div class="modal-footer"><button type="button" class="button" (click)="cerrarModalConfirmacion()"><span>Cancelar</span></button><button type="button" class="btn btn-danger" (click)="confirmarAccion()">Confirmar</button></div></div></div></div>
+  <div class="modal fade" [class.show]="mostrarModalConfirmacion" [style.display]="mostrarModalConfirmacion ? 'block' : 'none'" tabindex="-1" role="dialog" [attr.aria-hidden]="!mostrarModalConfirmacion"><div class="modal-dialog modal-dialog-centered" role="document"><div class="modal-content"><div class="modal-header papus-modal-header-warning"><h5 class="modal-title">Confirmar accion</h5><button type="button" class="btn-close" (click)="cerrarModalConfirmacion()" aria-label="Close"></button></div><div class="modal-body"><p class="mb-0">{{ mensajeConfirmacion }}</p></div><div class="modal-footer"><button type="button" class="btn btn-papus-ghost" (click)="cerrarModalConfirmacion()">Cancelar</button><button type="button" class="btn btn-papus-primary" (click)="confirmarAccion()">Confirmar</button></div></div></div></div>
   <div class="modal-backdrop fade" [class.show]="mostrarModalConfirmacion" [style.display]="mostrarModalConfirmacion ? 'block' : 'none'" (click)="cerrarModalConfirmacion()"></div>
 
   <!-- Modal de Notificación -->
-  <div class="modal fade" [class.show]="mostrarModalNotificacion" [style.display]="mostrarModalNotificacion ? 'block' : 'none'" tabindex="-1" role="dialog" [attr.aria-hidden]="!mostrarModalNotificacion"><div class="modal-dialog modal-dialog-centered modal-sm" role="document"><div class="modal-content"><div class="modal-header" [ngClass]="{ 'bg-success': tipoNotificacion === 'success', 'bg-danger': tipoNotificacion === 'error', 'bg-warning': tipoNotificacion === 'warning', 'bg-info': tipoNotificacion === 'info' }"><h5 class="modal-title text-white">{{ tipoNotificacion === 'success' ? 'éxito' : tipoNotificacion === 'error' ? 'Error' : tipoNotificacion === 'warning' ? 'Advertencia' : 'Información' }}</h5><button type="button" class="btn-close btn-close-white" (click)="cerrarModalNotificacion()" aria-label="Close"></button></div><div class="modal-body"><p class="mb-0">{{ mensajeNotificacion }}</p></div><div class="modal-footer"><button type="button" class="btn btn-primary" (click)="cerrarModalNotificacion()">Aceptar</button></div></div></div></div>
+  <div class="modal fade" [class.show]="mostrarModalNotificacion" [style.display]="mostrarModalNotificacion ? 'block' : 'none'" tabindex="-1" role="dialog" [attr.aria-hidden]="!mostrarModalNotificacion"><div class="modal-dialog modal-dialog-centered modal-sm" role="document"><div class="modal-content"><div class="modal-header" [ngClass]="{ 'papus-modal-header-success': tipoNotificacion === 'success', 'papus-modal-header-danger': tipoNotificacion === 'error', 'papus-modal-header-warning': tipoNotificacion === 'warning', 'papus-modal-header-info': tipoNotificacion === 'info' }"><h5 class="modal-title">{{ tipoNotificacion === 'success' ? 'Exito' : tipoNotificacion === 'error' ? 'Error' : tipoNotificacion === 'warning' ? 'Advertencia' : 'Informacion' }}</h5><button type="button" class="btn-close" (click)="cerrarModalNotificacion()" aria-label="Close"></button></div><div class="modal-body"><p class="mb-0">{{ mensajeNotificacion }}</p></div><div class="modal-footer"><button type="button" class="btn btn-papus-primary" (click)="cerrarModalNotificacion()">Aceptar</button></div></div></div></div>
   <div class="modal-backdrop fade" [class.show]="mostrarModalNotificacion" [style.display]="mostrarModalNotificacion ? 'block' : 'none'" (click)="cerrarModalNotificacion()"></div>
 </div>

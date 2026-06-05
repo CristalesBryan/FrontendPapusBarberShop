@@ -1,36 +1,15 @@
-.container-fluid {
-  padding: 20px;
-}
-
 .page-container {
-  padding-top: 80px; /* Espacio para que el navbar no cubra el contenido */
+  padding-top: 0;
 }
 
-.card {
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  border: none;
-  margin-bottom: 20px;
-}
-
-.card-header {
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
-  font-weight: 600;
-}
-
-.card-header h5 {
-  color: #000000;
-  margin: 0;
-}
-
-.table th {
-  background-color: #f8f9fa;
-  font-weight: 600;
+.papus-calendar-card {
+  overflow: hidden;
 }
 
 .badge {
-  padding: 0.5em 0.75em;
-  font-size: 0.875em;
+  padding: 0.35em 0.65em;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
 }
 
 .btn-sm {
@@ -115,15 +94,15 @@
   filter: invert(1) grayscale(100%) brightness(200%);
 }
 
-/* Estilos del Calendario Semanal con Columna de Barberos */
+/* Calendario semanal premium */
 .schedule-table-container {
   overflow-x: auto;
 }
 
 .schedule-table-header {
   display: flex;
-  background-color: #f8f9fa;
-  border-bottom: 2px solid #dee2e6;
+  background: var(--ink-elevated);
+  border-bottom: 1px solid var(--border-gold);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -133,10 +112,14 @@
   min-width: 200px;
   max-width: 200px;
   padding: 16px;
-  font-weight: 600;
-  color: #495057;
-  border-right: 2px solid #dee2e6;
-  background-color: #f8f9fa;
+  font-family: var(--font-display);
+  font-weight: 500;
+  color: var(--gold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  border-right: 1px solid var(--border-gold);
+  background: var(--ink-elevated);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -151,26 +134,26 @@
   flex: 1;
   padding: 12px 8px;
   text-align: center;
-  border-right: 1px solid #dee2e6;
+  border-right: 1px solid var(--border-subtle);
   min-width: 120px;
-  transition: background-color 0.2s;
+  transition: background var(--transition-base);
 }
 
 .schedule-day-header:hover {
-  background-color: #e9ecef;
+  background: rgba(201, 168, 76, 0.08);
 }
 
 .schedule-day-header.today {
-  background-color: #e7f3ff;
-  border: 2px solid #0d6efd;
-  border-radius: 8px;
+  background: rgba(201, 168, 76, 0.1);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-sm);
   margin: 2px;
 }
 
 .schedule-day-header.selected {
-  background-color: #0d6efd;
-  color: white;
-  border-radius: 8px;
+  background: rgba(201, 168, 76, 0.22);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-sm);
   margin: 2px;
 }
 
@@ -183,9 +166,10 @@
 }
 
 .day-name {
-  font-size: 12px;
-  color: #6c757d;
-  text-transform: lowercase;
+  font-size: 11px;
+  color: var(--cream-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   margin-bottom: 4px;
   font-weight: 500;
 }
@@ -195,21 +179,21 @@
 }
 
 .day-number {
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-weight: 500;
   font-size: 18px;
-  color: #212529;
+  color: var(--cream);
 }
 
 .day-number.today-number {
-  background-color: #0d6efd;
-  color: white;
+  background: var(--gold);
+  color: var(--ink-deep);
   border-radius: 50%;
   width: 32px;
   height: 32px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
 }
 
 .schedule-day-header.selected .day-number {
@@ -223,7 +207,7 @@
 
 .schedule-row {
   display: flex;
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: 1px solid var(--border-subtle);
   min-height: 150px;
 }
 
@@ -231,42 +215,42 @@
   min-width: 200px;
   max-width: 200px;
   padding: 12px;
-  border-right: 2px solid #dee2e6;
-  background-color: #ffffff;
+  border-right: 1px solid var(--border-gold);
+  background: var(--ink-surface);
   display: flex;
   align-items: flex-start;
   position: sticky;
   left: 0;
   z-index: 5;
-  background-color: #ffffff;
 }
 
 .barbero-name {
-  font-weight: 600;
-  color: #495057;
-  font-size: 14px;
+  font-family: var(--font-display);
+  font-weight: 500;
+  color: var(--gold);
+  font-size: 0.9rem;
 }
 
 .schedule-day-cell {
   flex: 1;
   padding: 8px;
-  border-right: 1px solid #dee2e6;
+  border-right: 1px solid var(--border-subtle);
   min-width: 120px;
-  background-color: #ffffff;
+  background: var(--ink-deep);
   position: relative;
-  transition: background-color 0.2s;
+  transition: background var(--transition-base);
 }
 
 .schedule-day-cell:hover {
-  background-color: #f8f9fa;
+  background: rgba(201, 168, 76, 0.04);
 }
 
 .schedule-day-cell.today {
-  background-color: #f0f8ff;
+  background: rgba(201, 168, 76, 0.03);
 }
 
 .schedule-day-cell.selected {
-  background-color: #e7f3ff;
+  background: rgba(201, 168, 76, 0.06);
 }
 
 .citas-container {
@@ -277,52 +261,52 @@
 }
 
 .cita-item {
-  background-color: #ffffff;
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
+  background: var(--ink-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
   padding: 8px;
   font-size: 12px;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
 }
 
 .cita-item:hover {
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  transform: translateY(-1px);
+  box-shadow: var(--shadow-gold);
+  transform: translateY(-2px);
+  border-color: var(--border-gold);
 }
 
 .cita-confirmada {
-  border-left: 4px solid #28a745;
-  background-color: #f0fff4;
+  border-color: rgba(110, 207, 154, 0.4);
+  background: rgba(72, 160, 110, 0.12);
 }
 
 .cita-pendiente {
-  border-left: 4px solid #ffc107;
-  background-color: #fffbf0;
+  border-color: var(--border-gold);
+  background: rgba(201, 168, 76, 0.1);
 }
 
 .cita-cancelada {
-  border-left: 4px solid #dc3545;
-  background-color: #fff5f5;
-  opacity: 0.7;
+  border-color: rgba(200, 100, 100, 0.35);
+  background: rgba(180, 60, 60, 0.1);
+  opacity: 0.75;
 }
 
 .cita-completada {
-  border-left: 4px solid #17a2b8;
-  background-color: #f0f9ff;
+  border-color: rgba(201, 168, 76, 0.5);
+  background: rgba(201, 168, 76, 0.08);
 }
 
 .cita-time {
   font-weight: 600;
-  color: #495057;
+  color: var(--gold);
   margin-bottom: 4px;
   font-size: 11px;
 }
 
 .cita-cliente {
   font-weight: 500;
-  color: #212529;
+  color: var(--cream);
   margin-bottom: 2px;
   font-size: 11px;
   white-space: nowrap;
@@ -331,7 +315,7 @@
 }
 
 .cita-tipo {
-  color: #6c757d;
+  color: var(--cream-muted);
   font-size: 10px;
   white-space: nowrap;
   overflow: hidden;
@@ -347,22 +331,21 @@
 }
 
 .cita-mas-indicador {
-  background-color: #e9ecef;
-  border: 1px dashed #6c757d;
-  border-radius: 6px;
+  background: var(--ink-elevated);
+  border: 1px dashed var(--border-gold);
+  border-radius: var(--radius-sm);
   padding: 6px 8px;
   font-size: 11px;
-  color: #495057;
+  color: var(--gold);
   cursor: pointer;
   text-align: center;
-  transition: all 0.2s;
+  transition: all var(--transition-base);
   margin-top: 4px;
 }
 
 .cita-mas-indicador:hover {
-  background-color: #dee2e6;
-  border-color: #495057;
-  color: #212529;
+  background: rgba(201, 168, 76, 0.12);
+  color: var(--gold-light);
   transform: translateY(-1px);
 }
 
@@ -376,12 +359,15 @@
 }
 
 .cita-card-modal {
-  transition: all 0.2s;
+  background: var(--ink-elevated);
+  border: 1px solid var(--border-subtle) !important;
+  transition: all var(--transition-base);
 }
 
 .cita-card-modal:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-gold);
   transform: translateY(-2px);
+  border-color: var(--border-gold) !important;
 }
 
 .cita-actions .btn-link {

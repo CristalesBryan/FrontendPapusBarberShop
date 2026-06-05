@@ -1,68 +1,31 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+<nav class="navbar navbar-expand-lg papus-navbar fixed-top">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">
+        <a class="navbar-brand" routerLink="/dashboard">
             <img src="/assets/images/Logo.jpeg" alt="Papus BarberShop" class="navbar-logo">
+            <span class="d-none d-md-inline">Papus BarberShop</span>
         </a>
-        <button class="navbar-toggler" type="button" (click)="toggleMenu()">
+        <button class="navbar-toggler" type="button" (click)="toggleMenu()" aria-label="Menú">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" [class.show]="menuOpen">
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item" *ngIf="isAdmin()">
-                    <a class="nav-link" routerLink="/dashboard" routerLinkActive="active">
-                        <i class="fas fa-home"></i> Dashboard
-                    </a>
-                </li>
-                <li class="nav-item" *ngIf="isAdmin()">
-                    <a class="nav-link" routerLink="/barberos" routerLinkActive="active">
-                        <i class="fas fa-user-tie"></i> Barberos
-                    </a>
-                </li>
-                <li class="nav-item" *ngIf="canAccessServiciosOVentas()">
-                    <a class="nav-link" routerLink="/servicios" routerLinkActive="active">
-                        <i class="fas fa-scissors"></i> Servicios
-                    </a>
-                </li>
-                <li class="nav-item" *ngIf="canAccessProductos()">
-                    <a class="nav-link" routerLink="/productos" routerLinkActive="active">
-                        <i class="fas fa-box"></i> Productos
-                    </a>
-                </li>
-                <li class="nav-item" *ngIf="canAccessServiciosOVentas()">
-                    <a class="nav-link" routerLink="/ventas" routerLinkActive="active">
-                        <i class="fas fa-shopping-cart"></i> Ventas
-                    </a>
-                </li>
-                <li class="nav-item" *ngIf="canAccessGestionCatalogo()">
-                    <a class="nav-link" routerLink="/gestion-catalogo" routerLinkActive="active">
-                        <i class="fas fa-images"></i> Gestión Catálogo
-                    </a>
-                </li>
-                <li class="nav-item" *ngIf="canAccessCompraAqui()">
-                    <a class="nav-link" routerLink="/compra-aqui" routerLinkActive="active">
-                        <i class="fas fa-shopping-bag"></i> Compra Aquí
-                    </a>
-                </li>
-                <li class="nav-item" *ngIf="isAdmin()">
-                    <a class="nav-link" routerLink="/reportes" routerLinkActive="active">
-                        <i class="fas fa-chart-bar"></i> Reportes
-                    </a>
-                </li>
-            </ul>
-            
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item dropdown" *ngIf="currentUser">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-user"></i> {{ currentUser.username }}
-                        <span class="badge bg-secondary ms-1">{{ currentUser.rol }}</span>
+                    <a class="nav-link dropdown-toggle user-menu-trigger" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle"></i>
+                        {{ currentUser.username }}
+                        <span class="badge role-badge ms-1">{{ currentUser.rol }}</span>
                     </a>
-                    <ul class="dropdown-menu">
-                        <li *ngIf="isAdmin()"><a class="dropdown-item" (click)="abrirModalCambiarPassword()">
-                            <i class="fas fa-key"></i> Cambiar contraseña
-                        </a></li>
-                        <li><a class="dropdown-item" (click)="logout()">
-                            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-                        </a></li>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li *ngIf="isAdmin()">
+                            <a class="dropdown-item" href="#" (click)="abrirModalCambiarPassword(); $event.preventDefault()">
+                                <i class="fas fa-key me-2"></i> Cambiar contraseña
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#" (click)="logout(); $event.preventDefault()">
+                                <i class="fas fa-sign-out-alt me-2"></i> Cerrar sesión
+                            </a>
+                        </li>
                     </ul>
                 </li>
             </ul>
@@ -70,45 +33,43 @@
     </div>
 </nav>
 
-<!-- Modal Cambiar contraseña (solo ADMIN) -->
-<div class="modal fade" [class.show]="mostrarModalPassword" [style.display]="mostrarModalPassword ? 'block' : 'none'" 
+<div class="modal fade" [class.show]="mostrarModalPassword" [style.display]="mostrarModalPassword ? 'block' : 'none'"
      tabindex="-1" role="dialog" (click)="cerrarModalPassword($event)">
     <div class="modal-dialog modal-dialog-centered" role="document" (click)="$event.stopPropagation()">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-key me-2"></i>Cambiar contraseña</h5>
+                <h5 class="modal-title text-gold"><i class="fas fa-key me-2"></i>Cambiar contraseña</h5>
                 <button type="button" class="btn-close" (click)="cerrarModalPassword($event)" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
                 <p class="text-muted small">Indica tu contraseña actual y la nueva. Mínimo 4 caracteres.</p>
                 <div class="mb-3">
                     <label class="form-label">Contraseña actual</label>
-                    <input type="password" class="form-control" [(ngModel)]="passwordActual" name="passwordActual" 
-                           placeholder="Contraseña actual" autocomplete="current-password">
+                    <input type="password" class="form-control" [(ngModel)]="passwordActual" name="passwordActual"
+                           autocomplete="current-password">
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Nueva contraseña</label>
-                    <input type="password" class="form-control" [(ngModel)]="passwordNueva" name="passwordNueva" 
-                           placeholder="Nueva contraseña" autocomplete="new-password">
+                    <input type="password" class="form-control" [(ngModel)]="passwordNueva" name="passwordNueva"
+                           autocomplete="new-password">
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Repetir nueva contraseña</label>
-                    <input type="password" class="form-control" [(ngModel)]="passwordRepetir" name="passwordRepetir" 
-                           placeholder="Repetir nueva contraseña" autocomplete="new-password">
+                    <input type="password" class="form-control" [(ngModel)]="passwordRepetir" name="passwordRepetir"
+                           autocomplete="new-password">
                 </div>
                 <div class="alert alert-danger py-2 mb-0" *ngIf="mensajeErrorPassword">{{ mensajeErrorPassword }}</div>
                 <div class="alert alert-success py-2 mb-0" *ngIf="mensajeOkPassword">{{ mensajeOkPassword }}</div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" (click)="cerrarModalPassword($event)">Cancelar</button>
-                <button type="button" class="btn btn-primary" (click)="enviarCambioPassword()" [disabled]="enviandoPassword">
-                    <span *ngIf="!enviandoPassword">Cambiar contraseña</span>
+                <button type="button" class="btn btn-papus-ghost" (click)="cerrarModalPassword($event)">Cancelar</button>
+                <button type="button" class="btn btn-papus-primary" (click)="enviarCambioPassword()" [disabled]="enviandoPassword">
+                    <span *ngIf="!enviandoPassword">Guardar</span>
                     <span *ngIf="enviandoPassword"><span class="spinner-border spinner-border-sm me-1"></span>Guardando...</span>
                 </button>
             </div>
         </div>
     </div>
 </div>
-<div class="modal-backdrop fade" [class.show]="mostrarModalPassword" 
+<div class="modal-backdrop fade" [class.show]="mostrarModalPassword"
      [style.display]="mostrarModalPassword ? 'block' : 'none'" (click)="cerrarModalPassword($event)"></div>
-

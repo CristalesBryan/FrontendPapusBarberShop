@@ -8,13 +8,13 @@ import { AuthService } from '../../services/auth.service';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="access-denied-container">
-      <div class="text-center">
-        <i class="fas fa-ban fa-5x text-danger mb-4"></i>
-        <h1 class="display-4">Acceso Denegado</h1>
-        <p class="lead">No tiene permisos para acceder a esta página.</p>
-        <button (click)="volver()" class="btn btn-primary mt-3">
-          <i class="fas fa-home"></i> {{ botonTexto }}
+    <div class="access-denied-container papus-admin-page">
+      <div class="access-denied-card text-center">
+        <i class="fas fa-ban fa-4x mb-4 access-icon"></i>
+        <h1>Acceso denegado</h1>
+        <p class="lead">No tiene permisos para acceder a esta pagina.</p>
+        <button type="button" (click)="volver()" class="btn btn-papus-primary mt-3">
+          <i class="fas fa-home me-2"></i>{{ botonTexto }}
         </button>
       </div>
     </div>
@@ -25,7 +25,26 @@ import { AuthService } from '../../services/auth.service';
       display: flex;
       align-items: center;
       justify-content: center;
-      background-color: #f5f5f5;
+      background: var(--ink-deep);
+      padding: 2rem;
+    }
+    .access-denied-card {
+      padding: 3rem 2.5rem;
+      background: var(--ink-surface);
+      border: 1px solid var(--border-gold);
+      border-radius: var(--radius-lg);
+      max-width: 440px;
+    }
+    .access-icon {
+      color: var(--gold);
+    }
+    .access-denied-card h1 {
+      font-family: var(--font-display);
+      color: var(--gold);
+      font-size: 1.75rem;
+    }
+    .access-denied-card .lead {
+      color: var(--cream-muted);
     }
   `]
 })

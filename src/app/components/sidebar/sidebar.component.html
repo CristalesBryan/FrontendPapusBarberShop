@@ -1,34 +1,70 @@
-<div class="sidebar" 
+<div class="sidebar"
      [class.collapsed]="isCollapsed"
      (mouseenter)="onMouseEnter()"
      (mouseleave)="onMouseLeave()">
-  <div class="sidebar-header">
-    <button class="btn btn-link toggle-btn" (click)="toggleSidebar()">
-      <i class="fas" [class.fa-chevron-left]="!isCollapsed" [class.fa-chevron-right]="isCollapsed"></i>
+  <div class="sidebar-brand" *ngIf="!isCollapsed">
+    <img src="/assets/images/Logo.jpeg" alt="Papus BarberShop">
+    <span class="sidebar-brand-text">Papus</span>
+  </div>
+
+  <div class="sidebar-header" *ngIf="isCollapsed">
+    <button class="btn btn-link toggle-btn" type="button" (click)="toggleSidebar()" aria-label="Expandir menú">
+      <i class="fas fa-bars"></i>
     </button>
   </div>
+
   <div class="sidebar-content">
     <nav class="sidebar-nav">
-    <ul class="nav flex-column">
-      <li class="nav-item" *ngFor="let item of menuItems">
-        <a class="nav-link" 
-           *ngIf="canShowItem(item) && item.external"
-           [href]="item.path"
-           target="_blank"
-           rel="noopener noreferrer">
-          <i [class]="item.icon"></i>
-          <span *ngIf="!isCollapsed">{{ item.label }}</span>
-        </a>
-        <a class="nav-link" 
-           *ngIf="canShowItem(item) && !item.external"
-           [routerLink]="item.path" 
-           routerLinkActive="active">
-          <i [class]="item.icon"></i>
-          <span *ngIf="!isCollapsed">{{ item.label }}</span>
-        </a>
-      </li>
-    </ul>
-  </nav>
+      <div class="nav-section-label" *ngIf="!isCollapsed">Operaciones</div>
+      <ul class="nav flex-column">
+        <li class="nav-item" *ngFor="let item of menuItemsOperaciones">
+          <a class="nav-link"
+             *ngIf="canShowItem(item) && item.external"
+             [href]="item.path"
+             target="_blank"
+             rel="noopener noreferrer">
+            <i [class]="item.icon"></i>
+            <span>{{ item.label }}</span>
+          </a>
+          <a class="nav-link"
+             *ngIf="canShowItem(item) && !item.external"
+             [routerLink]="item.path"
+             routerLinkActive="active">
+            <i [class]="item.icon"></i>
+            <span>{{ item.label }}</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="nav-divider"></div>
+      <div class="nav-section-label" *ngIf="!isCollapsed">Información</div>
+      <ul class="nav flex-column">
+        <li class="nav-item" *ngFor="let item of menuItemsInfo">
+          <a class="nav-link"
+             *ngIf="canShowItem(item) && item.external"
+             [href]="item.path"
+             target="_blank"
+             rel="noopener noreferrer">
+            <i [class]="item.icon"></i>
+            <span>{{ item.label }}</span>
+          </a>
+          <a class="nav-link"
+             *ngIf="canShowItem(item) && !item.external"
+             [routerLink]="item.path"
+             routerLinkActive="active">
+            <i [class]="item.icon"></i>
+            <span>{{ item.label }}</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+  <div class="sidebar-footer" *ngIf="currentUser">
+    <div class="sidebar-avatar">{{ userInitials }}</div>
+    <div class="sidebar-user-info">
+      <div class="sidebar-user-name">{{ currentUser.username }}</div>
+      <div class="sidebar-user-role">{{ currentUser.rol }}</div>
+    </div>
   </div>
 </div>
-
