@@ -226,7 +226,37 @@ export class HorariosComponent implements OnInit {
            fecha.getFullYear() === hoy.getFullYear();
   }
 
+  private hoyNormalizado(): Date {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    return hoy;
+  }
+
+  esFechaPasada(fecha: Date): boolean {
+    return fecha.getTime() < this.hoyNormalizado().getTime();
+  }
+
+  getFechaMinima(): string {
+    return this.formatearFecha(this.hoyNormalizado());
+  }
+
+  puedeNavegarDiaAnterior(): boolean {
+    const nuevaFecha = new Date(this.fechaSeleccionada);
+    nuevaFecha.setDate(nuevaFecha.getDate() - 1);
+    nuevaFecha.setHours(0, 0, 0, 0);
+    return nuevaFecha.getTime() >= this.hoyNormalizado().getTime();
+  }
+
+  private esFechaPasadaStr(fechaStr: string): boolean {
+    if (!fechaStr) return false;
+    const partes = fechaStr.split('-').map(Number);
+    const fecha = new Date(partes[0], partes[1] - 1, partes[2]);
+    fecha.setHours(0, 0, 0, 0);
+    return this.esFechaPasada(fecha);
+  }
+
   diaAnterior(): void {
+    if (!this.puedeNavegarDiaAnterior()) return;
     const nuevaFecha = new Date(this.fechaSeleccionada);
     nuevaFecha.setDate(nuevaFecha.getDate() - 1);
     nuevaFecha.setHours(0, 0, 0, 0);
@@ -288,7 +318,38 @@ export class HorariosComponent implements OnInit {
     this.resetearFormulario();
   }
 
+  onDiaHeaderClick(fecha: Date): void {
+    if (this.esFechaPasada(fecha)) {
+      this.mostrarNotificacion('No se pueden asignar horarios en fechas pasadas.', 'warning');
+      return;
+    }
+    this.abrirFormularioConFecha(fecha);
+  }
+
+  onCeldaHorarioClick(fecha: Date, barberoId: number): void {
+    if (this.esFechaPasada(fecha)) {
+      this.mostrarNotificacion('No se pueden asignar horarios en fechas pasadas.', 'warning');
+      return;
+    }
+    this.abrirFormularioConFecha(fecha, barberoId);
+  }
+
+  onFechaHorarioCambiada(): void {
+    if (this.esFechaPasadaStr(this.fechaHorarioSeleccionada)) {
+      const hoy = this.formatearFecha(this.hoyNormalizado());
+      this.fechaHorarioSeleccionada = hoy;
+      this.nuevoHorario.fecha = hoy;
+      this.mostrarNotificacion('No se pueden asignar horarios en fechas pasadas.', 'warning');
+    } else {
+      this.nuevoHorario.fecha = this.fechaHorarioSeleccionada;
+    }
+  }
+
   abrirFormularioConFecha(fecha: Date, barberoId?: number): void {
+    if (this.esFechaPasada(fecha)) {
+      this.mostrarNotificacion('No se pueden asignar horarios en fechas pasadas.', 'warning');
+      return;
+    }
     this.fechaHorarioSeleccionada = this.formatearFecha(fecha);
     this.nuevoHorario.fecha = this.fechaHorarioSeleccionada;
     this.editando = false;
@@ -377,6 +438,12 @@ export class HorariosComponent implements OnInit {
     // Convertir las horas seleccionadas a formato 24 horas antes de guardar
     this.nuevoHorario.horaEntrada = this.convertir12hA24h(this.horaEntradaSeleccionada);
     this.nuevoHorario.horaSalida = this.convertir12hA24h(this.horaSalidaSeleccionada);
+
+    const fechaGuardar = this.fechaHorarioSeleccionada || this.nuevoHorario.fecha;
+    if (!this.editando && fechaGuardar && this.esFechaPasadaStr(fechaGuardar)) {
+      this.mostrarNotificacion('No se pueden asignar horarios en fechas pasadas.', 'warning');
+      return;
+    }
     
     if (this.editando && this.horarioSeleccionado) {
       this.cargando = true;

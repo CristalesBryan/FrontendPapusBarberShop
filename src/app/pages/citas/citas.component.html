@@ -6,7 +6,7 @@
   <div class="papus-card mb-3">
     <div class="papus-card-body papus-toolbar">
       <div class="d-flex align-items-center flex-wrap gap-2">
-        <button type="button" class="btn btn-papus-ghost btn-sm" (click)="diaAnterior()" title="Dia anterior" aria-label="Dia anterior">
+        <button type="button" class="btn btn-papus-ghost btn-sm" (click)="diaAnterior()" [disabled]="!puedeNavegarDiaAnterior()" title="Dia anterior" aria-label="Dia anterior">
           <i class="fas fa-chevron-left"></i>
         </button>
         <h4 class="papus-calendar-range mb-0 mx-2">{{ getRangoSemana() }}</h4>
@@ -84,7 +84,7 @@
           <div class="col-md-4">
             <label class="form-label">Fecha *</label>
             <input type="date" class="form-control" [(ngModel)]="fechaSeleccionada" 
-                   name="fecha" required (change)="onFechaCambiada()">
+                   name="fecha" required [min]="getFechaMinima()" (change)="onFechaCambiada()">
           </div>
         </div>
 
@@ -235,8 +235,9 @@
               *ngFor="let fecha of semanaActual"
               [class.today]="esHoy(fecha)"
               [class.selected]="esFechaSeleccionada(fecha)"
-              (click)="abrirFormularioConFecha(fecha)"
-              style="cursor: pointer;">
+              [class.past]="esFechaPasada(fecha)"
+              (click)="onDiaHeaderClick(fecha)"
+              [style.cursor]="esFechaPasada(fecha) ? 'not-allowed' : 'pointer'">
               <div class="day-name">{{ getDiaSemanaAbrev(fecha) }}</div>
               <div class="day-number" [class.today-number]="esFechaSeleccionada(fecha)">
                 {{ getDiaNumero(fecha) }}
@@ -261,8 +262,9 @@
               *ngFor="let fecha of semanaActual"
               [class.today]="esHoy(fecha)"
               [class.selected]="esFechaSeleccionada(fecha)"
-              (click)="getCitasAdicionales(fecha, barbero.id) > 0 ? abrirModalCitasDia(fecha, barbero.id, $event) : abrirFormularioConFecha(fecha, barbero.id)"
-              style="cursor: pointer;">
+              [class.past]="esFechaPasada(fecha)"
+              (click)="onCeldaCalendarioClick(fecha, barbero.id, $event)"
+              [style.cursor]="esFechaPasada(fecha) && getCitasPorFechaYBarbero(fecha, barbero.id).length === 0 ? 'not-allowed' : 'pointer'">
               <div class="citas-container">
                 <!-- Mostrar solo las primeras 2 citas -->
                 <div 

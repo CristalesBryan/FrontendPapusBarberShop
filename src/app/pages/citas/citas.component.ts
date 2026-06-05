@@ -171,7 +171,37 @@ export class CitasComponent implements OnInit {
     }
   }
 
+  private hoyNormalizado(): Date {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    return hoy;
+  }
+
+  esFechaPasada(fecha: Date): boolean {
+    return fecha.getTime() < this.hoyNormalizado().getTime();
+  }
+
+  getFechaMinima(): string {
+    return this.formatearFecha(this.hoyNormalizado());
+  }
+
+  puedeNavegarDiaAnterior(): boolean {
+    const nuevaFecha = new Date(this.fechaSeleccionadaCalendario);
+    nuevaFecha.setDate(nuevaFecha.getDate() - 1);
+    nuevaFecha.setHours(0, 0, 0, 0);
+    return nuevaFecha.getTime() >= this.hoyNormalizado().getTime();
+  }
+
+  private esFechaPasadaStr(fechaStr: string): boolean {
+    if (!fechaStr) return false;
+    const partes = fechaStr.split('-').map(Number);
+    const fecha = new Date(partes[0], partes[1] - 1, partes[2]);
+    fecha.setHours(0, 0, 0, 0);
+    return this.esFechaPasada(fecha);
+  }
+
   diaAnterior(): void {
+    if (!this.puedeNavegarDiaAnterior()) return;
     const nuevaFecha = new Date(this.fechaSeleccionadaCalendario);
     nuevaFecha.setDate(nuevaFecha.getDate() - 1);
     nuevaFecha.setHours(0, 0, 0, 0);
@@ -284,7 +314,36 @@ export class CitasComponent implements OnInit {
     return `${anio}-${mes}-${dia}`;
   }
 
+  onDiaHeaderClick(fecha: Date): void {
+    if (this.esFechaPasada(fecha)) {
+      this.mostrarNotificacion('No se pueden agendar citas en fechas pasadas.', 'warning');
+      return;
+    }
+    this.abrirFormularioConFecha(fecha);
+  }
+
+  onCeldaCalendarioClick(fecha: Date, barberoId: number, event?: Event): void {
+    if (this.esFechaPasada(fecha)) {
+      const citas = this.getCitasPorFechaYBarbero(fecha, barberoId);
+      if (citas.length > 0) {
+        this.abrirModalCitasDia(fecha, barberoId, event);
+      } else {
+        this.mostrarNotificacion('No se pueden agendar citas en fechas pasadas.', 'warning');
+      }
+      return;
+    }
+    if (this.getCitasAdicionales(fecha, barberoId) > 0) {
+      this.abrirModalCitasDia(fecha, barberoId, event);
+    } else {
+      this.abrirFormularioConFecha(fecha, barberoId);
+    }
+  }
+
   abrirFormularioConFecha(fecha: Date, barberoId?: number): void {
+    if (this.esFechaPasada(fecha)) {
+      this.mostrarNotificacion('No se pueden agendar citas en fechas pasadas.', 'warning');
+      return;
+    }
     const fechaStr = this.formatearFecha(fecha);
     this.fechaSeleccionada = fechaStr;
     this.nuevaCita.fecha = fechaStr;
@@ -505,6 +564,11 @@ export class CitasComponent implements OnInit {
   }
 
   onFechaCambiada(): void {
+    if (this.esFechaPasadaStr(this.fechaSeleccionada)) {
+      this.establecerFechaHoy();
+      this.mostrarNotificacion('No se pueden agendar citas en fechas pasadas.', 'warning');
+      return;
+    }
     // Limpiar selecciones cuando cambia la fecha
     this.barberoSeleccionado = 0;
     this.nuevaCita.barberoId = 0;
@@ -940,6 +1004,10 @@ export class CitasComponent implements OnInit {
   }
 
   guardarCita(): void {
+    if (this.esFechaPasadaStr(this.nuevaCita.fecha)) {
+      this.mostrarNotificacion('No se pueden agendar citas en fechas pasadas.', 'warning');
+      return;
+    }
     // Validar que todos los correos estén llenos
     const correosValidos = this.nuevaCita.correosConfirmacion.filter(c => c.trim() !== '');
     if (correosValidos.length === 0) {

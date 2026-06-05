@@ -179,6 +179,17 @@
   background: rgba(201, 168, 76, 0.06);
 }
 
+.papus-admin-page .schedule-day-header.past,
+.papus-admin-page .schedule-day-cell.past {
+  opacity: 0.45;
+}
+
+.papus-admin-page .schedule-day-header.past:hover,
+.papus-admin-page .schedule-day-cell.past:hover {
+  box-shadow: none;
+  background: var(--ink-surface) !important;
+}
+
 /* Bloques de horario */
 .papus-admin-page .schedule-item {
   background: var(--ink-surface);
