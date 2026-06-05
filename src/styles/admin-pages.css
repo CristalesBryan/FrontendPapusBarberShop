@@ -1,6 +1,18 @@
 /* Estilos compartidos — módulos admin Papus */
 
-/* Calendario (citas + horarios) */
+/* Tablas anidadas (detalle en reportes, etc.) */
+.papus-admin-page .papus-table .table,
+.papus-admin-page .table-responsive .table.papus-table {
+  background: transparent;
+}
+
+.papus-admin-page .papus-table .table tbody td,
+.papus-admin-page .papus-table .table tbody th {
+  background-color: inherit !important;
+  color: var(--text-primary) !important;
+}
+
+/* Calendario (citas + horarios) — prioridad sobre estilos legacy de componentes */
 .papus-admin-page .schedule-table-container {
   overflow-x: auto;
 }
@@ -50,10 +62,15 @@
 }
 
 .papus-admin-page .schedule-day-header.today {
-  background: rgba(201, 168, 76, 0.1);
-  border: 1px solid var(--border-gold);
+  background: var(--gold) !important;
+  border: 1px solid var(--gold) !important;
   border-radius: var(--radius-sm);
   margin: 2px;
+}
+
+.papus-admin-page .schedule-day-header.today .day-name,
+.papus-admin-page .schedule-day-header.today .day-number {
+  color: var(--ink-deep) !important;
 }
 
 .papus-admin-page .schedule-day-header.selected {
@@ -113,7 +130,7 @@
   max-width: 200px;
   padding: 12px;
   border-right: 1px solid var(--border-gold);
-  background: var(--ink-surface);
+  background: var(--ink-surface) !important;
   display: flex;
   align-items: flex-start;
   position: sticky;
@@ -124,25 +141,38 @@
 .papus-admin-page .barbero-name {
   font-family: var(--font-display);
   font-weight: 500;
-  color: var(--gold);
+  color: #ffffff !important;
   font-size: 0.9rem;
 }
 
 .papus-admin-page .schedule-day-cell {
   flex: 1;
   padding: 8px;
-  border-right: 1px solid var(--border-subtle);
+  border-right: 1px solid var(--border-cell) !important;
   min-width: 120px;
-  background: var(--ink-deep);
-  transition: background var(--transition-base);
+  background: var(--ink-surface) !important;
+  transition: background var(--transition-base), box-shadow var(--transition-base);
 }
 
 .papus-admin-page .schedule-day-cell:hover {
-  background: rgba(201, 168, 76, 0.04);
+  background: var(--ink-hover) !important;
+  box-shadow: inset 2px 0 0 var(--gold);
 }
 
 .papus-admin-page .schedule-day-cell.today {
-  background: rgba(201, 168, 76, 0.03);
+  background: var(--gold) !important;
+  color: var(--ink-deep);
+  box-shadow: inset 0 0 0 1px var(--gold-dark);
+}
+
+.papus-admin-page .schedule-day-cell.today .cita-item,
+.papus-admin-page .schedule-day-cell.today .schedule-item {
+  border-color: rgba(10, 10, 10, 0.2);
+}
+
+.papus-admin-page .schedule-day-cell.today .cita-time,
+.papus-admin-page .schedule-day-cell.today .schedule-time {
+  color: var(--ink-deep) !important;
 }
 
 .papus-admin-page .schedule-day-cell.selected {

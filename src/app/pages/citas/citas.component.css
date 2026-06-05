@@ -144,10 +144,15 @@
 }
 
 .schedule-day-header.today {
-  background: rgba(201, 168, 76, 0.1);
-  border: 1px solid var(--border-gold);
+  background: var(--gold) !important;
+  border: 1px solid var(--gold) !important;
   border-radius: var(--radius-sm);
   margin: 2px;
+}
+
+.schedule-day-header.today .day-name,
+.schedule-day-header.today .day-number {
+  color: var(--ink-deep) !important;
 }
 
 .schedule-day-header.selected {
@@ -227,26 +232,28 @@
 .barbero-name {
   font-family: var(--font-display);
   font-weight: 500;
-  color: var(--gold);
+  color: #ffffff !important;
   font-size: 0.9rem;
 }
 
 .schedule-day-cell {
   flex: 1;
   padding: 8px;
-  border-right: 1px solid var(--border-subtle);
+  border-right: 1px solid var(--border-cell, #2a2a2a);
   min-width: 120px;
-  background: var(--ink-deep);
+  background: var(--ink-surface) !important;
   position: relative;
-  transition: background var(--transition-base);
+  transition: background var(--transition-base), box-shadow var(--transition-base);
 }
 
 .schedule-day-cell:hover {
-  background: rgba(201, 168, 76, 0.04);
+  background: var(--ink-hover, #2a2a2a) !important;
+  box-shadow: inset 2px 0 0 var(--gold);
 }
 
 .schedule-day-cell.today {
-  background: rgba(201, 168, 76, 0.03);
+  background: var(--gold) !important;
+  color: var(--ink-deep);
 }
 
 .schedule-day-cell.selected {
