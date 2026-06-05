@@ -1,13 +1,27 @@
+<div class="sidebar-backdrop"
+     *ngIf="mobileOpen"
+     (click)="closeMobileMenu()"
+     aria-hidden="true"></div>
+
 <div class="sidebar"
-     [class.collapsed]="isCollapsed"
+     id="app-sidebar"
+     [class.collapsed]="isCollapsed && !mobileOpen"
+     [class.mobile-open]="mobileOpen"
      (mouseenter)="onMouseEnter()"
      (mouseleave)="onMouseLeave()">
-  <div class="sidebar-brand" *ngIf="!isCollapsed">
+  <div class="sidebar-mobile-header" *ngIf="mobileOpen">
+    <span class="sidebar-mobile-title">Menú</span>
+    <button type="button" class="btn btn-link toggle-btn" (click)="closeMobileMenu()" aria-label="Cerrar menú">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <div class="sidebar-brand" *ngIf="!isCollapsed || mobileOpen">
     <img src="/assets/images/Logo.jpeg" alt="Papus BarberShop">
     <span class="sidebar-brand-text">Papus</span>
   </div>
 
-  <div class="sidebar-header" *ngIf="isCollapsed">
+  <div class="sidebar-header" *ngIf="isCollapsed && !mobileOpen">
     <button class="btn btn-link toggle-btn" type="button" (click)="toggleSidebar()" aria-label="Expandir menú">
       <i class="fas fa-bars"></i>
     </button>
@@ -15,21 +29,23 @@
 
   <div class="sidebar-content">
     <nav class="sidebar-nav">
-      <div class="nav-section-label" *ngIf="!isCollapsed">Operaciones</div>
+      <div class="nav-section-label" *ngIf="!isCollapsed || mobileOpen">Operaciones</div>
       <ul class="nav flex-column">
         <li class="nav-item" *ngFor="let item of menuItemsOperaciones">
           <a class="nav-link"
              *ngIf="canShowItem(item) && item.external"
              [href]="item.path"
              target="_blank"
-             rel="noopener noreferrer">
+             rel="noopener noreferrer"
+             (click)="onNavClick()">
             <i [class]="item.icon"></i>
             <span>{{ item.label }}</span>
           </a>
           <a class="nav-link"
              *ngIf="canShowItem(item) && !item.external"
              [routerLink]="item.path"
-             routerLinkActive="active">
+             routerLinkActive="active"
+             (click)="onNavClick()">
             <i [class]="item.icon"></i>
             <span>{{ item.label }}</span>
           </a>
@@ -37,21 +53,23 @@
       </ul>
 
       <div class="nav-divider"></div>
-      <div class="nav-section-label" *ngIf="!isCollapsed">Información</div>
+      <div class="nav-section-label" *ngIf="!isCollapsed || mobileOpen">Información</div>
       <ul class="nav flex-column">
         <li class="nav-item" *ngFor="let item of menuItemsInfo">
           <a class="nav-link"
              *ngIf="canShowItem(item) && item.external"
              [href]="item.path"
              target="_blank"
-             rel="noopener noreferrer">
+             rel="noopener noreferrer"
+             (click)="onNavClick()">
             <i [class]="item.icon"></i>
             <span>{{ item.label }}</span>
           </a>
           <a class="nav-link"
              *ngIf="canShowItem(item) && !item.external"
              [routerLink]="item.path"
-             routerLinkActive="active">
+             routerLinkActive="active"
+             (click)="onNavClick()">
             <i [class]="item.icon"></i>
             <span>{{ item.label }}</span>
           </a>
@@ -62,7 +80,7 @@
 
   <div class="sidebar-footer" *ngIf="currentUser">
     <div class="sidebar-avatar">{{ userInitials }}</div>
-    <div class="sidebar-user-info">
+    <div class="sidebar-user-info" *ngIf="!isCollapsed || mobileOpen">
       <div class="sidebar-user-name">{{ currentUser.username }}</div>
       <div class="sidebar-user-role">{{ currentUser.rol }}</div>
     </div>

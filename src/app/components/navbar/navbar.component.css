@@ -12,6 +12,54 @@
   padding: 0 1.5rem;
 }
 
+.papus-navbar .container-fluid {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.papus-sidebar-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  color: var(--gold) !important;
+  text-decoration: none;
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  transition: background var(--transition-base), color var(--transition-base);
+}
+
+.papus-sidebar-toggle:hover,
+.papus-sidebar-toggle:focus-visible {
+  background: rgba(201, 168, 76, 0.12);
+  color: var(--gold-light) !important;
+}
+
+.papus-sidebar-toggle i {
+  font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .papus-sidebar-toggle {
+    display: inline-flex;
+  }
+
+  .papus-navbar .navbar-brand {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .papus-navbar .navbar-brand span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
 .papus-navbar .navbar-brand {
   font-family: var(--font-display);
   color: var(--gold) !important;

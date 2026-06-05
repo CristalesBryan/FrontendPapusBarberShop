@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { AuthService, User } from '../../services/auth.service';
+import { SidebarMobileService } from '../../services/sidebar-mobile.service';
 
 @Component({
     selector: 'app-navbar',
@@ -13,6 +14,7 @@ import { AuthService, User } from '../../services/auth.service';
 })
 export class NavbarComponent implements OnInit {
     menuOpen = false;
+    sidebarMobileOpen = false;
     currentUser: User | null = null;
 
     mostrarModalPassword = false;
@@ -25,17 +27,31 @@ export class NavbarComponent implements OnInit {
 
     constructor(
         private authService: AuthService,
-        private router: Router
+        private router: Router,
+        private sidebarMobile: SidebarMobileService
     ) {}
 
     ngOnInit(): void {
         this.authService.currentUser$.subscribe(user => {
             this.currentUser = user;
         });
+        this.sidebarMobile.mobileOpen$.subscribe(open => {
+            this.sidebarMobileOpen = open;
+            if (open) {
+                this.menuOpen = false;
+            }
+        });
     }
 
-    toggleMenu() {
+    toggleSidebarMobile(): void {
+        this.sidebarMobile.toggle();
+    }
+
+    toggleUserMenu(): void {
         this.menuOpen = !this.menuOpen;
+        if (this.menuOpen) {
+            this.sidebarMobile.close();
+        }
     }
 
     logout(): void {

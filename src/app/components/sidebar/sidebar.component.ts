@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
 import { AuthService, User } from '../../services/auth.service';
+import { SidebarMobileService } from '../../services/sidebar-mobile.service';
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
@@ -24,9 +25,16 @@ interface SidebarMenuItem {
 })
 export class SidebarComponent implements OnInit, OnDestroy {
   isCollapsed = true;
+  mobileOpen = false;
   currentUser: User | null = null;
   private routerSubscription?: Subscription;
   private userSub?: Subscription;
+  private mobileSub?: Subscription;
+  private escapeHandler = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      this.closeMobileMenu();
+    }
+  };
 
   menuItemsOperaciones: SidebarMenuItem[] = [
     { path: '/dashboard', icon: 'fas fa-home', label: 'Dashboard', adminOnly: true },
@@ -57,26 +65,40 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private sidebarMobile: SidebarMobileService
   ) { }
 
   ngOnInit(): void {
     this.userSub = this.authService.currentUser$.subscribe(u => {
       this.currentUser = u;
     });
-    // Aplicar el estado inicial (colapsado)
+    this.mobileSub = this.sidebarMobile.mobileOpen$.subscribe(open => {
+      this.mobileOpen = open;
+      if (open) {
+        this.isCollapsed = false;
+        document.addEventListener('keydown', this.escapeHandler);
+      } else {
+        document.removeEventListener('keydown', this.escapeHandler);
+        if (!this.sidebarMobile.isMobile()) {
+          this.isCollapsed = true;
+        }
+      }
+      this.updateBodyClass();
+    });
     this.updateBodyClass();
-    
-    // Escuchar eventos de navegación para colapsar el sidebar automáticamente
+
     this.routerSubscription = this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe(() => {
-        // No colapsar automáticamente en navegación, solo en hover
+        this.closeMobileMenu();
       });
   }
 
   onMouseEnter(): void {
-    // Expandir cuando el mouse entra
+    if (this.sidebarMobile.isMobile()) {
+      return;
+    }
     if (this.isCollapsed) {
       this.isCollapsed = false;
       this.updateBodyClass();
@@ -84,7 +106,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   onMouseLeave(): void {
-    // Colapsar cuando el mouse sale
+    if (this.sidebarMobile.isMobile() || this.mobileOpen) {
+      return;
+    }
     if (!this.isCollapsed) {
       this.isCollapsed = true;
       this.updateBodyClass();
@@ -93,8 +117,19 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     document.body.classList.remove('sidebar-collapsed');
+    document.removeEventListener('keydown', this.escapeHandler);
+    this.sidebarMobile.close();
     this.routerSubscription?.unsubscribe();
     this.userSub?.unsubscribe();
+    this.mobileSub?.unsubscribe();
+  }
+
+  closeMobileMenu(): void {
+    this.sidebarMobile.close();
+  }
+
+  onNavClick(): void {
+    this.closeMobileMenu();
   }
 
   colapsarSidebar(): void {
