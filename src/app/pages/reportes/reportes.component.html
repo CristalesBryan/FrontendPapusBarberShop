@@ -16,6 +16,9 @@
         <li class="nav-item">
           <a class="nav-link" [class.active]="vista === 'mensual'" (click)="cambiarVista('mensual')">Resumen Mensual</a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link" [class.active]="vista === 'metodoPago'" (click)="cambiarVista('metodoPago')">Por Método de Pago</a>
+        </li>
       </ul>
     </div>
     <div class="papus-card-body">
@@ -365,7 +368,203 @@
         </div>
       </div>
 
-      <div class="text-center" *ngIf="cargando">
+      <!-- Por Método de Pago -->
+      <div *ngIf="vista === 'metodoPago'" #metodoPagoSection class="papus-metodo-pago-section">
+        <div class="papus-filters-bar mb-4">
+          <div class="row g-3 align-items-end">
+            <div class="col-sm-6 col-md-3">
+              <label class="form-label papus-filter-label">Fecha inicio</label>
+              <input type="date" class="form-control" [(ngModel)]="fechaInicioPago">
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <label class="form-label papus-filter-label">Fecha fin</label>
+              <input type="date" class="form-control" [(ngModel)]="fechaFinPago">
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <button type="button" class="btn btn-papus-primary w-100" (click)="consultarMetodoPago()" [disabled]="cargandoMetodoPago">
+                <i class="fas fa-search me-1"></i> Consultar
+              </button>
+            </div>
+            <div class="col-sm-6 col-md-3 text-md-end">
+              <button type="button" class="btn btn-papus-outline w-100" (click)="exportarCsv()" [disabled]="!detalleFiltrado.length">
+                <i class="fas fa-file-csv me-1"></i> Exportar CSV
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center py-5" *ngIf="cargandoMetodoPago">
+          <div class="spinner-border text-gold" role="status"></div>
+        </div>
+
+        <ng-container *ngIf="resumenMetodoPago && !cargandoMetodoPago">
+          <!-- Cards resumen -->
+          <div class="row g-4 mb-4">
+            <div class="col-md-6">
+              <div class="papus-pago-card papus-pago-card-efectivo">
+                <div class="papus-pago-card-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M7 9h10"/><path d="M7 15h10"/><path d="M12 3v18"/><path d="M17 7v10"/><path d="M7 7v10"/>
+                  </svg>
+                </div>
+                <div class="papus-pago-card-body">
+                  <span class="papus-pago-card-label">Efectivo</span>
+                  <div class="papus-pago-card-value">{{ resumenMetodoPago.efectivo.cantidad }} cortes</div>
+                  <div class="papus-pago-card-monto">Q{{ resumenMetodoPago.efectivo.total | number:'1.2-2' }}</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="papus-pago-card papus-pago-card-tarjeta">
+                <div class="papus-pago-card-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>
+                  </svg>
+                </div>
+                <div class="papus-pago-card-body">
+                  <span class="papus-pago-card-label">Tarjeta</span>
+                  <div class="papus-pago-card-value">{{ resumenMetodoPago.tarjeta.cantidad }} cortes</div>
+                  <div class="papus-pago-card-monto">Q{{ resumenMetodoPago.tarjeta.total | number:'1.2-2' }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gráfica -->
+          <div class="row mb-4">
+            <div class="col-lg-5">
+              <div class="papus-report-block papus-chart-card">
+                <h5 class="papus-section-title mb-3">Distribución de ventas</h5>
+                <div class="papus-chart-wrap">
+                  <canvas #chartMetodoPago></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-7">
+              <div class="papus-report-block papus-chart-legend-card">
+                <h5 class="papus-section-title mb-3">Resumen del período</h5>
+                <ul class="papus-leyenda-lista">
+                  <li>
+                    <span class="papus-leyenda-dot papus-leyenda-efectivo"></span>
+                    <span>Efectivo</span>
+                    <strong>Q{{ resumenMetodoPago.efectivo.total | number:'1.2-2' }}</strong>
+                    <small>{{ resumenMetodoPago.efectivo.cantidad }} cortes</small>
+                  </li>
+                  <li>
+                    <span class="papus-leyenda-dot papus-leyenda-tarjeta"></span>
+                    <span>Tarjeta</span>
+                    <strong>Q{{ resumenMetodoPago.tarjeta.total | number:'1.2-2' }}</strong>
+                    <small>{{ resumenMetodoPago.tarjeta.cantidad }} cortes</small>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Detalle -->
+          <div class="papus-report-block mb-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+              <h5 class="papus-section-title mb-0">Desglose por Método de Pago</h5>
+              <div class="papus-metodo-tabs">
+                <button type="button" class="papus-metodo-tab" [class.active]="filtroMetodo === 'Todos'" (click)="cambiarFiltroMetodo('Todos')">Todos</button>
+                <button type="button" class="papus-metodo-tab" [class.active]="filtroMetodo === 'Efectivo'" (click)="cambiarFiltroMetodo('Efectivo')">Efectivo</button>
+                <button type="button" class="papus-metodo-tab" [class.active]="filtroMetodo === 'Tarjeta'" (click)="cambiarFiltroMetodo('Tarjeta')">Tarjeta</button>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-5">
+                <input type="search" class="form-control" placeholder="Buscar por barbero o tipo de corte..." [(ngModel)]="busquedaDetalle">
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-striped papus-table">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Barbero</th>
+                    <th>Cliente</th>
+                    <th>Tipo de corte</th>
+                    <th>Precio base</th>
+                    <th>Descuento %</th>
+                    <th>Total (Q)</th>
+                    <th>Método</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of detalleFiltrado">
+                    <td>{{ item.fecha }}</td>
+                    <td>{{ item.hora }}</td>
+                    <td>{{ item.barberoNombre }}</td>
+                    <td>{{ item.cliente }}</td>
+                    <td>{{ item.tipoCorte }}</td>
+                    <td>Q{{ item.precioOriginal | number:'1.2-2' }}</td>
+                    <td>{{ item.descuentoPorcentaje | number:'1.0-2' }}%</td>
+                    <td class="papus-money-cell">Q{{ item.total | number:'1.2-2' }}</td>
+                    <td><span class="papus-badge" [ngClass]="claseBadgeMetodoPago(item.metodoPago)">{{ item.metodoPago }}</span></td>
+                  </tr>
+                  <tr *ngIf="!detalleFiltrado.length">
+                    <td colspan="9" class="text-center text-muted py-4">No hay cortes para el filtro seleccionado.</td>
+                  </tr>
+                </tbody>
+                <tfoot *ngIf="detalleFiltrado.length">
+                  <tr class="papus-table-totals">
+                    <td colspan="5"><strong>Totales</strong></td>
+                    <td><strong>Q{{ totalesDetalle.precioBase | number:'1.2-2' }}</strong></td>
+                    <td></td>
+                    <td><strong class="papus-money-cell">Q{{ totalesDetalle.total | number:'1.2-2' }}</strong></td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+
+          <!-- Rendimiento por barbero -->
+          <div class="papus-report-block">
+            <h5 class="papus-section-title mb-3">Rendimiento por Barbero</h5>
+            <div class="table-responsive">
+              <table class="table table-striped papus-table">
+                <thead>
+                  <tr>
+                    <th>Barbero</th>
+                    <th>Cortes efectivo</th>
+                    <th>Cortes tarjeta</th>
+                    <th>Total cortes</th>
+                    <th>Monto total (Q)</th>
+                    <th>Comisión (Q)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let barbero of resumenBarberosPago">
+                    <td>{{ barbero.barberoNombre }}</td>
+                    <td>{{ barbero.cortesEfectivo }}</td>
+                    <td>{{ barbero.cortesTarjeta }}</td>
+                    <td>{{ barbero.totalCortes }}</td>
+                    <td class="papus-money-cell">Q{{ barbero.montoTotal | number:'1.2-2' }}</td>
+                    <td class="papus-money-cell">Q{{ barbero.comisionCalculada | number:'1.2-2' }}</td>
+                  </tr>
+                  <tr *ngIf="!resumenBarberosPago.length">
+                    <td colspan="6" class="text-center text-muted py-4">Sin datos de barberos en este período.</td>
+                  </tr>
+                </tbody>
+                <tfoot *ngIf="resumenBarberosPago.length">
+                  <tr class="papus-table-totals">
+                    <td><strong>Totales</strong></td>
+                    <td><strong>{{ totalesBarberosPago.cortesEfectivo }}</strong></td>
+                    <td><strong>{{ totalesBarberosPago.cortesTarjeta }}</strong></td>
+                    <td><strong>{{ totalesBarberosPago.totalCortes }}</strong></td>
+                    <td><strong class="papus-money-cell">Q{{ totalesBarberosPago.monto | number:'1.2-2' }}</strong></td>
+                    <td><strong class="papus-money-cell">Q{{ totalesBarberosPago.comision | number:'1.2-2' }}</strong></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+      <div class="text-center" *ngIf="cargando && vista !== 'metodoPago'">
         <div class="spinner-border" role="status"></div>
       </div>
     </div>

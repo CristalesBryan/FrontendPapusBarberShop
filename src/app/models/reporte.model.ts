@@ -62,3 +62,35 @@ export interface ResumenMensual {
   cantidadVentas: number;
   resumenBarberos: ResumenBarbero[];
 }
+
+export interface ResumenMetodoPagoItem {
+  cantidad: number;
+  total: number;
+}
+
+export interface ResumenPorMetodoPago {
+  efectivo: ResumenMetodoPagoItem;
+  tarjeta: ResumenMetodoPagoItem;
+}
+
+export interface DetalleReporteItem {
+  fecha: string;
+  hora: string;
+  barberoNombre: string;
+  cliente: string;
+  tipoCorte: string;
+  precioOriginal: number;
+  descuentoPorcentaje: number;
+  total: number;
+  metodoPago: string;
+}
+
+export interface ResumenBarberoPago {
+  barberoId: number;
+  barberoNombre: string;
+  cortesEfectivo: number;
+  cortesTarjeta: number;
+  totalCortes: number;
+  montoTotal: number;
+  comisionCalculada: number;
+}

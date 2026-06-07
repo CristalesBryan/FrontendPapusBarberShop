@@ -1,7 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ResumenDiario, ResumenMensual } from '../models/reporte.model';
+import {
+  DetalleReporteItem,
+  ResumenBarberoPago,
+  ResumenDiario,
+  ResumenMensual,
+  ResumenPorMetodoPago
+} from '../models/reporte.model';
 import { environment } from '../../environments/environment';
 
 /** Mismo nombre en `ReportesComponent` (addEventListener). */
@@ -47,6 +53,26 @@ export class ReporteService {
 
   getResumenPorFecha(fecha: string): Observable<ResumenDiario> {
     return this.http.get<ResumenDiario>(`${this.API_URL}/fecha/${fecha}`);
+  }
+
+  getResumenPorMetodoPago(fechaInicio: string, fechaFin: string): Observable<ResumenPorMetodoPago> {
+    return this.http.get<ResumenPorMetodoPago>(
+      `${this.API_URL}/por-metodo-pago?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`
+    );
+  }
+
+  getDetalleReporte(fechaInicio: string, fechaFin: string, metodoPago?: string): Observable<DetalleReporteItem[]> {
+    let url = `${this.API_URL}/detalle?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`;
+    if (metodoPago && metodoPago !== 'Todos') {
+      url += `&metodoPago=${encodeURIComponent(metodoPago)}`;
+    }
+    return this.http.get<DetalleReporteItem[]>(url);
+  }
+
+  getResumenPorBarberoPago(fechaInicio: string, fechaFin: string): Observable<ResumenBarberoPago[]> {
+    return this.http.get<ResumenBarberoPago[]>(
+      `${this.API_URL}/por-barbero?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`
+    );
   }
 }
 
