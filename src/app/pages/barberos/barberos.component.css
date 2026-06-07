@@ -3,6 +3,119 @@
 }
 
 .page-container {
-  padding-top: 80px; /* Espacio para que el navbar no cubra el contenido */
+  padding-top: 80px;
 }
 
+.papus-barbero-modal {
+  z-index: 1055;
+}
+
+.papus-barbero-modal.show {
+  display: block !important;
+}
+
+.papus-modal-barbero {
+  background: #111111;
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-md);
+  color: var(--cream);
+}
+
+.papus-modal-barbero .modal-header {
+  background: #111111 !important;
+  border-bottom: 1px solid var(--border-gold) !important;
+}
+
+.papus-modal-barbero .modal-title {
+  color: var(--gold) !important;
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+}
+
+.papus-modal-barbero .modal-body {
+  background: #111111;
+}
+
+.papus-modal-body-editable {
+  position: relative;
+}
+
+.papus-modal-loading-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(17, 17, 17, 0.88);
+  pointer-events: all;
+}
+
+.papus-barbero-modal .modal-dialog {
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+}
+
+.papus-modal-input:disabled,
+.papus-modal-input[readonly] {
+  opacity: 1;
+  background: #1a1a1a !important;
+  color: var(--cream) !important;
+  cursor: text;
+}
+
+.papus-field-error {
+  display: block;
+  color: #e8a0a0;
+  font-size: 0.78rem;
+  margin-top: 0.35rem;
+}
+
+.papus-modal-footer {
+  background: #111111;
+  border-top: 1px solid var(--border-subtle);
+  gap: 0.75rem;
+}
+
+.papus-modal-label {
+  color: var(--gold) !important;
+  font-size: 0.72rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.35rem;
+}
+
+.papus-modal-input {
+  background: #1a1a1a !important;
+  border: 1px solid var(--border-subtle) !important;
+  color: var(--cream) !important;
+}
+
+.papus-modal-input:focus {
+  background: #1a1a1a !important;
+  border-color: var(--gold) !important;
+  color: var(--cream) !important;
+  box-shadow: 0 0 0 3px var(--gold-glow) !important;
+}
+
+.papus-modal-hint {
+  color: var(--text-secondary) !important;
+  font-size: 0.78rem;
+  margin-top: 0.35rem;
+}
+
+.papus-modal-backdrop-blur {
+  z-index: 1050;
+  background-color: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.papus-modal-backdrop-blur.show {
+  display: block !important;
+}
+
+.text-gold {
+  color: var(--gold) !important;
+}

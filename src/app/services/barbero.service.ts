@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Barbero } from '../models/barbero.model';
+import { Barbero, BarberoUpdate } from '../models/barbero.model';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -20,11 +20,11 @@ export class BarberoService {
     return this.http.get<Barbero>(`${this.API_URL}/${id}`);
   }
 
-  create(barbero: Barbero): Observable<Barbero> {
+  create(barbero: BarberoUpdate): Observable<Barbero> {
     return this.http.post<Barbero>(this.API_URL, barbero);
   }
 
-  update(id: number, barbero: Barbero): Observable<Barbero> {
+  update(id: number, barbero: BarberoUpdate): Observable<Barbero> {
     return this.http.put<Barbero>(`${this.API_URL}/${id}`, barbero);
   }
 
