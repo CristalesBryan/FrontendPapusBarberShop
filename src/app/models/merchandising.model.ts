@@ -51,4 +51,14 @@ export interface VentaMerchCreate {
 }
 
 export const CATEGORIAS_MERCH = ['Camisas', 'Gorras', 'Llaveros', 'Otros'] as const;
-export const TALLAS_MERCH = ['S', 'M', 'L', 'XL', 'XXL', 'UNICA'] as const;
+export const TALLAS_ROPA = ['S', 'M', 'L', 'XL', 'XXL'] as const;
+export const TALLA_UNICA = 'UNICA' as const;
+export const TALLAS_MERCH = [...TALLAS_ROPA, TALLA_UNICA] as const;
+
+export function tallasParaCategoria(categoria: string): readonly string[] {
+  return categoria === 'Llaveros' ? [TALLA_UNICA] : TALLAS_ROPA;
+}
+
+export function normalizarTallaMerch(talla: string | undefined | null): string {
+  return (talla ?? '').trim().toUpperCase();
+}

@@ -8,8 +8,9 @@ import {
   CATEGORIAS_MERCH,
   ProductoMerch,
   ProductoMerchCreate,
-  TALLAS_MERCH,
-  VarianteMerch
+  VarianteMerch,
+  normalizarTallaMerch,
+  tallasParaCategoria
 } from '../../models/merchandising.model';
 
 interface TallaFormState {
@@ -49,7 +50,6 @@ export class MerchandisingComponent implements OnInit {
   productoEditandoId = 0;
 
   readonly categorias = [...CATEGORIAS_MERCH];
-  readonly tallasDisponibles = [...TALLAS_MERCH];
 
   formulario: ProductoMerchCreate = this.crearFormularioVacio();
   tallasForm: TallaFormState[] = [];
@@ -82,7 +82,7 @@ export class MerchandisingComponent implements OnInit {
     this.modoEdicion = false;
     this.productoEditandoId = 0;
     this.formulario = this.crearFormularioVacio();
-    this.inicializarTallasForm([]);
+    this.inicializarTallasForm([], this.formulario.categoria);
     this.imagenesEnModal = [];
     this.mensajeError = '';
     this.mostrarModal = true;
@@ -98,6 +98,9 @@ export class MerchandisingComponent implements OnInit {
     this.cargandoEdicion = true;
     this.mostrarModal = true;
 
+    this.aplicarProductoAlFormulario(producto);
+    this.inicializarTallasForm(producto.variantes ?? [], producto.categoria);
+
     this.merchandisingService.getById(producto.id).subscribe({
       next: (data) => {
         this.aplicarProductoAlFormulario(data);
@@ -105,7 +108,6 @@ export class MerchandisingComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error al cargar producto:', error);
-        this.aplicarProductoAlFormulario(producto);
         this.cargandoEdicion = false;
         this.mensajeError = 'No se pudieron cargar todos los datos. Revisa la conexión e intenta de nuevo.';
       }
@@ -201,9 +203,14 @@ export class MerchandisingComponent implements OnInit {
     if (!talla.seleccionada) {
       talla.precio = null;
       talla.stock = 0;
+      talla.id = undefined;
     } else if (talla.stock <= 0) {
       talla.stock = 0;
     }
+  }
+
+  onCategoriaChange(): void {
+    this.inicializarTallasForm(this.construirVariantes(), this.formulario.categoria);
   }
 
   onArchivosSeleccionados(event: Event): void {
@@ -289,6 +296,10 @@ export class MerchandisingComponent implements OnInit {
     return (stock ?? 0) < 5;
   }
 
+  trackTalla(_index: number, talla: TallaFormState): string {
+    return talla.talla;
+  }
+
   private crearFormularioVacio(): ProductoMerchCreate {
     return {
       nombre: '',
@@ -303,9 +314,15 @@ export class MerchandisingComponent implements OnInit {
     };
   }
 
-  private inicializarTallasForm(variantes: VarianteMerch[]): void {
-    this.tallasForm = this.tallasDisponibles.map((talla) => {
-      const existente = variantes.find((v) => v.talla === talla);
+  private inicializarTallasForm(variantes: VarianteMerch[], categoria = this.formulario.categoria): void {
+    const tallasBase = [...tallasParaCategoria(categoria)];
+    const tallasExtras = variantes
+      .map((v) => normalizarTallaMerch(v.talla))
+      .filter((talla) => talla && !tallasBase.includes(talla));
+    const tallasVisibles = [...tallasBase, ...tallasExtras];
+
+    this.tallasForm = tallasVisibles.map((talla) => {
+      const existente = variantes.find((v) => normalizarTallaMerch(v.talla) === talla);
       return {
         talla,
         seleccionada: !!existente,
@@ -328,7 +345,7 @@ export class MerchandisingComponent implements OnInit {
       badge: producto.badge ?? '',
       variantes: producto.variantes ?? []
     };
-    this.inicializarTallasForm(producto.variantes ?? []);
+    this.inicializarTallasForm(producto.variantes ?? [], producto.categoria);
     this.imagenesEnModal = [...(producto.imagenes ?? [])]
       .sort((a, b) => a.orden - b.orden)
       .map((img, index) => ({

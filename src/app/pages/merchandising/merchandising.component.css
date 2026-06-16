@@ -36,6 +36,8 @@
 
 .papus-merch-modal {
   z-index: 1055;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .papus-merch-modal.show {
@@ -47,7 +49,7 @@
   border: 1px solid var(--border-gold);
   border-radius: var(--radius-md);
   color: var(--cream);
-  max-height: 85vh;
+  max-height: calc(100dvh - 2rem);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -74,6 +76,11 @@
 
 .papus-modal-merch .modal-body {
   background: #111111;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .papus-modal-body-editable {
@@ -98,13 +105,29 @@
   width: 95%;
   max-width: 800px;
   margin: 1rem auto;
+  min-height: 0 !important;
+  max-height: calc(100dvh - 2rem);
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.papus-merch-modal .modal-dialog .papus-modal-merch {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: calc(100dvh - 2rem);
+  height: auto;
 }
 
 .papus-modal-body-scroll {
   flex: 1 1 auto;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 32px;
+  padding-bottom: 2.5rem;
   min-height: 0;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: rgba(201, 168, 76, 0.45) rgba(26, 26, 26, 0.6);
 }
@@ -136,9 +159,10 @@
 }
 
 .papus-modal-footer-sticky {
-  position: sticky;
-  bottom: 0;
+  position: relative;
+  bottom: auto;
   z-index: 4;
+  flex-shrink: 0;
 }
 
 .papus-modal-label {
@@ -274,6 +298,10 @@
   font-size: 0.9rem;
   letter-spacing: 0.04em;
   margin-bottom: 0.5rem;
+}
+
+.merch-tallas-panel {
+  margin-top: 0.25rem;
 }
 
 .merch-talla-row {
