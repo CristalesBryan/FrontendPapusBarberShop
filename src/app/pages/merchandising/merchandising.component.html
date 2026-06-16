@@ -101,117 +101,99 @@
      tabindex="-1"
      role="dialog"
      [attr.aria-hidden]="!mostrarModal">
-  <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable" role="document">
+  <div class="modal-dialog modal-dialog-centered papus-modal-dialog-merch" role="document">
     <div class="modal-content papus-modal-merch">
-      <div class="modal-header papus-modal-header-gold">
+      <div class="modal-header papus-modal-header-gold papus-modal-header-sticky">
         <h5 class="modal-title">{{ modoEdicion ? 'Editar producto' : 'Agregar producto' }}</h5>
         <button type="button" class="btn-close" (click)="cerrarModal()" aria-label="Cerrar"></button>
       </div>
-      <div class="modal-body papus-modal-body-editable">
+      <div class="modal-body papus-modal-body-editable papus-modal-body-scroll">
         <div class="papus-modal-loading-overlay" *ngIf="cargandoEdicion">
           <div class="spinner-border text-gold" role="status">
             <span class="visually-hidden">Cargando producto...</span>
           </div>
         </div>
 
-        <form (ngSubmit)="guardarProducto()" id="formMerchandising">
-          <div class="row">
-            <div class="col-md-8 mb-3">
-              <label for="nombreMerch" class="form-label papus-modal-label">Nombre *</label>
-              <input type="text" class="form-control papus-modal-input" id="nombreMerch"
-                     [(ngModel)]="formulario.nombre" name="nombre" required autocomplete="off">
-            </div>
-            <div class="col-md-4 mb-3">
-              <label for="categoriaMerch" class="form-label papus-modal-label">Categoría *</label>
-              <select class="form-select papus-modal-input" id="categoriaMerch"
-                      [(ngModel)]="formulario.categoria" name="categoria" required>
-                <option *ngFor="let cat of categorias" [value]="cat">{{ cat }}</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="mb-3">
-            <label for="descripcionMerch" class="form-label papus-modal-label">Descripción</label>
-            <textarea class="form-control papus-modal-input" id="descripcionMerch" rows="3"
-                      [(ngModel)]="formulario.descripcion" name="descripcion"
-                      placeholder="Descripción del producto..."></textarea>
-          </div>
-
-          <div class="row">
-            <div class="col-md-4 mb-3">
-              <label for="precioBaseMerch" class="form-label papus-modal-label">Precio base (Q) *</label>
-              <input type="number" class="form-control papus-modal-input" id="precioBaseMerch"
-                     [(ngModel)]="formulario.precioBase" name="precioBase" min="0" step="0.01" required>
-            </div>
-            <div class="col-md-8 mb-3">
-              <label for="badgeMerch" class="form-label papus-modal-label">Texto de badge</label>
-              <input type="text" class="form-control papus-modal-input" id="badgeMerch"
-                     [(ngModel)]="formulario.badge" name="badge" placeholder="Ej: Edición limitada" autocomplete="off">
-            </div>
-          </div>
-
-          <div class="row mb-3">
-            <div class="col-md-4">
-              <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" id="activoMerch"
-                       [(ngModel)]="formulario.activo" name="activo">
-                <label class="form-check-label papus-modal-label" for="activoMerch">Activo</label>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" id="esNuevoMerch"
-                       [(ngModel)]="formulario.esNuevo" name="esNuevo">
-                <label class="form-check-label papus-modal-label" for="esNuevoMerch">Marcar como nuevo</label>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" id="permitePersonalizacionMerch"
-                       [(ngModel)]="formulario.permitePersonalizacion" name="permitePersonalizacion">
-                <label class="form-check-label papus-modal-label" for="permitePersonalizacionMerch">Permite personalización</label>
-              </div>
-            </div>
-          </div>
-
-          <!-- Variantes / tallas -->
-          <div class="merch-section mb-3">
-            <h6 class="merch-section-title"><i class="fas fa-ruler"></i> Variantes por talla</h6>
-            <p class="papus-modal-hint mb-3">Selecciona las tallas disponibles e indica stock (y precio opcional por talla).</p>
-            <div class="merch-talla-row" *ngFor="let talla of tallasForm">
-              <div class="form-check merch-talla-check">
-                <input class="form-check-input" type="checkbox" [id]="'talla-' + talla.talla"
-                       [(ngModel)]="talla.seleccionada" [name]="'talla-sel-' + talla.talla"
-                       (change)="onTallaChange(talla)">
-                <label class="form-check-label" [for]="'talla-' + talla.talla">{{ talla.talla }}</label>
-              </div>
-              <div class="merch-talla-inputs" *ngIf="talla.seleccionada">
-                <div>
-                  <label class="papus-modal-label">Precio override (Q)</label>
-                  <input type="number" class="form-control form-control-sm papus-modal-input"
-                         [(ngModel)]="talla.precio" [name]="'talla-precio-' + talla.talla"
-                         min="0" step="0.01" placeholder="Usar precio base">
+        <form (ngSubmit)="guardarProducto()" id="formMerchandising" class="merch-modal-form">
+          <!-- Información básica -->
+          <section class="merch-form-section">
+            <h6 class="merch-form-section-title">Información básica</h6>
+            <div class="merch-modal-columns">
+              <div class="merch-modal-col">
+                <div class="merch-form-field">
+                  <label for="nombreMerch" class="form-label papus-modal-label">Nombre *</label>
+                  <input type="text" class="form-control papus-modal-input" id="nombreMerch"
+                         [(ngModel)]="formulario.nombre" name="nombre" required autocomplete="off">
                 </div>
-                <div>
-                  <label class="papus-modal-label">Stock *</label>
-                  <input type="number" class="form-control form-control-sm papus-modal-input"
-                         [(ngModel)]="talla.stock" [name]="'talla-stock-' + talla.talla"
-                         min="0" required>
+                <div class="merch-form-field">
+                  <label for="categoriaMerch" class="form-label papus-modal-label">Categoría *</label>
+                  <select class="form-select papus-modal-input" id="categoriaMerch"
+                          [(ngModel)]="formulario.categoria" name="categoria" required>
+                    <option *ngFor="let cat of categorias" [value]="cat">{{ cat }}</option>
+                  </select>
+                </div>
+              </div>
+              <div class="merch-modal-col">
+                <div class="merch-form-field">
+                  <label for="descripcionMerch" class="form-label papus-modal-label">Descripción</label>
+                  <textarea class="form-control papus-modal-input papus-modal-textarea" id="descripcionMerch"
+                            [(ngModel)]="formulario.descripcion" name="descripcion"
+                            placeholder="Descripción del producto..."></textarea>
                 </div>
               </div>
             </div>
-          </div>
+          </section>
+
+          <!-- Precio y disponibilidad -->
+          <section class="merch-form-section">
+            <h6 class="merch-form-section-title">Precio y disponibilidad</h6>
+            <div class="merch-modal-columns">
+              <div class="merch-modal-col">
+                <div class="merch-form-field">
+                  <label for="precioBaseMerch" class="form-label papus-modal-label">Precio base (Q) *</label>
+                  <input type="number" class="form-control papus-modal-input" id="precioBaseMerch"
+                         [(ngModel)]="formulario.precioBase" name="precioBase" min="0" step="0.01" required>
+                </div>
+                <div class="merch-form-field">
+                  <label for="badgeMerch" class="form-label papus-modal-label">Texto de badge</label>
+                  <input type="text" class="form-control papus-modal-input" id="badgeMerch"
+                         [(ngModel)]="formulario.badge" name="badge" placeholder="Ej: Edición limitada" autocomplete="off">
+                </div>
+              </div>
+              <div class="merch-modal-col">
+                <div class="merch-form-toggles">
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="activoMerch"
+                           [(ngModel)]="formulario.activo" name="activo">
+                    <label class="form-check-label papus-modal-label" for="activoMerch">Activo</label>
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="esNuevoMerch"
+                           [(ngModel)]="formulario.esNuevo" name="esNuevo">
+                    <label class="form-check-label papus-modal-label" for="esNuevoMerch">Marcar como nuevo</label>
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="permitePersonalizacionMerch"
+                           [(ngModel)]="formulario.permitePersonalizacion" name="permitePersonalizacion">
+                    <label class="form-check-label papus-modal-label" for="permitePersonalizacionMerch">Permite personalización</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
 
           <!-- Imágenes -->
-          <div class="merch-section mb-3">
-            <h6 class="merch-section-title"><i class="fas fa-images"></i> Imágenes</h6>
-            <input type="file" class="form-control papus-modal-input" accept="image/*" multiple
-                   (change)="onArchivosSeleccionados($event)">
-            <small class="papus-modal-hint d-block mt-1">
-              Formatos: JPG, PNG, GIF, WEBP. Máximo 5MB por imagen. Se subirán a S3 al guardar.
-            </small>
+          <section class="merch-form-section merch-form-section--full">
+            <h6 class="merch-form-section-title"><i class="fas fa-images"></i> Imágenes</h6>
+            <div class="merch-form-field">
+              <input type="file" class="form-control papus-modal-input" accept="image/*" multiple
+                     (change)="onArchivosSeleccionados($event)">
+              <small class="papus-modal-hint d-block mt-1">
+                Formatos: JPG, PNG, GIF, WEBP. Máximo 5MB por imagen. Se subirán a S3 al guardar.
+              </small>
+            </div>
 
-            <div class="merch-imagenes-grid mt-3" *ngIf="imagenesEnModal.length > 0">
+            <div class="merch-imagenes-grid" *ngIf="imagenesEnModal.length > 0">
               <div class="merch-imagen-item" *ngFor="let img of imagenesEnModal; let i = index">
                 <img [src]="img.url" [alt]="'Imagen ' + (i + 1)">
                 <span class="merch-imagen-orden">{{ i + 1 }}</span>
@@ -231,14 +213,42 @@
                 </div>
               </div>
             </div>
-          </div>
+          </section>
+
+          <!-- Tallas y variantes -->
+          <section class="merch-form-section merch-form-section--full">
+            <h6 class="merch-form-section-title"><i class="fas fa-ruler"></i> Tallas y variantes</h6>
+            <p class="papus-modal-hint">Selecciona las tallas disponibles e indica stock (y precio opcional por talla).</p>
+            <div class="merch-talla-row" *ngFor="let talla of tallasForm">
+              <div class="form-check merch-talla-check">
+                <input class="form-check-input" type="checkbox" [id]="'talla-' + talla.talla"
+                       [(ngModel)]="talla.seleccionada" [name]="'talla-sel-' + talla.talla"
+                       (change)="onTallaChange(talla)">
+                <label class="form-check-label" [for]="'talla-' + talla.talla">{{ talla.talla }}</label>
+              </div>
+              <div class="merch-talla-inputs" *ngIf="talla.seleccionada">
+                <div class="merch-form-field">
+                  <label class="papus-modal-label">Precio override (Q)</label>
+                  <input type="number" class="form-control papus-modal-input"
+                         [(ngModel)]="talla.precio" [name]="'talla-precio-' + talla.talla"
+                         min="0" step="0.01" placeholder="Usar precio base">
+                </div>
+                <div class="merch-form-field">
+                  <label class="papus-modal-label">Stock *</label>
+                  <input type="number" class="form-control papus-modal-input"
+                         [(ngModel)]="talla.stock" [name]="'talla-stock-' + talla.talla"
+                         min="0" required>
+                </div>
+              </div>
+            </div>
+          </section>
 
           <div class="alert alert-danger" *ngIf="mensajeError">
             {{ mensajeError }}
           </div>
         </form>
       </div>
-      <div class="modal-footer papus-modal-footer">
+      <div class="modal-footer papus-modal-footer papus-modal-footer-sticky">
         <button type="button" class="btn btn-papus-ghost" (click)="cerrarModal()">Cancelar</button>
         <button type="submit" class="btn btn-papus-primary" form="formMerchandising"
                 [disabled]="guardando || cargandoEdicion">

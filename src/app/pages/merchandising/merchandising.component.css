@@ -47,11 +47,23 @@
   border: 1px solid var(--border-gold);
   border-radius: var(--radius-md);
   color: var(--cream);
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .papus-modal-merch .modal-header {
   background: #111111 !important;
   border-bottom: 1px solid var(--border-gold) !important;
+  flex-shrink: 0;
+  padding: 1.25rem 2rem;
+}
+
+.papus-modal-header-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 4;
 }
 
 .papus-modal-merch .modal-title {
@@ -83,12 +95,50 @@
   position: relative;
   z-index: 1;
   pointer-events: auto;
+  width: 95%;
+  max-width: 800px;
+  margin: 1rem auto;
+}
+
+.papus-modal-body-scroll {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 32px;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201, 168, 76, 0.45) rgba(26, 26, 26, 0.6);
+}
+
+.papus-modal-body-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.papus-modal-body-scroll::-webkit-scrollbar-track {
+  background: rgba(26, 26, 26, 0.6);
+  border-radius: 3px;
+}
+
+.papus-modal-body-scroll::-webkit-scrollbar-thumb {
+  background: rgba(201, 168, 76, 0.45);
+  border-radius: 3px;
+}
+
+.papus-modal-body-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(201, 168, 76, 0.65);
 }
 
 .papus-modal-footer {
   background: #111111;
   border-top: 1px solid var(--border-subtle);
   gap: 0.75rem;
+  flex-shrink: 0;
+  padding: 1rem 2rem 1.25rem;
+}
+
+.papus-modal-footer-sticky {
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
 }
 
 .papus-modal-label {
@@ -104,6 +154,17 @@
   background: #1a1a1a !important;
   border: 1px solid var(--border-subtle) !important;
   color: var(--cream) !important;
+  min-height: 44px;
+  padding: 0.65rem 0.85rem;
+}
+
+.papus-modal-textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.papus-modal-input[type='file'] {
+  padding: 0.5rem 0.85rem;
 }
 
 .papus-modal-input:focus,
@@ -133,6 +194,71 @@
 
 .text-gold {
   color: var(--gold) !important;
+}
+
+.merch-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.merch-form-section {
+  padding-bottom: 28px;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.22);
+}
+
+.merch-form-section:last-of-type {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.merch-form-section-title {
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.merch-form-section-title i {
+  margin-right: 0.4rem;
+  opacity: 0.85;
+}
+
+.merch-modal-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.merch-modal-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.merch-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.merch-form-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 0.25rem;
+}
+
+.merch-form-toggles .form-check {
+  margin: 0;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .merch-section {
@@ -176,11 +302,11 @@
 .merch-talla-inputs {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 20px;
   flex: 1;
 }
 
-.merch-talla-inputs > div {
+.merch-talla-inputs .merch-form-field {
   min-width: 140px;
   flex: 1;
 }
@@ -189,6 +315,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 0.75rem;
+  margin-top: 20px;
 }
 
 .merch-imagen-item {
@@ -248,4 +375,31 @@
 
 .form-check-label {
   color: var(--cream);
+}
+
+@media (max-width: 767.98px) {
+  .papus-modal-body-scroll {
+    padding: 24px 20px;
+  }
+
+  .papus-modal-merch .modal-header {
+    padding: 1rem 20px;
+  }
+
+  .papus-modal-footer {
+    padding: 0.85rem 20px 1rem;
+  }
+
+  .merch-modal-columns {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .merch-modal-form {
+    gap: 24px;
+  }
+
+  .merch-form-section {
+    padding-bottom: 24px;
+  }
 }
