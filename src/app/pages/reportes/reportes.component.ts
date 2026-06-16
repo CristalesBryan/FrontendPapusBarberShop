@@ -18,12 +18,13 @@ import {
   ResumenMensual,
   ResumenPorMetodoPago,
   DetalleReporteItem,
-  ResumenBarberoPago
+  ResumenBarberoPago,
+  ResumenMerchandising
 } from '../../models/reporte.model';
 
 Chart.register(...registerables);
 
-type VistaReporte = 'diario' | 'mensual' | 'metodoPago';
+type VistaReporte = 'diario' | 'mensual' | 'metodoPago' | 'merchandising';
 type FiltroMetodoPago = 'Todos' | 'Efectivo' | 'Tarjeta';
 
 @Component({
@@ -36,20 +37,28 @@ type FiltroMetodoPago = 'Todos' | 'Efectivo' | 'Tarjeta';
 export class ReportesComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('metodoPagoSection') metodoPagoSection?: ElementRef<HTMLElement>;
   @ViewChild('chartMetodoPago') chartCanvas?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('chartMerchTop') chartMerchTopCanvas?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('chartMerchCat') chartMerchCatCanvas?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('merchSection') merchSection?: ElementRef<HTMLElement>;
 
   resumenDiario: ResumenDiario | null = null;
   resumenMensual: ResumenMensual | null = null;
   resumenMetodoPago: ResumenPorMetodoPago | null = null;
   detalleReporte: DetalleReporteItem[] = [];
   resumenBarberosPago: ResumenBarberoPago[] = [];
+  resumenMerchandising: ResumenMerchandising | null = null;
 
   fechaConsulta: string = this.obtenerFechaLocal();
   mesConsulta: string = this.obtenerMesLocal();
   fechaInicioPago: string = this.obtenerPrimerDiaMesLocal();
   fechaFinPago: string = this.obtenerFechaLocal();
+  fechaInicioMerch: string = this.obtenerPrimerDiaMesLocal();
+  fechaFinMerch: string = this.obtenerFechaLocal();
+  filtroCategoriaMerch = '';
 
   cargando = true;
   cargandoMetodoPago = false;
+  cargandoMerch = false;
   vista: VistaReporte = 'diario';
   filtroMetodo: FiltroMetodoPago = 'Todos';
   busquedaDetalle = '';
@@ -58,6 +67,8 @@ export class ReportesComponent implements OnInit, AfterViewInit, OnDestroy {
   private barberosExpandidosMensual = new Set<number>();
   private readonly onReportesDatosExternos = () => this.refrescar();
   private chartMetodoPago?: Chart;
+  private chartMerchTop?: Chart;
+  private chartMerchCat?: Chart;
   private gsapCtx?: gsap.Context;
 
   constructor(
@@ -79,6 +90,8 @@ export class ReportesComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     window.removeEventListener(REPORTES_ACTUALIZADOS_EVENT, this.onReportesDatosExternos);
     this.destruirChart();
+    this.chartMerchTop?.destroy();
+    this.chartMerchCat?.destroy();
     this.gsap.revert(this.gsapCtx);
   }
 
@@ -87,6 +100,9 @@ export class ReportesComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cargarResumenMensual();
     if (this.vista === 'metodoPago') {
       this.cargarReporteMetodoPago();
+    }
+    if (this.vista === 'merchandising') {
+      this.cargarReporteMerchandising();
     }
   }
 
@@ -197,6 +213,101 @@ export class ReportesComponent implements OnInit, AfterViewInit, OnDestroy {
         this.actualizarGraficaMetodoPago();
       }, 100);
     }
+    if (nuevaVista === 'merchandising') {
+      if (!this.resumenMerchandising) {
+        this.cargarReporteMerchandising();
+      } else {
+        setTimeout(() => this.actualizarGraficasMerch(), 100);
+      }
+    }
+  }
+
+  cargarReporteMerchandising(): void {
+    if (!this.fechaInicioMerch || !this.fechaFinMerch) return;
+    this.cargandoMerch = true;
+    const cat = this.filtroCategoriaMerch || undefined;
+    this.reporteService.getResumenMerchandising(this.fechaInicioMerch, this.fechaFinMerch, cat).subscribe({
+      next: (data) => {
+        this.resumenMerchandising = data;
+        this.cargandoMerch = false;
+        setTimeout(() => this.actualizarGraficasMerch(), 50);
+        this.animarSeccionMerch();
+      },
+      error: (err) => {
+        console.error('Error reporte merchandising:', err);
+        this.cargandoMerch = false;
+      }
+    });
+  }
+
+  consultarMerchandising(): void {
+    this.cargarReporteMerchandising();
+  }
+
+  private actualizarGraficasMerch(): void {
+    if (!this.resumenMerchandising || this.vista !== 'merchandising') return;
+
+    this.chartMerchTop?.destroy();
+    this.chartMerchCat?.destroy();
+
+    const topCanvas = this.chartMerchTopCanvas?.nativeElement;
+    if (topCanvas && this.resumenMerchandising.topProductos?.length) {
+      const labels = this.resumenMerchandising.topProductos.map(p => p.nombre);
+      const data = this.resumenMerchandising.topProductos.map(p => p.cantidad);
+      this.chartMerchTop = new Chart(topCanvas, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Unidades',
+            data,
+            backgroundColor: '#C9A84C',
+            borderColor: '#E2C878',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: '#E5E5E5' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: { ticks: { color: '#E5E5E5' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+          }
+        }
+      });
+    }
+
+    const catCanvas = this.chartMerchCatCanvas?.nativeElement;
+    if (catCanvas && this.resumenMerchandising.distribucionCategoria?.length) {
+      const labels = this.resumenMerchandising.distribucionCategoria.map(c => c.categoria);
+      const data = this.resumenMerchandising.distribucionCategoria.map(c => c.total);
+      this.chartMerchCat = new Chart(catCanvas, {
+        type: 'doughnut',
+        data: {
+          labels,
+          datasets: [{
+            data,
+            backgroundColor: ['#C9A84C', '#6B6B6B', '#8eb4e8', '#8fd4a8'],
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom', labels: { color: '#E5E5E5' } } }
+        }
+      });
+    }
+  }
+
+  private animarSeccionMerch(): void {
+    if (this.gsap.prefersReducedMotion) return;
+    const section = this.merchSection?.nativeElement;
+    if (!section) return;
+    gsap.from(section.querySelectorAll('.papus-report-block, .papus-stat-card'), {
+      autoAlpha: 0, y: 24, duration: 0.6, stagger: 0.08, ease: 'power3.out'
+    });
   }
 
   cambiarFiltroMetodo(filtro: FiltroMetodoPago): void {

@@ -45,6 +45,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     { path: '/ventas', icon: 'fas fa-shopping-cart', label: 'Ventas', adminAndBarbero: true },
     { path: '/compra-aqui', icon: 'fas fa-shopping-bag', label: 'Compra Aquí', adminAndCesia: true },
     { path: '/productos', icon: 'fas fa-box', label: 'Productos', adminOnly: true },
+    { path: '/merchandising', icon: 'fas fa-tshirt', label: 'Merchandising', adminOnly: true },
     { path: '/gestion-catalogo', icon: 'fas fa-images', label: 'Gestión Catálogo', adminAndCesia: true },
     { path: '/mobiliario-equipo', icon: 'fas fa-couch', label: 'Mobiliario', adminOnly: true },
     { path: '/tipos-corte', icon: 'fas fa-cut', label: 'Tipos de Corte', adminOnly: true },

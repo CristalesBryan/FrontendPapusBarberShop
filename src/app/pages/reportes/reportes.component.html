@@ -19,6 +19,9 @@
         <li class="nav-item">
           <a class="nav-link" [class.active]="vista === 'metodoPago'" (click)="cambiarVista('metodoPago')">Por Método de Pago</a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link" [class.active]="vista === 'merchandising'" (click)="cambiarVista('merchandising')">Ventas Merchandising</a>
+        </li>
       </ul>
     </div>
     <div class="papus-card-body">
@@ -564,7 +567,117 @@
         </ng-container>
       </div>
 
-      <div class="text-center" *ngIf="cargando && vista !== 'metodoPago'">
+      <!-- Ventas Merchandising -->
+      <div *ngIf="vista === 'merchandising'" #merchSection>
+        <div class="papus-filters-bar mb-4">
+          <div class="row g-3 align-items-end">
+            <div class="col-sm-6 col-md-3">
+              <label class="form-label papus-filter-label">Fecha inicio</label>
+              <input type="date" class="form-control" [(ngModel)]="fechaInicioMerch">
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <label class="form-label papus-filter-label">Fecha fin</label>
+              <input type="date" class="form-control" [(ngModel)]="fechaFinMerch">
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <label class="form-label papus-filter-label">Categoría</label>
+              <select class="form-select" [(ngModel)]="filtroCategoriaMerch">
+                <option value="">Todas</option>
+                <option value="Camisas">Camisas</option>
+                <option value="Gorras">Gorras</option>
+                <option value="Llaveros">Llaveros</option>
+                <option value="Otros">Otros</option>
+              </select>
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <button type="button" class="btn btn-papus-primary w-100" (click)="consultarMerchandising()" [disabled]="cargandoMerch">Consultar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center py-5" *ngIf="cargandoMerch">
+          <div class="spinner-border text-gold" role="status"></div>
+        </div>
+
+        <ng-container *ngIf="resumenMerchandising && !cargandoMerch">
+          <div class="row g-4 mb-4">
+            <div class="col-md-4">
+              <div class="papus-stat-card">
+                <div class="stat-label">Total vendido</div>
+                <div class="stat-value papus-money">Q{{ resumenMerchandising.totalVendido | number:'1.2-2' }}</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="papus-stat-card">
+                <div class="stat-label">Unidades vendidas</div>
+                <div class="stat-value">{{ resumenMerchandising.totalUnidades }}</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="papus-stat-card">
+                <div class="stat-label">Producto más vendido</div>
+                <div class="stat-value" style="font-size:1.1rem;">{{ resumenMerchandising.productoMasVendido }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mb-4">
+            <div class="col-lg-7">
+              <div class="papus-report-block">
+                <h5 class="papus-section-title mb-3">Top 5 productos</h5>
+                <div class="papus-chart-wrap" style="height:260px">
+                  <canvas #chartMerchTop></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-5">
+              <div class="papus-report-block">
+                <h5 class="papus-section-title mb-3">Por categoría</h5>
+                <div class="papus-chart-wrap" style="height:260px">
+                  <canvas #chartMerchCat></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="papus-report-block">
+            <h5 class="papus-section-title mb-3">Detalle de ventas</h5>
+            <div class="table-responsive">
+              <table class="table table-striped papus-table">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Producto</th>
+                    <th>Categoría</th>
+                    <th>Talla</th>
+                    <th>Cant.</th>
+                    <th>P. unit.</th>
+                    <th>Total</th>
+                    <th>Pago</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let v of resumenMerchandising.ventas">
+                    <td>{{ v.fecha }}</td>
+                    <td>{{ v.productoNombre }}</td>
+                    <td>{{ v.categoria }}</td>
+                    <td>{{ v.talla || '—' }}</td>
+                    <td>{{ v.cantidad }}</td>
+                    <td>Q{{ v.precioUnitario | number:'1.2-2' }}</td>
+                    <td class="papus-money-cell">Q{{ v.total | number:'1.2-2' }}</td>
+                    <td>{{ v.metodoPago }}</td>
+                  </tr>
+                  <tr *ngIf="!resumenMerchandising.ventas?.length">
+                    <td colspan="8" class="text-center text-muted py-4">Sin ventas en el período.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+      <div class="text-center" *ngIf="cargando && vista !== 'metodoPago' && vista !== 'merchandising'">
         <div class="spinner-border" role="status"></div>
       </div>
     </div>

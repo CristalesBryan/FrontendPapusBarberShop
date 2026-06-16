@@ -6,6 +6,7 @@ import {
   ResumenBarberoPago,
   ResumenDiario,
   ResumenMensual,
+  ResumenMerchandising,
   ResumenPorMetodoPago
 } from '../models/reporte.model';
 import { environment } from '../../environments/environment';
@@ -73,6 +74,14 @@ export class ReporteService {
     return this.http.get<ResumenBarberoPago[]>(
       `${this.API_URL}/por-barbero?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`
     );
+  }
+
+  getResumenMerchandising(fechaInicio: string, fechaFin: string, categoria?: string): Observable<ResumenMerchandising> {
+    let url = `${this.API_URL}/merchandising?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`;
+    if (categoria) {
+      url += `&categoria=${encodeURIComponent(categoria)}`;
+    }
+    return this.http.get<ResumenMerchandising>(url);
   }
 }
 

@@ -94,3 +94,37 @@ export interface ResumenBarberoPago {
   montoTotal: number;
   comisionCalculada: number;
 }
+
+export interface VentaMerchReporte {
+  id: number;
+  productoNombre: string;
+  categoria: string;
+  talla?: string;
+  cantidad: number;
+  precioUnitario: number;
+  total: number;
+  metodoPago: string;
+  fecha: string;
+  hora: string;
+}
+
+export interface TopProductoMerch {
+  nombre: string;
+  cantidad: number;
+  total: number;
+}
+
+export interface CategoriaMerchReporte {
+  categoria: string;
+  cantidad: number;
+  total: number;
+}
+
+export interface ResumenMerchandising {
+  totalVendido: number;
+  totalUnidades: number;
+  productoMasVendido: string;
+  ventas: VentaMerchReporte[];
+  topProductos: TopProductoMerch[];
+  distribucionCategoria: CategoriaMerchReporte[];
+}
