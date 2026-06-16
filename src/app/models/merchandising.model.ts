@@ -56,7 +56,11 @@ export const TALLA_UNICA = 'UNICA' as const;
 export const TALLAS_MERCH = [...TALLAS_ROPA, TALLA_UNICA] as const;
 
 export function tallasParaCategoria(categoria: string): readonly string[] {
-  return categoria === 'Llaveros' ? [TALLA_UNICA] : TALLAS_ROPA;
+  const cat = (categoria ?? '').trim();
+  if (cat === 'Llaveros') {
+    return [TALLA_UNICA];
+  }
+  return TALLAS_ROPA;
 }
 
 export function normalizarTallaMerch(talla: string | undefined | null): string {

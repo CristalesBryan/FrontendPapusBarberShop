@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { forkJoin, of, switchMap } from 'rxjs';
@@ -37,7 +37,10 @@ interface ImagenEnModal {
   templateUrl: './merchandising.component.html',
   styleUrls: ['./merchandising.component.css']
 })
-export class MerchandisingComponent implements OnInit {
+export class MerchandisingComponent implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild('merchModal') merchModalRef?: ElementRef<HTMLElement>;
+  @ViewChild('merchBackdrop') merchBackdropRef?: ElementRef<HTMLElement>;
+
   productos: ProductoMerch[] = [];
   cargando = true;
   guardando = false;
@@ -57,11 +60,21 @@ export class MerchandisingComponent implements OnInit {
 
   constructor(
     private merchandisingService: MerchandisingService,
-    private s3Service: S3Service
+    private s3Service: S3Service,
+    private renderer: Renderer2,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.cargarProductos();
+  }
+
+  ngAfterViewInit(): void {
+    this.portalizarModalAlBody();
+  }
+
+  ngOnDestroy(): void {
+    this.bloquearScrollDocumento(false);
   }
 
   cargarProductos(): void {
@@ -86,6 +99,8 @@ export class MerchandisingComponent implements OnInit {
     this.imagenesEnModal = [];
     this.mensajeError = '';
     this.mostrarModal = true;
+    this.portalizarModalAlBody();
+    this.bloquearScrollDocumento(true);
   }
 
   abrirModalEditar(producto: ProductoMerch, event?: Event): void {
@@ -97,6 +112,8 @@ export class MerchandisingComponent implements OnInit {
     this.mensajeError = '';
     this.cargandoEdicion = true;
     this.mostrarModal = true;
+    this.portalizarModalAlBody();
+    this.bloquearScrollDocumento(true);
 
     this.aplicarProductoAlFormulario(producto);
     this.inicializarTallasForm(producto.variantes ?? [], producto.categoria);
@@ -121,6 +138,7 @@ export class MerchandisingComponent implements OnInit {
     this.mensajeError = '';
     this.productoEditandoId = 0;
     this.imagenesEnModal = [];
+    this.bloquearScrollDocumento(false);
   }
 
   guardarProducto(): void {
@@ -209,8 +227,14 @@ export class MerchandisingComponent implements OnInit {
     }
   }
 
-  onCategoriaChange(): void {
+  onCategoriaChange(categoria: string): void {
+    this.formulario.categoria = this.normalizarCategoria(categoria);
     this.inicializarTallasForm(this.construirVariantes(), this.formulario.categoria);
+    this.cdr.markForCheck();
+  }
+
+  usaTallasDeRopa(): boolean {
+    return tallasParaCategoria(this.formulario.categoria).length > 1;
   }
 
   onArchivosSeleccionados(event: Event): void {
@@ -315,7 +339,8 @@ export class MerchandisingComponent implements OnInit {
   }
 
   private inicializarTallasForm(variantes: VarianteMerch[], categoria = this.formulario.categoria): void {
-    const tallasBase = [...tallasParaCategoria(categoria)];
+    const categoriaNormalizada = this.normalizarCategoria(categoria);
+    const tallasBase = [...tallasParaCategoria(categoriaNormalizada)];
     const tallasExtras = variantes
       .map((v) => normalizarTallaMerch(v.talla))
       .filter((talla) => talla && !tallasBase.includes(talla));
@@ -331,12 +356,19 @@ export class MerchandisingComponent implements OnInit {
         id: existente?.id
       };
     });
+    this.cdr.markForCheck();
+  }
+
+  private normalizarCategoria(categoria: string | undefined | null): string {
+    const valor = (categoria ?? '').trim();
+    return (CATEGORIAS_MERCH as readonly string[]).includes(valor) ? valor : 'Camisas';
   }
 
   private aplicarProductoAlFormulario(producto: ProductoMerch): void {
+    const categoria = this.normalizarCategoria(producto.categoria);
     this.formulario = {
       nombre: producto.nombre,
-      categoria: producto.categoria,
+      categoria,
       descripcion: producto.descripcion ?? '',
       precioBase: producto.precioBase,
       activo: producto.activo,
@@ -345,7 +377,7 @@ export class MerchandisingComponent implements OnInit {
       badge: producto.badge ?? '',
       variantes: producto.variantes ?? []
     };
-    this.inicializarTallasForm(producto.variantes ?? [], producto.categoria);
+    this.inicializarTallasForm(producto.variantes ?? [], categoria);
     this.imagenesEnModal = [...(producto.imagenes ?? [])]
       .sort((a, b) => a.orden - b.orden)
       .map((img, index) => ({
@@ -443,5 +475,22 @@ export class MerchandisingComponent implements OnInit {
         URL.revokeObjectURL(img.url);
       }
     });
+  }
+
+  /** Evita que el modal quede recortado por el transform de .route-enter (GSAP). */
+  private portalizarModalAlBody(): void {
+    const modal = this.merchModalRef?.nativeElement;
+    const backdrop = this.merchBackdropRef?.nativeElement;
+
+    if (modal && modal.parentElement !== document.body) {
+      this.renderer.appendChild(document.body, modal);
+    }
+    if (backdrop && backdrop.parentElement !== document.body) {
+      this.renderer.appendChild(document.body, backdrop);
+    }
+  }
+
+  private bloquearScrollDocumento(bloquear: boolean): void {
+    document.body.style.overflow = bloquear ? 'hidden' : '';
   }
 }
